@@ -196,3 +196,11 @@ WhatsApp or phone, and the site takes no commission.
 `/statistics` shows live counts (tenders, buyers, companies, products) and tables by province and by sector,
 with the province map. A figure below **Admin > Settings > "Smallest number that is shown"** (10 by default)
 stays hidden, so a new site does not show tiny numbers.
+
+## Pick lists (Select2)
+
+Every `<select>` in the company panel, the admin panel and the sign-up pages is a Select2 list
+(jQuery 3.7.1 and Select2 4.0.13, self-hosted under `public/vendor`). `public/js/select2-init.js` sets them up
+and `public/css/select2-fida.css` gives them the look of the form boxes, in light and dark mode. A list with
+8 choices or more gets a search box. Add `data-native` to a `<select>` to keep the plain browser list.
+The public website keeps plain lists, so its pages stay light.

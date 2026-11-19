@@ -1,0 +1,48 @@
+/* Select2 in the look of the fida-admin form boxes, light and dark, left-to-right and right-to-left. */
+.select2-container { max-width: 100%; }
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    min-height: calc(1.5em + 1.16rem + 2px); background-color: var(--input-bg, var(--bs-body-bg)); border: 1px solid var(--border-strong, var(--bs-border-color));
+    border-radius: 9px; font-size: 13.5px; transition: border-color .15s, box-shadow .15s;
+}
+.select2-container--default .select2-selection--single { height: auto; display: flex; align-items: center; }
+.select2-container--default .select2-selection--single .select2-selection__rendered { flex: 1; min-width: 0; padding: .58rem 2.1rem .58rem .9rem; line-height: 1.5; color: var(--text, var(--bs-body-color)); }
+.select2-container--default[dir="rtl"] .select2-selection--single .select2-selection__rendered { padding: .58rem .9rem .58rem 2.1rem; }
+.select2-container--default .select2-selection--single .select2-selection__placeholder { color: var(--muted, var(--bs-secondary-color)); }
+.select2-container--default .select2-selection--single .select2-selection__arrow { height: 100%; top: 0; right: .55rem; width: 1.2rem; }
+.select2-container--default[dir="rtl"] .select2-selection--single .select2-selection__arrow { right: auto; left: .55rem; }
+.select2-container--default .select2-selection--single .select2-selection__arrow b { border-color: var(--muted, #6c757d) transparent transparent; }
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b { border-color: transparent transparent var(--muted, #6c757d); }
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--multiple {
+    border-color: rgba(var(--primary-rgb, var(--bs-primary-rgb)), .6); box-shadow: 0 0 0 3px rgba(var(--primary-rgb, var(--bs-primary-rgb)), .14); outline: 0;
+}
+.select2-container--default.select2-container--disabled .select2-selection--single,
+fieldset:disabled .select2-container--default .select2-selection--single { background-color: var(--hover, var(--bs-secondary-bg)); cursor: default; pointer-events: none; }
+.select2-container--default .select2-selection--multiple .select2-selection__choice { background-color: rgba(var(--primary-rgb, var(--bs-primary-rgb)), .1); border: 0; border-radius: 6px; color: var(--text, var(--bs-body-color)); }
+
+/* a list with a mistake keeps its red border */
+.form-select.is-invalid + .select2-container--default .select2-selection--single { border-color: var(--bs-form-invalid-border-color, #dc3545); }
+/* small lists (filters of a table) */
+.form-select-sm + .select2-container--default .select2-selection--single { min-height: 0; font-size: 12.5px; border-radius: 7px; }
+.form-select-sm + .select2-container--default .select2-selection--single .select2-selection__rendered { padding-top: .35rem; padding-bottom: .35rem; }
+
+/* the list that opens */
+.select2-dropdown { background-color: var(--card, var(--bs-body-bg)); border: 1px solid var(--border-strong, var(--bs-border-color)); border-radius: 11px; box-shadow: 0 16px 40px -18px rgba(18, 28, 45, .35); overflow: hidden; font-size: 13.5px; z-index: 1060; }
+.select2-container--open .select2-dropdown--below { margin-top: 4px; border-top: 1px solid var(--border-strong, var(--bs-border-color)); border-radius: 11px; }
+.select2-container--open .select2-dropdown--above { margin-top: -4px; border-bottom: 1px solid var(--border-strong, var(--bs-border-color)); border-radius: 11px; }
+.select2-container--default .select2-search--dropdown { padding: 8px; }
+.select2-container--default .select2-search--dropdown .select2-search__field { background-color: var(--input-bg, var(--bs-body-bg)); color: var(--text, var(--bs-body-color)); border: 1px solid var(--border-strong, var(--bs-border-color)); border-radius: 8px; padding: .45rem .7rem; outline: 0; }
+.select2-container--default .select2-search--dropdown .select2-search__field:focus { border-color: rgba(var(--primary-rgb, var(--bs-primary-rgb)), .6); }
+.select2-container--default .select2-results > .select2-results__options { max-height: 280px; padding: 0 6px 6px; }
+.select2-container--default .select2-results__option { padding: .5rem .7rem; border-radius: 7px; color: var(--text, var(--bs-body-color)); }
+.select2-container--default .select2-results__option--highlighted[aria-selected],
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable { background-color: rgba(var(--primary-rgb, var(--bs-primary-rgb)), .1); color: var(--text, var(--bs-body-color)); }
+.select2-container--default .select2-results__option[aria-selected=true],
+.select2-container--default .select2-results__option--selected { background-color: rgba(var(--primary-rgb, var(--bs-primary-rgb)), .16); font-weight: 600; }
+.select2-container--default .select2-results__option[aria-disabled=true] { color: var(--muted, var(--bs-secondary-color)); }
+.select2-results__message { color: var(--muted, var(--bs-secondary-color)); }
+/* the real list stays in the page for the form, but is not seen before Select2 has drawn itself */
+select.select2-hidden-accessible { position: absolute !important; }

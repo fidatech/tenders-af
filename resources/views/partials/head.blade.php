@@ -14,3 +14,5 @@
 <link rel="apple-touch-icon" href="{{ asset_v('img/favicon.svg') }}">
 <script>(function(){var s={};try{s=JSON.parse(localStorage.getItem('erp.ui')||'{}')}catch(e){}var h=document.documentElement;h.setAttribute('data-bs-theme',s.theme==='dark'?'dark':'light');h.setAttribute('data-layout',s.layout==='collapsed'?'collapsed':'vertical')})();</script>
 <link rel="stylesheet" href="{{ asset_v(text_dir() === 'rtl' ? 'css/app.rtl.css' : 'css/app.css') }}">
+<link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/select2-fida.css') }}">

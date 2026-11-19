@@ -439,7 +439,9 @@
         });
     };
     // Lists marked data-search, and every list long enough to need it (8 choices or more), become searchable.
+    // With Select2 on the page (the panels) every list is a Select2 list instead.
     var enhance = function (scope) {
+        if (window.initSelect2) { window.initSelect2(scope); return; }
         $$('select', scope).forEach(function (select) {
             if (select.multiple || select.hasAttribute('data-plain') || select.closest('.input-group')) return;
             if (select.hasAttribute('data-search') || select.options.length >= 9) ERP.searchSelect(select);
