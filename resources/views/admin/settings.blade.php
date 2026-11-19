@@ -18,6 +18,16 @@
             $text('trial_warn_days', 'Warn before the trial ends, days before', 'For example 2. An email also goes on the last day and the day after.'),
             $text('renew_warn_days', 'Warn before a subscription ends, days before', 'For example 7, 1. An email also goes on the last day and the day after.'),
         ]],
+        [__('Products for wholesale'), __('Companies show their products with pictures or a short video. A listing is free; being sponsored is paid. A price of 0 means that period is not offered.'), [
+            $text('products_free_limit', 'Products a company may list', '0 means no limit.', 4, 'number'),
+            $text('sponsor_week_afn', 'Sponsored for a week, AFN', null, 4),
+            $text('sponsor_month_afn', 'Sponsored for a month, AFN', null, 4),
+            $text('sponsor_week_usd', 'Sponsored for a week, USD', null, 4),
+            $text('sponsor_month_usd', 'Sponsored for a month, USD', null, 4),
+        ]],
+        [__('Public statistics'), __('The Statistics page of the site shows real numbers only.'), [
+            $text('stats_min', 'Smallest number that is shown', 'A figure below this stays hidden until it grows. 0 shows everything.', 6, 'number'),
+        ]],
         [__('WhatsApp alerts'), __('Tender alerts by WhatsApp go through your own sender service. Each alert is one POST with "to" and "message". Leave the address empty to switch WhatsApp alerts off.'), [
             $text('whatsapp_url', 'Address of the sender service', 'For example https://sender.example.af/api/send', 8, 'url'),
             $text('whatsapp_token', 'Access token', 'Sent as "Authorization: Bearer ...".', 4),
@@ -54,6 +64,16 @@
                             <input class="form-check-input" type="checkbox" role="switch" id="s-posting-free" name="posting_free" value="1" @checked(old('posting_free', $values['posting_free'] ? '1' : '0') == '1')>
                             <label class="form-check-label" for="s-posting-free">{{ __('Posting tenders is free for every buyer') }}</label>
                             <div class="form-text">{{ __('Switched off: a buyer needs a plan with "May post tenders" to post new tenders. Registration stays free, and tenders already published stay online.') }}</div>
+                        </div>
+                    </div>
+                @endif
+                @if ($title === __('Products for wholesale'))
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <input type="hidden" name="products_enabled" value="0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="s-products" name="products_enabled" value="1" @checked(old('products_enabled', $values['products_enabled'] ? '1' : '0') == '1')>
+                            <label class="form-check-label" for="s-products">{{ __('The products module is switched on') }}</label>
+                            <div class="form-text">{{ __('Switched off: there is no Products page on the site and companies do not see "My products". Nothing is deleted.') }}</div>
                         </div>
                     </div>
                 @endif

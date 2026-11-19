@@ -20,6 +20,7 @@ class SettingsController extends Controller
         }
         $values['registration'] = Platform::bool('registration');
         $values['posting_free'] = Platform::bool('posting_free');
+        $values['products_enabled'] = Platform::bool('products_enabled');
 
         return view('admin.settings', ['values' => $values]);
     }
@@ -46,6 +47,12 @@ class SettingsController extends Controller
             'receipt_prefix' => ['nullable', 'string', 'max:10'],
             'company_name' => ['nullable', 'string', 'max:150'],
             'company_address' => ['nullable', 'string', 'max:500'],
+            'products_free_limit' => ['required', 'integer', 'between:0,1000'],
+            'sponsor_week_afn' => ['required', 'numeric', 'min:0'],
+            'sponsor_month_afn' => ['required', 'numeric', 'min:0'],
+            'sponsor_week_usd' => ['required', 'numeric', 'min:0'],
+            'sponsor_month_usd' => ['required', 'numeric', 'min:0'],
+            'stats_min' => ['required', 'integer', 'between:0,100000'],
         ], [
             'trial_warn_days.regex' => __('Write the days as numbers with commas between them, for example 7, 1.'),
             'renew_warn_days.regex' => __('Write the days as numbers with commas between them, for example 7, 1.'),
@@ -53,6 +60,7 @@ class SettingsController extends Controller
 
         $data['registration'] = $request->boolean('registration') ? '1' : '0';
         $data['posting_free'] = $request->boolean('posting_free') ? '1' : '0';
+        $data['products_enabled'] = $request->boolean('products_enabled') ? '1' : '0';
         $data['billing_email'] = implode(', ', preg_split('/[\s,;]+/', (string) ($data['billing_email'] ?? ''), -1, PREG_SPLIT_NO_EMPTY));
 
         Platform::set($data);

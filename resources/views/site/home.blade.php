@@ -54,6 +54,7 @@
         <div class="stat"><b class="gt-ink">{{ number_format($stats['buyers']) }}</b><span>buyers posting tenders</span></div>
         <div class="stat"><b class="gt-green">{{ number_format($stats['companies']) }}</b><span>verified companies</span></div>
     </div>
+    <p style="margin-top:10px;text-align:right;font-size:14px"><a href="{{ route('site.statistics') }}" style="font-weight:600">All statistics, by province and sector</a></p>
 </div>
 
 <section class="wrap section" id="tenders">
@@ -117,6 +118,20 @@
         </div>
     </div>
 </section>
+
+@if ($sponsored->isNotEmpty())
+<section class="wrap section" id="products">
+    <div class="section-head">
+        <div><div class="eyebrow red">Wholesale products</div><h2>From factories and producers in Afghanistan</h2></div>
+        <a href="{{ route('site.products') }}" style="font-weight:600">See all products</a>
+    </div>
+    <div class="grid-products">
+        @foreach ($sponsored as $product)
+            @include('site._product', ['product' => $product])
+        @endforeach
+    </div>
+</section>
+@endif
 
 @if ($featured->isNotEmpty())
 <section class="band" id="companies">

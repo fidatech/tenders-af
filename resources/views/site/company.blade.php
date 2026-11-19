@@ -65,6 +65,17 @@
                 </section>
             @endif
 
+            @if ($products->isNotEmpty())
+                <section class="block">
+                    <h2>Products for wholesale</h2>
+                    <div class="grid-products">
+                        @foreach ($products as $product)
+                            @include('site._product', ['product' => $product])
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
             @if ($posted->isNotEmpty())
                 <section class="block">
                     <h2>Tenders from {{ $company->name }}</h2>

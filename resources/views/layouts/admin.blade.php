@@ -3,11 +3,14 @@
     // [label, icon, route, pattern that marks it current, only for super administrators]
     $waitingVerify = \App\Models\Company::where('verify_status', 'pending')->count();
     $waitingTenders = \App\Models\Tender::where('status', 'pending')->count();
+    $productsOn = \App\Support\Platform::bool('products_enabled');
+    $waitingProducts = $productsOn ? \App\Models\Product::where('status', 'pending')->count() + \App\Models\ProductPromotion::where('status', 'pending')->count() : 0;
     $waitingPay = \App\Models\Subscription::waiting()->count();
     // [label, icon, route, pattern that marks it current, only for super administrators, number waiting]
     $menu = [
         ['Dashboard', 'gauge-high', 'admin.dashboard', 'admin.dashboard', false, 0],
         ['Tenders', 'gavel', 'admin.tenders.index', 'admin.tenders.*', false, $waitingTenders],
+        ['Products', 'boxes-stacked', 'admin.products.index', 'admin.products.*', false, $waitingProducts],
         ['Sectors', 'layer-group', 'admin.industries.index', 'admin.industries.*', false, 0],
         ['Categories', 'tags', 'admin.categories.index', 'admin.categories.*', false, 0],
         ['Companies', 'building', 'admin.companies.index', 'admin.companies.*', false, 0],

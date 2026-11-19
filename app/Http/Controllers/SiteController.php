@@ -8,6 +8,8 @@ use App\Models\Company;
 use App\Models\Industry;
 use App\Models\Plan;
 use App\Models\PlatformAccount;
+use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\Province;
 use App\Models\Tender;
 use App\Support\Platform;
@@ -19,6 +21,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
@@ -37,6 +40,7 @@ class SiteController extends Controller
         'site.sectors' => ['/sectors', 'Sectors'],
         'site.provinces' => ['/provinces', 'Provinces'],
         'site.companies' => ['/companies', 'Companies'],
+        'site.statistics' => ['/statistics', 'Statistics'],
         'site.pricing' => ['/pricing', 'Pricing'],
         'site.how' => ['/how-it-works', 'How it works'],
         'site.faq' => ['/questions', 'Questions'],
@@ -65,6 +69,7 @@ class SiteController extends Controller
             'map' => $this->map($counts),
             'top' => Province::whereIn('id', array_keys($counts))->get()->sortByDesc(fn (Province $p) => $counts[$p->id])->take(4)->values()
                 ->map(fn (Province $p) => ['name' => $p->name, 'slug' => $p->slug, 'count' => $counts[$p->id]]),
+            'sponsored' => Platform::bool('products_enabled') ? Product::live()->sponsored()->with('company', 'images', 'province')->inRandomOrder()->limit(4)->get() : collect(),
             'featured' => Company::listed()->where('verify_status', 'verified')->with('province', 'industries')->orderByDesc('verified_at')->limit(4)->get(),
             'faqSchema' => array_slice($this->faqs(), 0, 4),
         ]);
@@ -223,6 +228,7 @@ class SiteController extends Controller
             'description' => mb_substr($company->about ? preg_replace('/\s+/', ' ', $company->about) : $company->name.' is a '.mb_strtolower($company->kindLabel()).($place ? ' in '.$place : '').' registered on '.config('app.name').'.', 0, 300),
             'company' => $company,
             // what this organisation posted itself: open ones first, then the newest results
+            'products' => Platform::bool('products_enabled') ? Product::live()->where('company_id', $company->id)->with('company', 'images', 'province')->sponsoredFirst()->limit(6)->get() : collect(),
             'posted' => Tender::visible()->where('company_id', $company->id)->with('industry', 'province')
                 ->orderByRaw("case when status = 'published' then 0 else 1 end")->orderByDesc('published_on')->orderByDesc('id')->limit(12)->get(),
             'crumbs' => [['Companies', route('site.companies')], [$company->name, null]],
@@ -230,6 +236,135 @@ class SiteController extends Controller
     }
 
     /** The logo of a listed company. */
+    /* ------------------------------------------------------------ products for wholesale */
+
+    public function products(Request $request): View
+    {
+        abort_unless(Platform::bool('products_enabled'), 404);
+        $term = trim((string) $request->query('q', ''));
+        $rows = Product::live()
+            ->when($term !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner->where('name', 'like', "%$term%")->orWhere('summary', 'like', "%$term%")))
+            ->when($request->query('industry'), fn (Builder $q, $id) => $q->where('industry_id', $id))
+            ->when($request->query('province'), fn (Builder $q, $id) => $q->where('province_id', $id))
+            ->with('company', 'industry', 'province', 'images')->sponsoredFirst()->paginate(24)->withQueryString();
+
+        return $this->page('site.products', [
+            'title' => 'Wholesale products made and supplied in Afghanistan',
+            'description' => 'Products from factories and producers in Afghanistan, for wholesale: unit, smallest order and a direct contact for NGOs, UN agencies, government offices and traders.',
+            'rows' => $rows,
+            'term' => $term,
+            'industries' => Industry::options(),
+            'provinceOptions' => Province::options(),
+            'crumbs' => [['Products', null]],
+            'noindex' => $request->hasAny(['q', 'industry', 'province', 'page']),
+        ]);
+    }
+
+    public function product(string $slug): View
+    {
+        abort_unless(Platform::bool('products_enabled'), 404);
+        $product = Product::live()->with('company.province', 'industry', 'province', 'images')->where('slug', $slug)->firstOrFail();
+        $product->increment('views');
+        $place = $product->province?->name ?: ($product->company->province?->name ?: 'Afghanistan');
+
+        return $this->page('site.product', [
+            'title' => $product->name.' wholesale, '.$place.' ('.$product->company->name.')',
+            'description' => mb_substr($product->summary.' Smallest order: '.$product->min_order.'. '.$product->priceText().'.', 0, 300),
+            'product' => $product,
+            'place' => $place,
+            'more' => Product::live()->where('company_id', $product->company_id)->whereKeyNot($product->id)->with('company', 'images', 'province')->sponsoredFirst()->limit(3)->get(),
+            'crumbs' => array_values(array_filter([
+                ['Products', route('site.products')],
+                $product->industry ? [$product->industry->name, route('site.products', ['industry' => $product->industry_id])] : null,
+                [$product->name, null],
+            ])),
+        ]);
+    }
+
+    /** A visitor presses "WhatsApp": the click is counted for the company, then WhatsApp opens. */
+    public function productContact(string $slug): RedirectResponse
+    {
+        abort_unless(Platform::bool('products_enabled'), 404);
+        $product = Product::live()->with('company')->where('slug', $slug)->firstOrFail();
+        $number = preg_replace('/\D+/', '', (string) ($product->company->whatsapp ?: $product->company->phone));
+        abort_if($number === '', 404);
+        $product->increment('contacts');
+        // 0700 123 456 is written the international way: 93700123456
+        $number = str_starts_with($number, '00') ? substr($number, 2) : (str_starts_with($number, '0') ? '93'.substr($number, 1) : $number);
+
+        return redirect()->away('https://wa.me/'.$number.'?text='.rawurlencode('Hello, I saw "'.$product->name.'" on '.config('app.name').' ('.route('site.products.show', ['slug' => $product->slug]).'). Please send me your wholesale offer.'));
+    }
+
+    /** A picture of a product. Before it is published only its company and the administrators see it. */
+    public function productImage(int $id): StreamedResponse
+    {
+        $image = ProductImage::with('product')->findOrFail($id);
+        $this->maySee($image->product);
+        abort_unless(Storage::disk('local')->exists($image->path), 404);
+
+        return Storage::disk('local')->response($image->path, null, ['Cache-Control' => $image->product->isLive() ? 'public, max-age=86400' : 'private, no-store']);
+    }
+
+    public function productVideo(int $id): BinaryFileResponse
+    {
+        $product = Product::findOrFail($id);
+        $this->maySee($product);
+        abort_unless($product->video_path && Storage::disk('local')->exists($product->video_path), 404);
+
+        // a file response answers "Range" requests, which a video player needs to seek
+        return response()->file(Storage::disk('local')->path($product->video_path));
+    }
+
+    private function maySee(Product $product): void
+    {
+        $open = $product->isLive() && Platform::bool('products_enabled');
+        abort_unless($open || auth('admin')->check() || auth('web')->user()?->company_id === $product->company_id, 404);
+    }
+
+    /* ---------------------------------------------------------------------- statistics */
+
+    /** Real numbers about the site, for visitors, journalists and AI assistants. Small figures stay hidden until they grow. */
+    public function statistics(): View
+    {
+        $min = (int) platform('stats_min');
+        $products = Platform::bool('products_enabled');
+        // [label, number, explanation]
+        $figures = [
+            ['Tenders published', Tender::visible()->count(), 'Every tender published on the site so far, open or closed.'],
+            ['Open tenders', Tender::open()->count(), 'Tenders whose deadline has not passed.'],
+            ['Closing this week', Tender::closingWithin(7)->count(), 'Open tenders whose deadline is within seven days.'],
+            ['Tenders awarded', Tender::where('status', Tender::AWARDED)->count(), 'Tenders whose winner was published.'],
+            ['Buyers', Tender::visible()->distinct()->count('buyer_name'), 'Organisations whose tenders are on the site.'],
+            ['Registered companies', Company::where('status', '!=', Company::SUSPENDED)->count(), 'Companies and organisations with an account.'],
+            ['Verified companies', Company::listed()->where('verify_status', 'verified')->count(), 'Companies whose business licence we checked.'],
+            $products ? ['Products listed', Product::live()->count(), 'Wholesale products from factories and producers.'] : null,
+        ];
+        $figures = array_values(array_filter($figures, fn ($figure) => $figure && $figure[1] >= max(1, $min)));
+
+        $open = $this->provinceCounts();
+        $all = Tender::visible()->whereNotNull('province_id')->selectRaw('province_id, count(*) as n')->groupBy('province_id')->pluck('n', 'province_id');
+        $companies = Company::listed()->whereNotNull('province_id')->selectRaw('province_id, count(*) as n')->groupBy('province_id')->pluck('n', 'province_id');
+        $made = $products ? Product::live()->whereNotNull('province_id')->selectRaw('province_id, count(*) as n')->groupBy('province_id')->pluck('n', 'province_id') : collect();
+
+        return $this->page('site.statistics', [
+            'title' => 'Statistics: tenders and companies in Afghanistan, by province and sector',
+            'description' => 'Live figures from '.config('app.name').': tenders published and open, buyers, registered and verified companies, by province and by sector.',
+            'figures' => $figures,
+            'showTables' => Tender::visible()->count() >= max(1, $min),
+            'withProducts' => $products,
+            'map' => $this->map($open),
+            'provinces' => Province::orderBy('name')->get()->map(fn (Province $p) => [
+                'name' => $p->name, 'slug' => $p->slug, 'open' => (int) ($open[$p->id] ?? 0), 'all' => (int) ($all[$p->id] ?? 0),
+                'companies' => (int) ($companies[$p->id] ?? 0), 'products' => (int) ($made[$p->id] ?? 0),
+            ])->sortByDesc('all')->values(),
+            'sectors' => Industry::where('is_active', true)
+                ->withCount(['tenders as all_count' => fn (Builder $q) => $q->visible(), 'tenders as open_count' => fn (Builder $q) => $q->open()])
+                ->orderByDesc('all_count')->orderBy('name')->get(),
+            'updated' => fmt_datetime(Tender::now()),
+            'crumbs' => [['Statistics', null]],
+        ]);
+    }
+
     public function logo(string $slug): StreamedResponse
     {
         $company = Company::listed()->where('slug', $slug)->firstOrFail();
@@ -324,6 +459,12 @@ class SiteController extends Controller
             }
             foreach (Tender::whereIn('status', [Tender::PUBLISHED, Tender::AWARDED])->orderByDesc('id')->limit(20000)->get(['slug', 'updated_at']) as $tender) {
                 $urls[] = [route('site.tenders.show', ['slug' => $tender->slug]), $tender->updated_at?->toDateString() ?? $today, '0.6'];
+            }
+            if (Platform::bool('products_enabled')) {
+                $urls[] = [route('site.products'), $today, '0.8'];
+                foreach (Product::live()->orderByDesc('id')->limit(20000)->get(['slug', 'updated_at']) as $product) {
+                    $urls[] = [route('site.products.show', ['slug' => $product->slug]), $product->updated_at?->toDateString() ?? $today, '0.6'];
+                }
             }
             foreach (Company::listed()->orderByDesc('id')->limit(20000)->get(['slug', 'updated_at']) as $company) {
                 $urls[] = [route('site.companies.show', ['slug' => $company->slug]), $company->updated_at?->toDateString() ?? $today, '0.5'];

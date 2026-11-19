@@ -17,6 +17,15 @@ class Platform
         'trial_days' => 7,
         'registration' => '1',
         'posting_free' => '1',
+        // products for wholesale: off until an administrator switches the module on
+        'products_enabled' => '0',
+        'products_free_limit' => '5',
+        'sponsor_week_afn' => '1500',
+        'sponsor_month_afn' => '5000',
+        'sponsor_week_usd' => '25',
+        'sponsor_month_usd' => '75',
+        // public statistics: a figure smaller than this is not shown yet
+        'stats_min' => '10',
         'billing_email' => '',
         'support_email' => '',
         'support_whatsapp' => '',

@@ -113,6 +113,9 @@ class Menu
 
     private static function allowed(User $user, array $item): bool
     {
+        if (! empty($item['setting']) && ! Platform::bool($item['setting'])) {
+            return false;
+        }
         $company = $user->company;
         if (! empty($item['supplier']) && ! $company?->is_supplier) {
             return false;

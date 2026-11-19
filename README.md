@@ -175,3 +175,24 @@ EasyApache PHP it finds. The workflow `.github/workflows/deploy.yml` runs it ove
 ```
 php artisan test
 ```
+
+## Products for wholesale (switched off by default)
+
+Factories and producers show what they make, with up to 6 pictures and one short video, for NGOs, UN agencies,
+government offices and traders. Every product needs a unit and a smallest order; buyers contact the company by
+WhatsApp or phone, and the site takes no commission.
+
+- Switch it on in **Admin > Settings > Products for wholesale**. While it is off there is no Products page,
+  no "My products" in the panel of companies, and nothing is deleted.
+- A company lists a limited number of products for free (5 by default). Each product is approved under
+  **Admin > Products** before it is shown; a change to a published product is checked again.
+- **Sponsoring is paid**: a week or a month, priced in AFN and USD in the settings. The company pays to one of
+  the payment methods, uploads the proof, and an administrator confirms it. A sponsored product is shown first
+  on the Products page and on the home page, with a "Sponsored" label.
+- The company sees views and contact clicks for each product.
+
+## Statistics
+
+`/statistics` shows live counts (tenders, buyers, companies, products) and tables by province and by sector,
+with the province map. A figure below **Admin > Settings > "Smallest number that is shown"** (10 by default)
+stays hidden, so a new site does not show tiny numbers.

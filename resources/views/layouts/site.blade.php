@@ -4,6 +4,7 @@
     $canonical = url()->current();
     $image = asset('img/og.png');
     $menu = ['site.tenders' => ['site.tenders', 'site.sector', 'site.province', 'site.tenders.show'], 'site.companies' => ['site.companies', 'site.companies.show'], 'site.sectors' => ['site.sectors'], 'site.provinces' => ['site.provinces'], 'site.pricing' => ['site.pricing']];
+    $productsOn = \App\Support\Platform::bool('products_enabled');
     $signedIn = auth('web')->check();
 
     // structured data: who runs the site and what it is. No ratings or reviews: there are none to quote.
@@ -71,6 +72,7 @@
             @foreach ($menu as $route => $patterns)
                 <a href="{{ route($route) }}" @if (request()->routeIs(...$patterns)) aria-current="page" @endif>{{ \App\Http\Controllers\SiteController::PAGES[$route][1] }}</a>
             @endforeach
+            @if ($productsOn)<a href="{{ route('site.products') }}" @if (request()->routeIs('site.products', 'site.products.show')) aria-current="page" @endif>Products</a>@endif
         </nav>
         <div class="top-actions">
             @if ($signedIn)
@@ -106,6 +108,8 @@
             <nav aria-label="Companies">
                 <h2>Companies</h2>
                 <a href="{{ route('site.companies') }}">Company directory</a>
+                @if ($productsOn)<a href="{{ route('site.products') }}">Wholesale products</a>@endif
+                <a href="{{ route('site.statistics') }}">Statistics</a>
                 @if ($signup)<a href="{{ route('register') }}">Register your company</a>@endif
                 <a href="{{ route('login') }}">Sign in</a>
                 <a href="{{ route('site.pricing') }}">Pricing</a>

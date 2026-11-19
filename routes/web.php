@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PostedTenderController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SiteController;
@@ -32,6 +33,14 @@ Route::get('provinces', [SiteController::class, 'provinces'])->name('site.provin
 Route::get('companies', [SiteController::class, 'companies'])->name('site.companies');
 Route::get('companies/{slug}', [SiteController::class, 'company'])->name('site.companies.show');
 Route::get('companies/{slug}/logo', [SiteController::class, 'logo'])->name('site.companies.logo');
+
+// products for wholesale (the module is switched on in the settings of the administrators)
+Route::get('products', [SiteController::class, 'products'])->name('site.products');
+Route::get('products/image/{id}', [SiteController::class, 'productImage'])->whereNumber('id')->name('site.products.image');
+Route::get('products/video/{id}', [SiteController::class, 'productVideo'])->whereNumber('id')->name('site.products.video');
+Route::get('products/{slug}', [SiteController::class, 'product'])->name('site.products.show');
+Route::get('products/{slug}/whatsapp', [SiteController::class, 'productContact'])->middleware('throttle:30,1')->name('site.products.contact');
+Route::get('statistics', [SiteController::class, 'statistics'])->name('site.statistics');
 
 Route::get('pricing', [SiteController::class, 'pricing'])->name('site.pricing');
 Route::get('how-it-works', [SiteController::class, 'how'])->name('site.how');
@@ -91,6 +100,19 @@ Route::middleware('auth:web')->group(function () {
             Route::delete('{id}/documents/{document}', [PostedTenderController::class, 'destroyDocument'])->whereNumber(['id', 'document'])->name('document.destroy');
         });
 
+        // the products a company offers for wholesale
+        Route::prefix('my/products')->name('products.')->group(function () {
+            Route::get('/', [ProductController::class, 'index'])->name('index');
+            Route::get('create', [ProductController::class, 'create'])->name('create');
+            Route::post('/', [ProductController::class, 'store'])->name('store');
+            Route::get('{id}/edit', [ProductController::class, 'edit'])->whereNumber('id')->name('edit');
+            Route::put('{id}', [ProductController::class, 'update'])->whereNumber('id')->name('update');
+            Route::delete('{id}', [ProductController::class, 'destroy'])->whereNumber('id')->name('destroy');
+            Route::delete('{id}/images/{image}', [ProductController::class, 'destroyImage'])->whereNumber(['id', 'image'])->name('image.destroy');
+            Route::get('{id}/sponsor', [ProductController::class, 'sponsor'])->whereNumber('id')->name('sponsor');
+            Route::post('{id}/sponsor', [ProductController::class, 'storeSponsor'])->whereNumber('id')->name('sponsor.store');
+        });
+
         Route::middleware('owner')->group(function () {
             crud_routes('team', TeamController::class, 'team');
             Route::get('company', [SettingsController::class, 'edit'])->name('settings.edit');
@@ -147,6 +169,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('tenders/{id}/reject', [Admin\TenderController::class, 'reject'])->whereNumber('id')->name('tenders.reject');
         Route::get('tenders/{id}/documents/{document}', [Admin\TenderController::class, 'document'])->whereNumber(['id', 'document'])->name('tenders.document');
         Route::delete('tenders/{id}/documents/{document}', [Admin\TenderController::class, 'destroyDocument'])->whereNumber(['id', 'document'])->name('tenders.document.destroy');
+        Route::get('products', [Admin\ProductController::class, 'index'])->name('products.index');
+        Route::get('products/{id}', [Admin\ProductController::class, 'show'])->whereNumber('id')->name('products.show');
+        Route::post('products/{id}/approve', [Admin\ProductController::class, 'approve'])->whereNumber('id')->name('products.approve');
+        Route::post('products/{id}/reject', [Admin\ProductController::class, 'reject'])->whereNumber('id')->name('products.reject');
+        Route::post('products/{id}/hide', [Admin\ProductController::class, 'hide'])->whereNumber('id')->name('products.hide');
+        Route::delete('products/{id}', [Admin\ProductController::class, 'destroy'])->whereNumber('id')->name('products.destroy');
+        Route::post('products/payments/{id}/approve', [Admin\ProductController::class, 'approvePayment'])->whereNumber('id')->name('products.payments.approve');
+        Route::post('products/payments/{id}/reject', [Admin\ProductController::class, 'rejectPayment'])->whereNumber('id')->name('products.payments.reject');
+        Route::get('products/payments/{id}/receipt', [Admin\ProductController::class, 'receipt'])->whereNumber('id')->name('products.payments.receipt');
         crud_routes('industries', Admin\IndustryController::class, 'industries');
         crud_routes('categories', Admin\CategoryController::class, 'categories');
 

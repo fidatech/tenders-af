@@ -2,7 +2,8 @@
 
 // The sidebar of a company. 'owner' => true: only the owner of the company sees it.
 // 'active' is the route pattern that opens the entry. 'supplier' => true: only accounts that look
-// for tenders see it; 'buyer' => true: only accounts that post tenders.
+// for tenders see it; 'buyer' => true: only accounts that post tenders. 'setting' => a switch of the administrators
+// that must be on.
 return [
     ['label' => 'Dashboard', 'icon' => 'gauge-high', 'route' => 'dashboard'],
 
@@ -14,6 +15,9 @@ return [
     ['heading' => 'Post tenders'],
     ['label' => 'Posted tenders', 'icon' => 'bullhorn', 'route' => 'posted.index', 'active' => 'posted.*', 'buyer' => true],
     ['label' => 'Post a tender', 'icon' => 'plus', 'route' => 'posted.create', 'buyer' => true],
+
+    ['heading' => 'Products'],
+    ['label' => 'My products', 'icon' => 'boxes-stacked', 'route' => 'products.index', 'active' => 'products.*', 'setting' => 'products_enabled'],
 
     ['heading' => 'My company'],
     ['label' => 'Company profile', 'icon' => 'building', 'route' => 'settings.edit', 'owner' => true],
