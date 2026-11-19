@@ -58,6 +58,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}">
 <link rel="stylesheet" href="{{ asset_v('css/site.css') }}">
 <script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@graph' => $graph], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
 </head>
@@ -135,5 +136,9 @@
         </div>
     </div>
 </footer>
+{{-- every pick list of the website is a Select2 list --}}
+<script src="{{ asset_v('vendor/jquery/jquery.min.js') }}" defer></script>
+<script src="{{ asset_v('vendor/select2/select2.min.js') }}" defer></script>
+<script src="{{ asset_v('js/select2-init.js') }}" defer></script>
 </body>
 </html>
