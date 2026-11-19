@@ -64,6 +64,17 @@
                     @endif
                 </section>
             @endif
+
+            @if ($posted->isNotEmpty())
+                <section class="block">
+                    <h2>Tenders from {{ $company->name }}</h2>
+                    <div class="grid-tenders">
+                        @foreach ($posted as $tender)
+                            @include('site._tender', ['tender' => $tender])
+                        @endforeach
+                    </div>
+                </section>
+            @endif
         </article>
 
         <aside class="side">

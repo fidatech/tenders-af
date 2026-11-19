@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 class Companies
 {
     /**
-     * @param  array{name: string, kind?: string, owner_name: string, owner_email: string, owner_password: string, country?: ?string, phone?: ?string, province_id?: ?int, plan_id?: ?int, status?: string, subscription_ends_at?: ?string, timezone?: string}  $data
+     * @param  array{name: string, kind?: string, owner_name: string, owner_email: string, owner_password: string, is_supplier?: bool, is_buyer?: bool, country?: ?string, phone?: ?string, province_id?: ?int, plan_id?: ?int, status?: string, subscription_ends_at?: ?string, timezone?: string}  $data
      */
     public static function create(array $data): Company
     {
@@ -33,6 +33,9 @@ class Companies
                 'country' => $data['country'] ?? ($kind === 'company' ? 'Afghanistan' : null),
                 'province_id' => $data['province_id'] ?? null,
                 'timezone' => $data['timezone'] ?? 'Asia/Kabul',
+                // looking for tenders unless said otherwise; an account with no role would be useless
+                'is_buyer' => (bool) ($data['is_buyer'] ?? false),
+                'is_supplier' => (bool) ($data['is_supplier'] ?? true) || ! ($data['is_buyer'] ?? false),
                 'currency' => $currency,
                 'plan_id' => $plan?->id,
                 'status' => $status,

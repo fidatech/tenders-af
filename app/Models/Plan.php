@@ -11,7 +11,7 @@ class Plan extends Model
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean', 'full_access' => 'boolean', 'instant_alerts' => 'boolean', 'whatsapp_alerts' => 'boolean'];
+        return ['is_active' => 'boolean', 'full_access' => 'boolean', 'instant_alerts' => 'boolean', 'whatsapp_alerts' => 'boolean', 'can_post' => 'boolean'];
     }
 
     public function companies(): HasMany
@@ -53,6 +53,7 @@ class Plan extends Model
             $this->instant_alerts ? __('Email alerts the moment a matching tender is published') : __('Weekly email digest of matching tenders'),
             $this->whatsapp_alerts ? __('WhatsApp alerts') : null,
             $this->full_access ? __('Bid price calculator on every tender') : null,
+            $this->can_post ? __('Post your own tenders') : null,
             $this->max_users ? trans_choice('{1} 1 user|[2,*] Up to :count users', $this->max_users, ['count' => $this->max_users]) : __('Unlimited users'),
         ]));
     }

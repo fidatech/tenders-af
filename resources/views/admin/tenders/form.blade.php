@@ -16,10 +16,35 @@
 
 @section('content')
 <x-page-header :title="$tender ? $tender->title : __('Add tender')" icon="gavel" :crumbs="[[__('Tenders'), route('admin.tenders.index')], [$tender ? $tender->number() : __('Add')]]">
-    @if ($tender && $tender->status !== 'draft')
+    @if ($tender && in_array($tender->status, ['published', 'awarded', 'cancelled'], true))
         <a class="btn btn-outline-soft" href="{{ route('site.tenders.show', ['slug' => $tender->slug]) }}" target="_blank" rel="noopener"><x-icon name="eye" class="me-1" /> {{ __('See on the site') }}</a>
     @endif
 </x-page-header>
+
+@if ($tender?->company)
+    <div class="card h-auto mb-3">
+        <div class="card-body d-flex flex-wrap align-items-center gap-3">
+            <span class="sc-icon icon-soft {{ $tender->status === 'pending' ? 'warning' : 'success' }} flex-shrink-0" style="width:42px;height:42px"><x-icon name="bullhorn" /></span>
+            <div class="flex-grow-1 min-w-0">
+                <div class="fw-bold">{{ __('Posted by :name', ['name' => $tender->company->name]) }} <span class="badge bg-secondary-subtle text-secondary-emphasis">{{ $tender->company->kindLabel() }}</span> @if ($tender->company->isVerified())<span class="badge bg-success-subtle text-success-emphasis">{{ __('Verified') }}</span>@else<span class="badge bg-warning-subtle text-warning-emphasis">{{ __('Not verified') }}</span>@endif</div>
+                <div class="small text-muted">@if ($tender->status === 'pending'){{ __('Waiting since :date. Check it, correct small things below if needed, then publish it or send it back.', ['date' => fmt_datetime($tender->submitted_at)]) }}@elseif ($tender->status === 'rejected'){{ __('Sent back:') }} {{ __($tender->reject_reason) }}@else{{ $tender->company->email }}@endif</div>
+            </div>
+            @if ($tender->status === 'pending')
+                <form method="POST" action="{{ route('admin.tenders.reject', ['id' => $tender->id]) }}" class="d-flex gap-2 flex-wrap">
+                    @csrf
+                    <select class="form-select w-auto" name="reason" required aria-label="{{ __('Reason') }}" data-plain style="max-width:260px">
+                        <option value="">{{ __('Reason to send back…') }}</option>
+                        @foreach ($reasons as $key => $text)
+                            <option value="{{ $key }}">{{ __($text) }}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit" class="btn btn-soft-danger">{{ __('Send back') }}</button>
+                </form>
+                <form method="POST" action="{{ route('admin.tenders.approve', ['id' => $tender->id]) }}">@csrf<button type="submit" class="btn btn-success"><x-icon name="check" class="me-1" /> {{ __('Publish') }}</button></form>
+            @endif
+        </div>
+    </div>
+@endif
 
 <form method="POST" action="{{ $tender ? route('admin.tenders.update', ['id' => $tender->id]) : route('admin.tenders.store') }}" enctype="multipart/form-data" id="tenderForm">
     @csrf

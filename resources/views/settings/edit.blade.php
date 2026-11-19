@@ -162,6 +162,16 @@
                     <span class="badge {{ $company->isVerified() ? 'bg-success-subtle text-success-emphasis' : 'bg-secondary-subtle text-secondary-emphasis' }}">{{ $company->verifyLabel() }}</span>
                 </div>
                 <div class="card-body">
+                    <div class="small fw-semibold text-muted text-uppercase mb-2">{{ __('What you do here') }}</div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" role="switch" id="s-supplier" name="is_supplier" value="1" @checked(old('is_supplier', $company->is_supplier))>
+                        <label class="form-check-label" for="s-supplier">{{ __('We look for tenders to bid on') }}</label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="s-buyer" name="is_buyer" value="1" @checked(old('is_buyer', $company->is_buyer))>
+                        <label class="form-check-label" for="s-buyer">{{ __('We post our own tenders') }}</label>
+                    </div>
+                    <hr>
                     <div class="form-check form-switch mb-3">
                         <input type="hidden" name="is_listed" value="0">
                         <input class="form-check-input" type="checkbox" role="switch" id="s-listed" name="is_listed" value="1" @checked(old('is_listed', $company->is_listed))>

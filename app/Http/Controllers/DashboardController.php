@@ -18,6 +18,8 @@ class DashboardController extends Controller
             'company' => $company,
             'hasAlerts' => $hasAlerts,
             'profile' => $company->completeness(),
+            // for a buyer: how many of its own tenders are in each state
+            'posted' => $company->is_buyer ? Tender::where('company_id', $company->id)->selectRaw('status, count(*) as n')->groupBy('status')->pluck('n', 'status')->all() : null,
             'counts' => [
                 'open' => Tender::open()->count(),
                 'matching' => $hasAlerts ? $matching()->count() : 0,

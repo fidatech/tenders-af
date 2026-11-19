@@ -41,7 +41,7 @@ class Menu
     public static function badge(array $item): int
     {
         return match ($item['badge'] ?? null) {
-            'matching' => ($company = company()) ? \App\Models\Tender::open()->matching($company)->count() : 0,
+            'matching' => ($company = company()) && $company->is_supplier ? \App\Models\Tender::open()->matching($company)->count() : 0,
             default => 0,
         };
     }
@@ -113,6 +113,14 @@ class Menu
 
     private static function allowed(User $user, array $item): bool
     {
+        $company = $user->company;
+        if (! empty($item['supplier']) && ! $company?->is_supplier) {
+            return false;
+        }
+        if (! empty($item['buyer']) && ! $company?->is_buyer) {
+            return false;
+        }
+
         return empty($item['owner']) || $user->isOwner();
     }
 }

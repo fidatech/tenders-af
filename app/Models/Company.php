@@ -26,6 +26,7 @@ class Company extends Model
     /** kind => [label, the currency it pays in] */
     public const KINDS = [
         'company' => ['Afghan company', 'AFN'],
+        'government' => ['Government office or ministry', 'AFN'],
         'ngo' => ['NGO', 'USD'],
         'international' => ['International company or organisation', 'USD'],
     ];
@@ -43,6 +44,8 @@ class Company extends Model
             'alert_email' => 'boolean',
             'alert_whatsapp' => 'boolean',
             'is_listed' => 'boolean',
+            'is_supplier' => 'boolean',
+            'is_buyer' => 'boolean',
             'trial_ends_at' => Day::class,
             'subscription_ends_at' => Day::class,
             'verify_requested_at' => 'datetime',
@@ -98,6 +101,12 @@ class Company extends Model
         return $this->belongsToMany(Category::class);
     }
 
+    /** The tenders this buyer posted. */
+    public function tenders(): HasMany
+    {
+        return $this->hasMany(Tender::class);
+    }
+
     public function savedTenders(): BelongsToMany
     {
         return $this->belongsToMany(Tender::class, 'saved_tenders')->withPivot('created_at');
@@ -112,6 +121,25 @@ class Company extends Model
     public function scopeListed(Builder $query): Builder
     {
         return $query->where('is_listed', true)->where('status', '!=', self::SUSPENDED);
+    }
+
+    /** The kind of buyer written on the tenders this organisation posts. */
+    public function buyerType(): string
+    {
+        return ['government' => 'government', 'ngo' => 'ngo', 'company' => 'private', 'international' => 'private'][$this->kind] ?? 'private';
+    }
+
+    /**
+     * May this account post tenders now? It must be a buyer. While posting is free for
+     * everybody (Settings) that is enough; afterwards its plan must include posting.
+     */
+    public function canPostTenders(): bool
+    {
+        if (! $this->is_buyer || $this->status === self::SUSPENDED) {
+            return false;
+        }
+
+        return \App\Support\Platform::bool('posting_free') || ($this->isUsable() && (bool) $this->plan?->can_post);
     }
 
     public function kindLabel(): string

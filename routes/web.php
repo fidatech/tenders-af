@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PostedTenderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SiteController;
@@ -74,6 +75,22 @@ Route::middleware('auth:web')->group(function () {
             Route::get('tenders/{id}/documents/{document}', [TenderController::class, 'document'])->whereNumber(['id', 'document'])->name('tenders.document');
         });
 
+        // the tenders a buyer posts itself
+        Route::prefix('my/posted')->name('posted.')->group(function () {
+            Route::get('/', [PostedTenderController::class, 'index'])->name('index');
+            Route::get('create', [PostedTenderController::class, 'create'])->name('create');
+            Route::post('/', [PostedTenderController::class, 'store'])->name('store');
+            Route::get('{id}/edit', [PostedTenderController::class, 'edit'])->whereNumber('id')->name('edit');
+            Route::put('{id}', [PostedTenderController::class, 'update'])->whereNumber('id')->name('update');
+            Route::delete('{id}', [PostedTenderController::class, 'destroy'])->whereNumber('id')->name('destroy');
+            Route::post('{id}/extend', [PostedTenderController::class, 'extend'])->whereNumber('id')->name('extend');
+            Route::post('{id}/documents', [PostedTenderController::class, 'addDocuments'])->whereNumber('id')->name('documents');
+            Route::post('{id}/cancel', [PostedTenderController::class, 'cancel'])->whereNumber('id')->name('cancel');
+            Route::post('{id}/award', [PostedTenderController::class, 'award'])->whereNumber('id')->name('award');
+            Route::get('{id}/documents/{document}', [PostedTenderController::class, 'document'])->whereNumber(['id', 'document'])->name('document');
+            Route::delete('{id}/documents/{document}', [PostedTenderController::class, 'destroyDocument'])->whereNumber(['id', 'document'])->name('document.destroy');
+        });
+
         Route::middleware('owner')->group(function () {
             crud_routes('team', TeamController::class, 'team');
             Route::get('company', [SettingsController::class, 'edit'])->name('settings.edit');
@@ -126,6 +143,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('tenders/{id}/edit', [Admin\TenderController::class, 'edit'])->whereNumber('id')->name('tenders.edit');
         Route::put('tenders/{id}', [Admin\TenderController::class, 'update'])->whereNumber('id')->name('tenders.update');
         Route::delete('tenders/{id}', [Admin\TenderController::class, 'destroy'])->whereNumber('id')->name('tenders.destroy');
+        Route::post('tenders/{id}/approve', [Admin\TenderController::class, 'approve'])->whereNumber('id')->name('tenders.approve');
+        Route::post('tenders/{id}/reject', [Admin\TenderController::class, 'reject'])->whereNumber('id')->name('tenders.reject');
         Route::get('tenders/{id}/documents/{document}', [Admin\TenderController::class, 'document'])->whereNumber(['id', 'document'])->name('tenders.document');
         Route::delete('tenders/{id}/documents/{document}', [Admin\TenderController::class, 'destroyDocument'])->whereNumber(['id', 'document'])->name('tenders.document.destroy');
         crud_routes('industries', Admin\IndustryController::class, 'industries');

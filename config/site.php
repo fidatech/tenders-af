@@ -30,6 +30,9 @@ return [
     // braces are filled in from the live settings: {price}, {payments}.
     'faqs' => [
         ['What is Tenders.af?', 'Tenders.af is a website that brings tenders in Afghanistan into one place. It lists tenders from NGOs, UN agencies, government offices and private buyers, and it has a free directory of companies. Companies get the tenders that match their sectors by email and WhatsApp.'],
+        ['Who can post a tender?', 'Any organisation that buys: a ministry or government office, an NGO, a UN agency or a private company. Register for free, choose "Post tenders", write the tender and send it. We check it and publish it, usually within one working day, and the companies of its sector are told by email and WhatsApp.'],
+        ['Does it cost money to post a tender?', 'Posting tenders is free at the moment. Later, posting will need a monthly plan. Registering an organisation stays free.'],
+        ['Can one account both post tenders and look for tenders?', 'Yes. One account can do both. You choose it when you register and you can change it in your company profile.'],
         ['Is it free to register a company?', 'Yes. Registering a company is free and stays free. A registered company gets a public profile in the directory, can read the summary and the deadline of every tender, and gets a weekly email of matching tenders.'],
         ['What do I get on a paid plan?', 'A paid plan opens the full details of every tender and its documents, sends you an alert the moment a matching tender is published, and gives you the bid price calculator. The Pro and Business plans add WhatsApp alerts and more users.'],
         ['How much does it cost?', '{price}'],

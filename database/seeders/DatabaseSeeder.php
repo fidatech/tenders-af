@@ -28,6 +28,16 @@ class DatabaseSeeder extends Seeder
     /** Free for everybody; Basic, Pro and Business by the month or the year (the year costs about 20% less). */
     private function plans(): void
     {
+        // Plans for buyers. Posting is free at first (Settings), so these wait switched off:
+        // set the prices, switch them on and switch "Posting tenders is free" off when the time comes.
+        foreach (['AFN' => 1500, 'USD' => 25] as $currency => $price) {
+            Plan::firstOrCreate(['name' => 'Buyer', 'interval' => 'monthly', 'currency' => $currency], [
+                'price' => $price, 'description' => 'For organisations that post tenders.',
+                'full_access' => false, 'instant_alerts' => false, 'whatsapp_alerts' => false, 'can_post' => true,
+                'max_users' => 5, 'is_active' => false, 'sort' => 90,
+            ]);
+        }
+
         Plan::firstOrCreate(['name' => 'Free', 'interval' => 'lifetime'], [
             'price' => 0, 'currency' => 'AFN', 'max_users' => 1, 'sort' => 1,
             'full_access' => false, 'instant_alerts' => false, 'whatsapp_alerts' => false,

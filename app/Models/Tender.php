@@ -25,7 +25,12 @@ class Tender extends Model
 
     public const AWARDED = 'awarded';
 
-    public const STATUSES = ['draft' => 'Draft', 'published' => 'Published', 'cancelled' => 'Cancelled', 'awarded' => 'Awarded'];
+    public const PENDING = 'pending';
+
+    public const REJECTED = 'rejected';
+
+    // pending: posted by a buyer and waiting for an administrator; rejected: sent back to the buyer
+    public const STATUSES = ['draft' => 'Draft', 'pending' => 'Waiting for approval', 'published' => 'Published', 'rejected' => 'Sent back', 'cancelled' => 'Cancelled', 'awarded' => 'Awarded'];
 
     public const ZONE = 'Asia/Kabul';
 
@@ -38,6 +43,7 @@ class Tender extends Model
             'questions_until' => Day::class,
             'deadline' => 'datetime',
             'alerted_at' => 'datetime',
+            'submitted_at' => 'datetime',
         ];
     }
 
@@ -54,6 +60,12 @@ class Tender extends Model
     public function province(): BelongsTo
     {
         return $this->belongsTo(Province::class);
+    }
+
+    /** The buyer that posted the tender; null when the data team entered it. */
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 
     public function documents(): HasMany
@@ -130,6 +142,12 @@ class Tender extends Model
             ->when($types, fn (Builder $q) => $q->whereIn('type', $types));
     }
 
+    /** May the buyer still change everything? Only before the tender is published. */
+    public function isEditableByBuyer(): bool
+    {
+        return in_array($this->status, [self::DRAFT, self::PENDING, self::REJECTED], true);
+    }
+
     public function isOpen(): bool
     {
         return $this->status === self::PUBLISHED && ($this->deadline === null || $this->deadline->gte(self::now()));
@@ -140,6 +158,8 @@ class Tender extends Model
     {
         return match (true) {
             $this->status === self::DRAFT => 'draft',
+            $this->status === self::PENDING => 'pending',
+            $this->status === self::REJECTED => 'rejected',
             $this->status === self::CANCELLED => 'cancelled',
             $this->status === self::AWARDED => 'awarded',
             ! $this->isOpen() => 'closed',
@@ -150,7 +170,7 @@ class Tender extends Model
 
     public function stateLabel(): string
     {
-        return __(['draft' => 'Draft', 'cancelled' => 'Cancelled', 'awarded' => 'Awarded', 'closed' => 'Closed', 'soon' => 'Closing soon', 'open' => 'Open'][$this->state()]);
+        return __(['draft' => 'Draft', 'pending' => 'Waiting for approval', 'rejected' => 'Sent back', 'cancelled' => 'Cancelled', 'awarded' => 'Awarded', 'closed' => 'Closed', 'soon' => 'Closing soon', 'open' => 'Open'][$this->state()]);
     }
 
     /** "2 days left", "5 hours left", "Closed" ... */

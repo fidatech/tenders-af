@@ -16,6 +16,7 @@ class Platform
     public const DEFAULTS = [
         'trial_days' => 7,
         'registration' => '1',
+        'posting_free' => '1',
         'billing_email' => '',
         'support_email' => '',
         'support_whatsapp' => '',

@@ -77,7 +77,7 @@
                 <a class="btn btn-red btn-sm" href="{{ route('dashboard') }}">My account</a>
             @else
                 <a class="plain" href="{{ route('login') }}">Sign in</a>
-                @if ($signup)<a class="btn btn-red btn-sm" href="{{ route('register') }}">Register free</a>@endif
+                @if ($signup)<a class="plain" href="{{ route('register', ['as' => 'buyer']) }}">Post a tender</a><a class="btn btn-red btn-sm" href="{{ route('register') }}">Register free</a>@endif
             @endif
         </div>
     </header>
@@ -101,7 +101,7 @@
                 <a href="{{ route('site.tenders') }}">All open tenders</a>
                 <a href="{{ route('site.sectors') }}">By sector</a>
                 <a href="{{ route('site.provinces') }}">By province</a>
-                <a href="{{ route('site.contact') }}">Post a tender</a>
+                <a href="{{ $signup ? route('register', ['as' => 'buyer']) : route('site.contact') }}">Post a tender</a>
             </nav>
             <nav aria-label="Companies">
                 <h2>Companies</h2>

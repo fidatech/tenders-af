@@ -2,11 +2,12 @@
     $admin = auth('admin')->user();
     // [label, icon, route, pattern that marks it current, only for super administrators]
     $waitingVerify = \App\Models\Company::where('verify_status', 'pending')->count();
+    $waitingTenders = \App\Models\Tender::where('status', 'pending')->count();
     $waitingPay = \App\Models\Subscription::waiting()->count();
     // [label, icon, route, pattern that marks it current, only for super administrators, number waiting]
     $menu = [
         ['Dashboard', 'gauge-high', 'admin.dashboard', 'admin.dashboard', false, 0],
-        ['Tenders', 'gavel', 'admin.tenders.index', 'admin.tenders.*', false, 0],
+        ['Tenders', 'gavel', 'admin.tenders.index', 'admin.tenders.*', false, $waitingTenders],
         ['Sectors', 'layer-group', 'admin.industries.index', 'admin.industries.*', false, 0],
         ['Categories', 'tags', 'admin.categories.index', 'admin.categories.*', false, 0],
         ['Companies', 'building', 'admin.companies.index', 'admin.companies.*', false, 0],

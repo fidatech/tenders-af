@@ -138,7 +138,7 @@ class SiteController extends Controller
     /** One tender as everybody may read it: the summary, the facts and the deadline. */
     public function tender(string $slug): View
     {
-        $tender = Tender::visible()->with('industry', 'category', 'province', 'documents')->where('slug', $slug)->firstOrFail();
+        $tender = Tender::visible()->with('industry', 'category', 'province', 'documents', 'company')->where('slug', $slug)->firstOrFail();
         $tender->increment('views');
         $place = $tender->placeText();
 
@@ -222,6 +222,9 @@ class SiteController extends Controller
             'title' => $company->name.($place ? ', '.$place : ''),
             'description' => mb_substr($company->about ? preg_replace('/\s+/', ' ', $company->about) : $company->name.' is a '.mb_strtolower($company->kindLabel()).($place ? ' in '.$place : '').' registered on '.config('app.name').'.', 0, 300),
             'company' => $company,
+            // what this organisation posted itself: open ones first, then the newest results
+            'posted' => Tender::visible()->where('company_id', $company->id)->with('industry', 'province')
+                ->orderByRaw("case when status = 'published' then 0 else 1 end")->orderByDesc('published_on')->orderByDesc('id')->limit(12)->get(),
             'crumbs' => [['Companies', route('site.companies')], [$company->name, null]],
         ]);
     }

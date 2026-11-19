@@ -19,6 +19,7 @@ class SettingsController extends Controller
             $values[$key] = Platform::get($key);
         }
         $values['registration'] = Platform::bool('registration');
+        $values['posting_free'] = Platform::bool('posting_free');
 
         return view('admin.settings', ['values' => $values]);
     }
@@ -51,6 +52,7 @@ class SettingsController extends Controller
         ]);
 
         $data['registration'] = $request->boolean('registration') ? '1' : '0';
+        $data['posting_free'] = $request->boolean('posting_free') ? '1' : '0';
         $data['billing_email'] = implode(', ', preg_split('/[\s,;]+/', (string) ($data['billing_email'] ?? ''), -1, PREG_SPLIT_NO_EMPTY));
 
         Platform::set($data);

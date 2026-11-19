@@ -57,6 +57,9 @@ class SettingsController extends Controller
         unset($data['industries'], $data['categories'], $data['logo']);
 
         $data['is_listed'] = $request->boolean('is_listed');
+        $data['is_buyer'] = $request->boolean('is_buyer');
+        // an account always keeps one role: without posting, it looks for tenders
+        $data['is_supplier'] = $request->boolean('is_supplier') || ! $data['is_buyer'];
         if ($data['name'] !== $company->name) {
             $data['slug'] = Company::freeSlug($data['name'], $company->id);
         }

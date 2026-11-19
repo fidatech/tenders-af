@@ -16,7 +16,21 @@
 
 @include('partials.plan-status', ['company' => $company, 'link' => true])
 
-@unless ($hasAlerts)
+@if ($posted !== null)
+    <div class="card h-auto mb-3">
+        <div class="card-body d-flex flex-wrap align-items-center gap-3">
+            <span class="sc-icon icon-soft success flex-shrink-0" style="width:42px;height:42px"><x-icon name="bullhorn" /></span>
+            <div class="flex-grow-1 min-w-0">
+                <div class="fw-bold">{{ __('Your posted tenders') }}</div>
+                <div class="small text-muted">{{ __(':published published · :pending waiting for approval · :draft drafts', ['published' => number_format($posted['published'] ?? 0), 'pending' => number_format($posted['pending'] ?? 0), 'draft' => number_format($posted['draft'] ?? 0)]) }}@if (! empty($posted['rejected'])) · <span class="text-danger">{{ __(':count sent back', ['count' => $posted['rejected']]) }}</span>@endif</div>
+            </div>
+            <a class="btn btn-outline-soft" href="{{ route('posted.index') }}">{{ __('Open') }}</a>
+            <a class="btn btn-primary" href="{{ route('posted.create') }}"><x-icon name="plus" class="me-1" /> {{ __('Post a tender') }}</a>
+        </div>
+    </div>
+@endif
+
+@unless ($hasAlerts || ! $company->is_supplier)
     <div class="alert alert-warning d-flex align-items-center gap-3">
         <x-icon name="bell" class="fs-4" />
         <div class="flex-grow-1 min-w-0">

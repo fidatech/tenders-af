@@ -22,6 +22,16 @@
             </select>
             @error('kind')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
         </div>
+        <div class="mb-3">
+            <span class="form-label d-block">{{ __('What do you want to do?') }}</span>
+            @php $roles = (array) old('roles', request('as') === 'buyer' ? ['buyer'] : ['supplier']); @endphp
+            <div class="role-pick">
+                <label class="role-option"><input type="checkbox" name="roles[]" value="supplier" @checked(in_array('supplier', $roles, true))><span><x-icon name="magnifying-glass" /><strong>{{ __('Find tenders') }}</strong><small>{{ __('Get alerts and bid') }}</small></span></label>
+                <label class="role-option"><input type="checkbox" name="roles[]" value="buyer" @checked(in_array('buyer', $roles, true))><span><x-icon name="bullhorn" /><strong>{{ __('Post tenders') }}</strong><small>{{ __('Reach suppliers') }}</small></span></label>
+            </div>
+            <div class="form-text">{{ __('You can tick both, and change it later.') }}</div>
+            @error('roles')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+        </div>
         <div class="row g-3 mb-3">
             <div class="col-12 col-sm-6" data-for-kind="company">
                 <label class="form-label" for="province_id">{{ __('Province') }}</label>

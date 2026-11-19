@@ -55,6 +55,23 @@ payment checking, receipts and administration.
 - WhatsApp goes through your own sender service: one POST with `to` and `message` to the address saved under
   /admin > Settings (or `WHATSAPP_API_URL` in `.env`). With no address, no WhatsApp message is sent.
 
+## Buyers and suppliers
+
+An account says what it does on the site, at registration and later in its company profile:
+
+- **Find tenders** (supplier): alerts, saved tenders, full tenders on a paid plan.
+- **Post tenders** (buyer): a ministry, a government office, an NGO or a company posts its own tenders under *Posted tenders*.
+- One account can do both.
+
+A tender posted by a buyer is saved as a draft or sent for approval. It waits under **Admin > Tenders > Waiting for approval**
+until an administrator publishes it or sends it back with a reason; the buyer gets a notification and an email either way.
+After publishing, the buyer can extend the deadline, add documents, cancel the tender or name the winner. The public page of
+the buyer lists its tenders.
+
+Posting is free while **Admin > Settings > "Posting tenders is free for every buyer"** is on. To start charging: give the
+seeded `Buyer` plans (AFN and USD, monthly, switched off) their prices, switch them on, and switch the setting off. From then
+on a buyer needs a plan with "May post tenders". Registration stays free and published tenders stay online.
+
 ## First steps after installing
 
 1. `php artisan migrate --seed` creates the plans (Free; Basic, Pro, Business in AFN and USD, monthly and

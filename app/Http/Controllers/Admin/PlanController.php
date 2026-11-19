@@ -45,6 +45,7 @@ class PlanController extends CrudController
             ['name' => 'full_access', 'label' => 'Full tender details and documents', 'type' => 'checkbox', 'default' => true],
             ['name' => 'instant_alerts', 'label' => 'Email alert as soon as a tender is published', 'type' => 'checkbox', 'default' => true, 'help' => 'Off: only the weekly digest.'],
             ['name' => 'whatsapp_alerts', 'label' => 'WhatsApp alerts', 'type' => 'checkbox', 'default' => false],
+            ['name' => 'can_post', 'label' => 'May post tenders', 'type' => 'checkbox', 'default' => false, 'help' => 'Only matters once posting is no longer free for everybody (Settings).'],
             ['name' => 'description', 'label' => 'Description', 'type' => 'textarea', 'rules' => ['nullable', 'string', 'max:2000'], 'col' => 12],
         ];
     }

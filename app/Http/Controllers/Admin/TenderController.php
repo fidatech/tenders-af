@@ -4,26 +4,43 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exceptions\UserError;
 use App\Http\Controllers\Controller;
+use App\Mail\BusinessMail;
 use App\Models\AdminLog;
 use App\Models\Category;
 use App\Models\Industry;
+use App\Models\Notice;
 use App\Models\Province;
 use App\Models\Tender;
 use App\Models\TenderDocument;
+use App\Models\User;
+use App\Support\TenderForm;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 /**
- * Tenders are entered here by the data team: collected from the buyers and the tender sites,
- * written as a draft, then published. Publishing puts a tender on the site and in the alerts.
+ * Tenders are entered here by the data team, and tenders posted by buyers wait here to be
+ * approved. Publishing puts a tender on the site and in the alerts.
  */
 class TenderController extends Controller
 {
+    /** Why a tender posted by a buyer can be sent back. The administrator picks one; the buyer reads the text. */
+    public const REASONS = [
+        'incomplete' => 'Important details are missing: please add the scope, the deadline and how to submit.',
+        'no_documents' => 'The tender documents are missing or cannot be opened.',
+        'duplicate' => 'This tender is already on the site.',
+        'not_tender' => 'This is not a tender. Only tenders, quotations and calls for bids are published.',
+        'wrong_sector' => 'The sector or the province is wrong. Please choose the right ones.',
+        'unclear' => 'The text is not clear enough to publish. Please rewrite the summary.',
+        'payment' => 'A tender must not ask bidders to pay in order to take part.',
+    ];
+
     public function index(Request $request): View
     {
         $filters = $request->only('q', 'industry', 'province', 'type', 'buyer');
@@ -33,7 +50,7 @@ class TenderController extends Controller
             'filters' => $filters,
             'status' => $status,
             'rows' => Tender::filtered($filters)->when($status, fn (Builder $q) => $q->where('status', $status))
-                ->with('industry', 'province')->withCount('documents')->orderByDesc('id')->paginate(25)->withQueryString(),
+                ->with('industry', 'province', 'company')->withCount('documents')->orderByDesc('id')->paginate(25)->withQueryString(),
             'industries' => Industry::options(),
             'counts' => Tender::selectRaw('status, count(*) as n')->groupBy('status')->pluck('n', 'status')->all(),
         ]);
@@ -41,7 +58,7 @@ class TenderController extends Controller
 
     public function create(): View
     {
-        return view('admin.tenders.form', $this->lists() + ['tender' => null]);
+        return view('admin.tenders.form', $this->lists() + ['tender' => null, 'reasons' => self::REASONS]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -49,8 +66,8 @@ class TenderController extends Controller
         $data = $this->validated($request);
         $data['slug'] = Tender::freeSlug($data['title']);
         $data['admin_id'] = auth('admin')->id();
-        $tender = Tender::create($this->prepare($data, null));
-        $this->addDocuments($tender, $request);
+        $tender = Tender::create(TenderForm::prepare($data, null));
+        TenderForm::addDocuments($tender, $request);
         AdminLog::record('added tender', $tender->title, $tender->status);
 
         return redirect()->route('admin.tenders.edit', ['id' => $tender->id])->with('success', $tender->status === Tender::PUBLISHED ? __('The tender is published.') : __('The tender is saved as a draft.'));
@@ -58,16 +75,20 @@ class TenderController extends Controller
 
     public function edit(int $id): View
     {
-        return view('admin.tenders.form', $this->lists() + ['tender' => Tender::with('documents')->findOrFail($id)]);
+        return view('admin.tenders.form', $this->lists() + ['tender' => Tender::with('documents', 'company')->findOrFail($id), 'reasons' => self::REASONS]);
     }
 
     public function update(Request $request, int $id): RedirectResponse
     {
         $tender = Tender::findOrFail($id);
         $before = $tender->status;
-        $tender->update($this->prepare($this->validated($request), $tender));
-        $this->addDocuments($tender, $request);
+        $tender->update(TenderForm::prepare($this->validated($request), $tender) + ['reject_reason' => null]);
+        TenderForm::addDocuments($tender, $request);
         AdminLog::record('changed tender', $tender->title, $before !== $tender->status ? 'status: '.$before.' → '.$tender->status : null);
+        // a tender posted by a buyer was waiting, and is published now: the buyer is told
+        if ($before === Tender::PENDING && $tender->status === Tender::PUBLISHED) {
+            $this->tellBuyer($tender, 'Your tender is published', ['It is on the site now, and the companies of its sector are being told.']);
+        }
 
         return back()->with('success', __('The tender is saved.'));
     }
@@ -115,72 +136,59 @@ class TenderController extends Controller
 
     private function validated(Request $request): array
     {
-        return $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'reference' => ['nullable', 'string', 'max:100'],
-            'type' => ['required', Rule::in(array_keys(config('tenders.types')))],
+        return $request->validate(TenderForm::rules() + [
             'buyer_name' => ['required', 'string', 'max:255'],
             'buyer_type' => ['required', Rule::in(array_keys(config('tenders.buyer_types')))],
-            'industry_id' => ['required', 'exists:industries,id'],
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'province_id' => ['nullable', 'exists:provinces,id'],
-            'location' => ['nullable', 'string', 'max:255'],
-            'summary' => ['required', 'string', 'max:2000'],
-            'description' => ['nullable', 'string', 'max:60000'],
-            'eligibility' => ['nullable', 'string', 'max:10000'],
-            'submission_method' => ['nullable', Rule::in(array_keys(config('tenders.submission_methods')))],
-            'submission_details' => ['nullable', 'string', 'max:5000'],
-            'contact' => ['nullable', 'string', 'max:2000'],
-            'budget_type' => ['required', Rule::in(['exact', 'range', 'undisclosed'])],
-            'budget_min' => ['nullable', 'required_unless:budget_type,undisclosed', 'numeric', 'min:0'],
-            'budget_max' => ['nullable', 'required_if:budget_type,range', 'numeric', 'gte:budget_min'],
-            'budget_currency' => ['nullable', 'required_unless:budget_type,undisclosed', Rule::in(config('tenders.currencies'))],
             'size_band' => ['nullable', Rule::in(array_keys(config('tenders.size_bands')))],
             'published_on' => ['nullable', 'date'],
-            'questions_until' => ['nullable', 'date'],
-            'deadline' => ['nullable', 'date'],
             'status' => ['required', Rule::in(array_keys(Tender::STATUSES))],
             'awarded_to' => ['nullable', 'string', 'max:255'],
             'source_name' => ['nullable', 'string', 'max:255'],
             'source_url' => ['nullable', 'url', 'max:500'],
-            'documents' => ['nullable', 'array', 'max:10'],
-            'documents.*' => ['file', 'mimes:pdf,doc,docx,xls,xlsx,zip,jpg,jpeg,png', 'max:20480'],
-        ], [], ['budget_min' => __('budget'), 'budget_max' => __('highest budget'), 'industry_id' => __('sector')]);
+        ], [], TenderForm::names());
     }
 
-    /** Tidy what the form sent before it is stored. */
-    private function prepare(array $data, ?Tender $tender): array
+    /** Publish a tender a buyer posted. It goes on the site and into the next round of alerts. */
+    public function approve(int $id): RedirectResponse
     {
-        unset($data['documents']);
-        if ($data['budget_type'] === 'undisclosed') {
-            $data['budget_min'] = $data['budget_max'] = $data['budget_currency'] = null;
-        } elseif ($data['budget_type'] === 'exact') {
-            $data['budget_max'] = null;
-        }
-        // the category must belong to the chosen sector
-        if (! empty($data['category_id']) && ! Category::where('id', $data['category_id'])->where('industry_id', $data['industry_id'])->exists()) {
-            $data['category_id'] = null;
-        }
-        // a tender gets its publishing day the first time it is published
-        if ($data['status'] === Tender::PUBLISHED && empty($data['published_on'])) {
-            $data['published_on'] = $tender?->published_on?->toDateString() ?? Tender::now()->toDateString();
-        }
-        if ($data['status'] !== Tender::AWARDED) {
-            $data['awarded_to'] = $data['awarded_to'] ?? null;
-        }
+        $tender = Tender::where('status', Tender::PENDING)->findOrFail($id);
+        $tender->update(['status' => Tender::PUBLISHED, 'reject_reason' => null, 'admin_id' => auth('admin')->id(), 'published_on' => $tender->published_on ?? Tender::now()->toDateString()]);
+        AdminLog::record('approved tender', $tender->title, $tender->company?->name);
+        $this->tellBuyer($tender, 'Your tender is published', ['It is on the site now, and the companies of its sector are being told.']);
 
-        return $data;
+        return redirect()->route('admin.tenders.index', ['status' => Tender::PENDING])->with('success', __('The tender is published.'));
     }
 
-    private function addDocuments(Tender $tender, Request $request): void
+    /** Send a tender back to the buyer that posted it, with a reason picked from a list. */
+    public function reject(Request $request, int $id): RedirectResponse
     {
-        foreach ($request->file('documents', []) as $file) {
-            TenderDocument::create([
-                'tender_id' => $tender->id,
-                'name' => mb_substr($file->getClientOriginalName(), 0, 250),
-                'path' => $file->store('tenders/'.$tender->id, 'local'),
-                'size' => (int) $file->getSize(),
-            ]);
+        $tender = Tender::where('status', Tender::PENDING)->findOrFail($id);
+        $data = $request->validate(['reason' => ['required', Rule::in(array_keys(self::REASONS))]]);
+        $text = self::REASONS[$data['reason']];
+        $tender->update(['status' => Tender::REJECTED, 'reject_reason' => $text]);
+        AdminLog::record('sent tender back', $tender->title, $text);
+        $this->tellBuyer($tender, 'Your tender was not published', [$text, 'You can correct it and send it again from Posted tenders.']);
+
+        return redirect()->route('admin.tenders.index', ['status' => Tender::PENDING])->with('success', __('The buyer is told why.'));
+    }
+
+    /** A notification under the bell of every user of the buyer and an email to its owner. */
+    private function tellBuyer(Tender $tender, string $subject, array $lines): void
+    {
+        $company = $tender->company;
+        if (! $company) {
+            return;
+        }
+        $url = route('posted.edit', ['id' => $tender->id]);
+        foreach (User::where('company_id', $company->id)->where('is_active', true)->get() as $user) {
+            Notice::create(['company_id' => $company->id, 'user_id' => $user->id, 'title' => $subject, 'body' => $tender->title, 'url' => $url]);
+        }
+        if ($to = $company->owner()?->email) {
+            try {
+                Mail::to($to)->send(new BusinessMail($company, $subject, array_merge([$tender->title], $lines), 'Open the tender', $url));
+            } catch (Throwable $e) {
+                report($e);
+            }
         }
     }
 }

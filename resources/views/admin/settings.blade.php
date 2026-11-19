@@ -48,6 +48,14 @@
                             <div class="form-text">{{ __('Switched off: only an administrator opens a company.') }}</div>
                         </div>
                     </div>
+                    <div class="col-12 col-md-8">
+                        <div class="form-check form-switch">
+                            <input type="hidden" name="posting_free" value="0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="s-posting-free" name="posting_free" value="1" @checked(old('posting_free', $values['posting_free'] ? '1' : '0') == '1')>
+                            <label class="form-check-label" for="s-posting-free">{{ __('Posting tenders is free for every buyer') }}</label>
+                            <div class="form-text">{{ __('Switched off: a buyer needs a plan with "May post tenders" to post new tenders. Registration stays free, and tenders already published stay online.') }}</div>
+                        </div>
+                    </div>
                 @endif
                 @foreach ($fields as $field)
                     <div class="col-12 col-md-{{ $field['col'] }}">
