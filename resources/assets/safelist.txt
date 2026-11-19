@@ -1,0 +1,50 @@
+# Class names and icons that the build cannot see in the views or scripts.
+# One or more per line. Icons are written as #s-name (solid) or #r-name (regular).
+
+# icons used from JavaScript
+#s-sun #s-moon #s-file #s-arrow-right
+#s-circle-check #s-circle-xmark #s-circle-info #s-circle-question #s-triangle-exclamation
+#r-eye #r-eye-slash
+
+# toast colours are built in JavaScript as "is-" + type
+is-success is-danger is-warning is-info
+
+# screen icons chosen in PHP lists (AccountController::SCREENS, ItemController)
+#s-user-group #s-truck-field #s-building-columns #s-money-bill-transfer #s-vault #s-handshake
+#s-id-badge #s-user-tie #s-hand-holding-dollar #s-receipt #s-sack-dollar #s-folder #s-flask #s-box
+
+# screen icons chosen in PHP lists (LookupController::LISTS, HrRecordController::SCREENS)
+#s-building-user #s-user-tag #s-folder-tree #s-layer-group
+#s-umbrella-beach #s-star #s-file-signature #s-clock #s-business-time #s-scale-unbalanced
+#s-list-check #s-vial
+
+# balance colours are built in PHP as "bal-" / "is-" + tone (Account::balanceTone)
+bal-due bal-owe bal-capital bal-zero bal-plain is-due is-owe is-capital is-zero is-plain
+
+# Excel and PDF buttons are added by JavaScript
+#s-file-excel #s-file-pdf
+
+# icons of the report cards (App\Reports\Tables::LIST)
+#s-arrow-right-arrow-left #s-chart-column #s-chart-line #s-clipboard-check #s-coins #s-gavel #s-hourglass-half #s-id-card #s-layer-group #s-list-check #s-money-bill-transfer #s-money-bill-wave #s-paper-plane #s-pen #s-percent #s-receipt #s-trash #s-triangle-exclamation #s-users
+
+# icons of the row buttons (x-act)
+#s-eye #s-receipt #s-pen #s-trash #s-ban
+
+# Tenders.af: avatar tones chosen in lists (admin dashboard), menu and quick-action icons from config/menu.php and PHP lists
+avatar-soft-warning avatar-soft-danger avatar-soft-primary
+
+# Tenders.af: icons chosen in PHP lists inside views (cards, tiles, quick actions, ternaries), which the build cannot see
+#s-calendar-day #s-calendar #s-sack-dollar #s-wallet #s-building-columns #s-building #s-circle-check #s-hourglass-half #s-ban
+#s-triangle-exclamation #s-bell #s-arrow-trend-up #s-receipt #s-hand-holding-dollar #s-handshake #s-user-plus #s-file-signature
+#s-arrow-down #s-arrow-up #s-gauge-high #s-layer-group #s-user-shield #s-user #s-circle-xmark #s-credit-card
+
+# Tenders.af website: the icons of the feature list come from config/site.php
+#s-envelope #s-file-signature #s-hand-holding-dollar #s-handshake #s-arrow-trend-up #s-coins #s-chart-column #s-user-group #s-wallet #s-bell #s-building
+
+# Tenders.af: icons chosen in PHP lists (menus, cards, sector icons kept in the database, the website's feature list)
+#s-gavel #s-bell #s-bookmark #s-building #s-paper-plane #s-shield-halved #s-user-group #s-credit-card #s-magnifying-glass
+#s-layer-group #s-tags #s-coins #s-building-columns #s-money-bill-wave #s-chart-line #s-user-shield #s-clock-rotate-left #s-gear #s-user
+#s-helmet-safety #s-kit-medical #s-laptop #s-seedling #s-utensils #s-truck #s-bolt #s-comments #s-graduation-cap #s-droplet #s-shirt
+#s-print #s-shield #s-screwdriver-wrench #s-boxes-stacked #s-car #s-box #s-calculator #s-map-location-dot #s-hourglass-half
+#s-circle-check #s-circle-xmark #s-lock #s-file-lines #s-download #s-envelope #s-message #s-filter #s-id-card #s-eye #s-trash #s-check
+avatar-soft-success icon-soft

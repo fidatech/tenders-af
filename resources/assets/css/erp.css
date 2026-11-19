@@ -1,0 +1,522 @@
+/* ==========================================================================
+   ERP additions to the fida-admin stylesheet.
+   Everything here replaces something the template loaded from a CDN:
+   web fonts, the Font Awesome icon font, SweetAlert2 and Select2.
+   ========================================================================== */
+
+/* System fonts: nothing to download. */
+:root {
+    --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-rtl: 'Vazirmatn', Tahoma, system-ui, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Icons: <x-icon name="box" /> prints <i class="fi"><svg><use/></svg></i>. */
+.fi { display: inline-block; font-style: normal; line-height: 1; vertical-align: -.125em; }
+.fi svg { display: block; width: 1.25em; height: 1em; fill: currentColor; }
+
+/* Currency rows of a new account: tick, opening balance, receivable or payable. */
+.erp-side { flex: 0 1 46%; }
+
+/* The company's own logo. */
+.erp-brand-logo { height: auto; max-height: 42px; width: auto; max-width: 100%; object-fit: contain; }
+.sidebar-brand .brand-link:has(.erp-brand-logo) { flex: 1; justify-content: center; }
+[data-layout="collapsed"] .app-sidebar:not(:hover) .erp-brand-logo { max-width: 44px; max-height: 32px; }
+.erp-logo-preview { max-height: 72px; max-width: 220px; border: 1px solid var(--border); border-radius: 8px; padding: 4px; background: #fff; }
+
+/* Long company names fit the sidebar brand. */
+.sidebar-brand .brand-link { min-width: 0; }
+.sidebar-brand .brand-text { font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Select with a search box (replaces Select2). */
+.ss { position: relative; }
+.ss > .form-control { padding-inline-end: 3.4rem; text-overflow: ellipsis; cursor: pointer; background-image: var(--erp-caret); background-repeat: no-repeat; background-position: right .85rem center; background-size: 12px; }
+[dir="rtl"] .ss > .form-control { background-position: left .85rem center; }
+.ss.open > .form-control { cursor: text; border-color: rgba(var(--primary-rgb), .6); box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .14); }
+.ss-clear { position: absolute; top: 50%; inset-inline-end: 2rem; transform: translateY(-50%); display: none; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: var(--hover); color: var(--muted); font-size: 15px; line-height: 20px; cursor: pointer; }
+.ss-clear:hover { background: rgba(var(--danger-rgb), .12); color: var(--danger); }
+.ss.has-value .ss-clear { display: block; }
+.ss-list { display: none; position: absolute; z-index: 1060; top: calc(100% + 6px); inset-inline-start: 0; min-width: 100%; width: max-content; max-width: min(420px, 92vw); max-height: 280px; overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow-lg); padding: 6px; animation: erpDrop .12s ease; }
+.ss.up .ss-list { top: auto; bottom: calc(100% + 6px); }
+.ss.open .ss-list { display: block; }
+.ss-item { position: relative; padding: 9px 12px; padding-inline-end: 30px; border-radius: 8px; cursor: pointer; font-size: 14px; color: var(--heading); overflow-wrap: anywhere; }
+.ss-item.focus, .ss-item:hover { background: var(--hover); }
+.ss-item.selected { background: var(--primary-soft); color: var(--primary); font-weight: 700; }
+.ss-item.selected::after { content: ""; position: absolute; top: 50%; inset-inline-end: 12px; width: 6px; height: 11px; margin-top: -8px; border: solid var(--primary); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+@keyframes erpDrop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.ss-empty { padding: 10px; color: var(--muted); font-size: 14px; }
+
+/* An open pick list must not be cut off by a scrolling table. */
+.table-responsive:has(.ss.open) { overflow: visible; }
+
+/* Rows of a sale, purchase or journal entry. */
+[data-rows] td { vertical-align: middle; }
+[data-rows] .form-control, [data-rows] .form-select { min-width: 90px; }
+
+/* Buttons of a form that is being sent. */
+.is-busy { opacity: .65; pointer-events: none; }
+
+/* Toasts (ERP.toast and flash messages). */
+.erp-toasts { position: fixed; top: 16px; inset-inline-end: 16px; z-index: 1100; display: grid; gap: 8px; width: min(360px, calc(100vw - 32px)); }
+.erp-toast { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: var(--radius); background: var(--card); color: var(--heading); border: 1px solid var(--border); border-inline-start: 4px solid var(--info); box-shadow: var(--shadow-lg); font-weight: 600; font-size: 14px; animation: erpToastIn .2s ease; }
+.erp-toast .fi { margin-top: 3px; color: var(--info); }
+.erp-toast.is-success { border-inline-start-color: var(--success); }
+.erp-toast.is-success .fi { color: var(--success); }
+.erp-toast.is-danger { border-inline-start-color: var(--danger); }
+.erp-toast.is-danger .fi { color: var(--danger); }
+.erp-toast.is-warning { border-inline-start-color: var(--warning); }
+.erp-toast.is-warning .fi { color: var(--warning); }
+.erp-toast.is-out { opacity: 0; transition: opacity .25s; }
+@keyframes erpToastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+/* Confirm dialog (ERP.confirm and <form data-confirm>). */
+.erp-confirm .modal-content { border: 0; border-radius: 18px; background: var(--card); box-shadow: var(--shadow-lg); }
+.erp-confirm .modal-body { padding: 28px 22px 22px; }
+.erp-confirm-icon { font-size: 40px; margin-bottom: 12px; }
+.erp-confirm h5 { color: var(--heading); font-weight: 800; }
+
+@media (max-width: 991.98px) {
+    .erp-toasts { top: calc(env(safe-area-inset-top, 0px) + 10px); inset-inline: 16px; width: auto; }
+    /* The tab bar and the drawer shortcuts share the width equally, however many there are. */
+    .app-tabbar { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 1fr; }
+    .drawer-quick { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 1fr; }
+}
+
+/* ---------- Statements (account statement, stock card) and printed reports ---------- */
+.stmt { display: grid; gap: 16px; }
+.stmt .card { margin-bottom: 0; }
+
+/* Who the statement is about + the balance today. */
+.stmt-id { overflow: hidden; border-top: 4px solid var(--primary); }
+.stmt-id > .card-body { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.stmt-who { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.stmt-who-text { min-width: 0; }
+.stmt-who h2 { margin: 0 0 6px; font-size: 22px; font-weight: 800; color: var(--heading); letter-spacing: -.3px; overflow-wrap: anywhere; }
+.stmt-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.stmt-contact { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 8px 0 0; padding: 0; font-size: 13px; color: var(--muted); }
+.stmt-contact:empty { display: none; }
+.stmt-contact .fi { margin-inline-end: 4px; opacity: .8; }
+.stmt-now { text-align: end; padding: 12px 18px; border-radius: var(--radius); background: var(--hover); border-inline-start: 4px solid var(--border); min-width: 200px; }
+.stmt-now-label { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.stmt-now-value { font-size: 28px; font-weight: 800; line-height: 1.2; color: var(--heading); letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
+.stmt-now-value small { font-size: 14px; font-weight: 700; color: var(--muted); letter-spacing: 0; }
+.stmt-now-words { display: inline-block; margin-top: 4px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--card); color: var(--muted); }
+.stmt-now.is-plus { border-inline-start-color: var(--success); }
+.stmt-now.is-due { border-inline-start-color: var(--bal-due); }
+.stmt-now.is-capital { border-inline-start-color: var(--bal-capital); }
+.stmt-now.is-capital .stmt-now-value, .stmt-now.is-capital .stmt-now-words { color: var(--bal-capital); }
+.stmt-now.is-plus .stmt-now-words { color: var(--success); }
+.stmt-now.is-due .stmt-now-value, .stmt-now.is-due .stmt-now-words { color: var(--bal-due); }
+.stmt-now.is-minus, .stmt-now.is-owe { border-inline-start-color: var(--bal-owe); }
+.stmt-now.is-minus .stmt-now-value, .stmt-now.is-minus .stmt-now-words, .stmt-now.is-owe .stmt-now-value, .stmt-now.is-owe .stmt-now-words { color: var(--bal-owe); }
+
+/* Quick periods and the date boxes. */
+.stmt-period > .card-body { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; }
+.stmt-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.stmt-chip { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--heading); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.stmt-chip:hover { border-color: var(--primary); color: var(--primary); }
+.stmt-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+.stmt-cards .sc-value { font-variant-numeric: tabular-nums; }
+
+/* The list of movements. */
+.stmt-ledger { overflow: hidden; }
+.stmt-ledger-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.stmt-ledger-head h3 { margin: 0; font-size: 16px; font-weight: 800; color: var(--heading); }
+.stmt-ledger-period { margin-inline-start: auto; font-size: 13px; color: var(--muted); }
+.stmt-table { margin: 0; font-variant-numeric: tabular-nums; }
+.stmt-table > :not(caption) > * > * { padding: 11px 14px; vertical-align: top; background: transparent; }
+.stmt-table > :not(caption) > * > :first-child { padding-inline-start: 20px; }
+.stmt-table > :not(caption) > * > :last-child { padding-inline-end: 20px; }
+.stmt-table thead th { position: sticky; top: 0; background: var(--hover); color: var(--muted); font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; border-bottom: 1px solid var(--border); }
+.stmt-table tbody tr:nth-child(even) > * { background: rgba(var(--primary-rgb), .025); }
+.stmt-table tbody tr:hover > * { background: var(--primary-soft); }
+.stmt-row-open > * { color: var(--muted); font-style: italic; }
+.stmt-what { color: var(--heading); font-weight: 600; min-width: 160px; overflow-wrap: anywhere; }
+.stmt-ref { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 3px; font-size: 12px; color: var(--muted); }
+.stmt-ref .badge-soft { font-size: 11px; padding: 2px 8px; }
+.stmt-in { color: var(--success); font-weight: 600; }
+.stmt-out { color: var(--danger); font-weight: 600; }
+.stmt-bal { font-weight: 700; color: var(--heading); }
+.stmt-bal.is-due { color: var(--bal-due); }
+.stmt-bal.is-capital { color: var(--bal-capital); }
+.stmt-bal.is-minus, .stmt-bal.is-owe { color: var(--bal-owe); }
+.stmt-bal.is-zero { color: var(--muted); }
+.stmt-table tfoot td { font-weight: 800; color: var(--heading); background: var(--hover); border-top: 2px solid var(--border); border-bottom: 0; }
+.stmt-legend { padding: 10px 20px 0; font-size: 12px; color: var(--muted); }
+.stmt-legend .is-plus { color: var(--heading); }
+.stmt-close { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 16px 20px 20px; padding: 14px 18px; border-radius: var(--radius); background: var(--primary-soft); color: var(--heading); }
+.stmt-close .bal { font-size: 18px; }
+.stmt-close .bal-tag { font-size: 12px; }
+
+/* Paper only: company heading, signatures. */
+.letterhead, .stmt-foot { display: none; }
+.report-strip { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+
+@media (max-width: 575.98px) {
+    .stmt-id > .card-body { align-items: stretch; }
+    .stmt-now { width: 100%; text-align: start; }
+    .stmt-who h2 { font-size: 18px; }
+    .stmt-now-value { font-size: 24px; }
+    .stmt-period > .card-body { align-items: stretch; }
+    .stmt-chips { flex-wrap: nowrap; overflow-x: auto; margin-inline: -4px; padding: 0 4px 4px; }
+    .stmt-cards .sc-icon { display: none; }
+    .stmt-cards .sc-value { font-size: 19px; white-space: nowrap; }
+    /* On a phone every movement becomes a small card: what happened and the amount, then the date and the balance. */
+    .stmt-table, .stmt-table tbody, .stmt-table tfoot { display: block; }
+    .stmt-table thead { display: none; }
+    .stmt-table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "what amount" "extra extra" "date bal"; gap: 4px 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+    .stmt-table > :not(caption) > * > * { padding: 0 !important; border: 0; font-size: 13.5px; text-align: start; }
+    .stmt-table td:empty { display: none; }
+    .stmt-table td:nth-child(1) { grid-area: date; font-size: 12px; color: var(--muted); align-self: end; }
+    .stmt-table td:nth-child(2) { grid-area: what; }
+    .stmt-table td.stmt-extra { grid-area: extra; font-size: 12px; color: var(--muted); }
+    .stmt-table td.stmt-in, .stmt-table td.stmt-out { grid-area: amount; font-size: 15px; font-weight: 700; text-align: end; }
+    .stmt-table td.stmt-in::before { content: "+ "; }
+    .stmt-table td.stmt-out::before { content: "\2212  "; }
+    .stmt-table td.stmt-bal { grid-area: bal; text-align: end; font-size: 12.5px; }
+    .stmt-table td[data-label]::before { content: attr(data-label) " "; font-weight: 600; color: var(--muted); }
+    .stmt-table tbody tr:nth-child(even) > * { background: transparent; }
+    .stmt-what { min-width: 0; }
+    .stmt-table tfoot tr { display: flex; flex-direction: column; gap: 6px; background: var(--hover); border-bottom: 0; }
+    .stmt-table tfoot td { display: flex; justify-content: space-between; gap: 12px; background: transparent; border: 0; }
+    .stmt-table tfoot td:first-child { font-size: 13.5px; color: var(--heading); }
+    .stmt-ledger-head { padding: 14px; }
+    .stmt-close { margin: 14px; }
+}
+
+@media print {
+    @page { size: A4; margin: 12mm; }
+    body { font-size: 12px; color: #000; }
+    /* the paper has its own heading, so the screen title bar is not printed */
+    .app-content:has(.letterhead) .page-header { display: none !important; }
+    .letterhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 2px solid #111; }
+    .letterhead-company { display: flex; align-items: center; gap: 12px; }
+    .letterhead-company img { max-height: 60px; max-width: 160px; }
+    .letterhead-name { font-size: 20px; font-weight: 800; color: #000; }
+    .letterhead-local { font-size: 15px; font-weight: 700; }
+    .letterhead-contact { font-size: 11px; color: #444; }
+    .letterhead-doc { text-align: end; font-size: 12px; color: #333; }
+    .letterhead-title { font-size: 17px; font-weight: 800; color: #000; text-transform: uppercase; letter-spacing: .5px; }
+    .app-tabbar, .erp-toasts { display: none !important; }
+    .stmt { gap: 10px; }
+    .stmt-ledger { overflow: visible; }
+    .stmt-id { border: 1px solid #999 !important; border-radius: 6px; }
+    .stmt-id > .card-body { padding: 10px 14px; }
+    .stmt-who .avatar { display: none; }
+    .stmt-who h2 { font-size: 17px; }
+    .stmt-now { background: none; border: 0; padding: 0; }
+    .stmt-now-value { font-size: 20px; }
+    .stmt-cards > * { width: 25%; }
+    .stmt-cards .stat-card { border: 1px solid #999 !important; border-radius: 6px; padding: 8px 10px; gap: 2px; }
+    .stmt-cards .sc-icon { display: none; }
+    .stmt-cards .sc-value { font-size: 15px; }
+    .stmt-ledger-head { padding: 6px 0; border: 0; }
+    .stmt-ledger .table-responsive { overflow: visible; }
+    .stmt-table > :not(caption) > * > * { padding: 5px 8px !important; border: 1px solid #999; background: none !important; color: #000; }
+    .stmt-table thead th { position: static; background: #eee !important; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .stmt-table thead { display: table-header-group; }
+    .stmt-table tr { break-inside: avoid; }
+    .stmt-ref .badge-soft { background: none; color: #333; padding: 0; }
+    .stmt-ref a { color: #333; text-decoration: none; }
+    .stmt-in, .stmt-out, .stmt-bal, .stmt-bal.is-minus { color: #000; }
+    .stmt-legend { display: none; }
+    .stmt-close { margin: 10px 0 0; border: 1px solid #111; background: none; border-radius: 6px; }
+    .bal, .bal-due, .bal-owe, .bal-capital, .stmt-bal { color: #000 !important; }
+    .bal-tag { background: none !important; border: 1px solid #999; }
+    .stmt-foot { display: block; margin-top: 46px; break-inside: avoid; }
+    .stmt-sign { display: flex; justify-content: space-between; gap: 24px; }
+    .stmt-sign div { flex: 1; max-width: 200px; border-top: 1px solid #111; padding-top: 4px; text-align: center; font-size: 11px; }
+    .stmt-stamp { margin-top: 18px; text-align: center; font-size: 10px; color: #666; }
+    .table > :not(caption) > * > * { color: #000; }
+}
+
+/* ---------- Dashboard cards and charts (plain HTML and CSS, no chart library) ---------- */
+:root { --chart-1: var(--primary); --chart-2: #e8590c; --chart-grid: var(--border); }
+[data-bs-theme="dark"] { --chart-2: #f97316; }
+.dash-card { margin-bottom: 0; }
+.dash-card > .card-body { padding-top: 8px; }
+.dash-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 18px 20px 6px; }
+.dash-head h5 { margin: 0; font-size: 16px; font-weight: 800; color: var(--heading); }
+.dash-head p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+.dash-figure { font-size: 22px; font-weight: 800; color: var(--heading); letter-spacing: -.4px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dash-figure small { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0; }
+.dash-list-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px 4px; }
+.dash-list-head h5 { margin: 0; font-size: 15px; font-weight: 800; color: var(--heading); flex: 1; }
+.dash-list-head .sc-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font-size: 15px; flex-shrink: 0; }
+.dash-table > :not(caption) > * > * { padding-inline: 0; }
+.dash-table tr:last-child > * { border-bottom: 0; }
+
+.chart { padding: 14px 20px 16px; }
+.chart-plot { position: relative; height: 210px; margin-inline-start: 38px; }
+.chart-grid { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
+.chart-grid span { position: relative; border-top: 1px solid var(--chart-grid); height: 0; }
+.chart-grid em { position: absolute; inset-inline-end: 100%; top: -8px; padding-inline-end: 8px; font-style: normal; font-size: 11px; line-height: 16px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.chart-cols { position: absolute; inset: 0; display: flex; align-items: stretch; }
+.chart-col { position: relative; flex: 1 1 0; min-width: 0; display: flex; align-items: flex-end; justify-content: center; gap: 2px; outline: 0; border-radius: 6px 6px 0 0; }
+.chart-col:hover, .chart-col:focus { background: rgba(var(--primary-rgb), .07); }
+.chart-bar { display: block; width: 24px; max-width: 34%; min-height: 0; border-radius: 4px 4px 0 0; background: var(--chart-1); }
+.chart-cols.is-thin .chart-bar { width: 70%; max-width: 16px; border-radius: 3px 3px 0 0; }
+.chart-bar.s2, .chart-legend i.s2, .chart-tip i.s2 { background: var(--chart-2); }
+.chart-tip { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); z-index: 5; display: none; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 8px; background: var(--heading); color: var(--card); font-size: 12px; font-weight: 600; line-height: 1.35; white-space: nowrap; box-shadow: var(--shadow-lg); pointer-events: none; font-variant-numeric: tabular-nums; }
+.chart-tip b { font-weight: 700; opacity: .75; font-size: 11px; }
+.chart-tip i, .chart-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-inline-end: 6px; background: var(--chart-1); }
+.chart-col:hover .chart-tip, .chart-col:focus .chart-tip { display: flex; }
+.chart-col.tip-start .chart-tip { left: 0; transform: none; }
+.chart-col.tip-end .chart-tip { left: auto; right: 0; transform: none; }
+.chart-x { display: flex; margin-inline-start: 38px; padding-top: 6px; }
+.chart-x span { flex: 1 1 0; min-width: 0; text-align: center; font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.chart-x.is-thin span { overflow: visible; font-size: 11px; }
+.chart-legend { display: flex; gap: 14px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+
+.hbars { display: grid; gap: 14px; padding: 14px 20px 20px; }
+.hbar-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 13.5px; }
+.hbar-head a, .hbar-head span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.hbar-head strong { color: var(--heading); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.hbar-track { height: 8px; margin-top: 6px; border-radius: 999px; background: var(--hover); overflow: hidden; }
+.hbar-track i { display: block; height: 100%; border-radius: 999px; background: var(--chart-1); }
+.hbar-track i.is-minus { background: var(--danger); }
+
+@media (max-width: 575.98px) {
+    .chart { padding-inline: 14px; }
+    .chart-plot { height: 170px; }
+    .dash-head { padding: 16px 14px 4px; }
+    .hbars { padding-inline: 14px; }
+    .dash-figure { font-size: 19px; }
+}
+
+/* Currency exchange: the sum in one line under the form (1,000 USD × 70 = 70,000 AFN). */
+.exchange-sum { padding: 12px 16px; border-radius: var(--radius); background: var(--primary-soft); color: var(--primary); font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; direction: ltr; text-align: center; }
+
+/* ---------- Balances: green when they owe us, red when we owe them, blue for owners' capital ---------- */
+:root { --bal-due: #15803d; --bal-owe: #dc2626; --bal-capital: var(--primary); }
+[data-bs-theme="dark"] { --bal-due: #4ade80; --bal-owe: #f87171; }
+.bal { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--heading); }
+.bal-tag { padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; line-height: 1.5; background: var(--hover); color: var(--muted); }
+.bal-due { color: var(--bal-due); }
+.bal-due .bal-tag { background: rgba(var(--success-rgb), .13); color: var(--bal-due); }
+.bal-owe { color: var(--bal-owe); }
+.bal-owe .bal-tag { background: rgba(var(--danger-rgb), .12); color: var(--bal-owe); }
+.bal-capital { color: var(--bal-capital); }
+.bal-capital .bal-tag { background: var(--primary-soft); color: var(--bal-capital); }
+.bal-zero { color: var(--muted); font-weight: 600; }
+.stat-card .sc-value.bal-due { color: var(--bal-due); }
+.stat-card .sc-value.bal-owe { color: var(--bal-owe); }
+
+/* ---------- Quick add: "+ New" beside a pick list opens the add form in a pop-up ---------- */
+.form-label.has-quick-add { display: flex; align-items: center; gap: 6px; }
+.quick-add { margin-inline-start: auto; padding: 1px 9px; border: 0; border-radius: 999px; background: var(--primary-soft); color: var(--primary); font-size: 12px; font-weight: 700; line-height: 1.6; white-space: nowrap; cursor: pointer; }
+.quick-add:hover, .quick-add:focus-visible { background: var(--primary); color: #fff; outline: 0; }
+.quick-add .fi { font-size: 10px; }
+.erp-quick .modal-content { border: 0; border-radius: 18px; background: var(--card); box-shadow: var(--shadow-lg); }
+.erp-quick .modal-header { padding: 18px 22px; border-bottom: 1px solid var(--border); }
+.erp-quick .modal-title { font-size: 17px; font-weight: 800; color: var(--heading); }
+.erp-quick .modal-body { padding: 20px 22px 22px; }
+@media (max-width: 575.98px) {
+    .erp-quick .modal-dialog { margin: 0; min-height: 100%; align-items: flex-end; display: flex; }
+    .erp-quick .modal-content { border-radius: 18px 18px 0 0; max-height: 92vh; }
+}
+
+/* ---------- Languages: the choice on the sign-in page, and small fixes for right-to-left ---------- */
+.auth-languages { display: flex; justify-content: center; gap: 8px; margin-top: 18px; }
+.auth-languages button { padding: 5px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--card); color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; }
+.auth-languages button:hover, .auth-languages button.active { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+[dir="rtl"] body { font-family: 'Segoe UI', Tahoma, 'Noto Naskh Arabic', 'Noto Sans Arabic', 'Geeza Pro', Arial, sans-serif; letter-spacing: 0; }
+[dir="rtl"] .stat-card .sc-value, [dir="rtl"] .stmt-now-value, [dir="rtl"] .dash-figure, [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h5 { letter-spacing: 0; }
+[dir="rtl"] .stmt-table thead th, [dir="rtl"] .table thead th { letter-spacing: 0; }
+[dir="rtl"] .chart-col.tip-start .chart-tip { left: auto; right: 0; }
+[dir="rtl"] .chart-col.tip-end .chart-tip { right: auto; left: 0; }
+/* amounts keep their own order inside right-to-left text: "9,400.00 USD", not "USD 9,400.00" */
+[dir="rtl"] .text-end, [dir="rtl"] .sc-value, [dir="rtl"] .sc-foot, [dir="rtl"] .hbar-head strong, [dir="rtl"] .bal-amount, [dir="rtl"] .dash-figure, [dir="rtl"] .stmt-now-value, [dir="rtl"] .chart-tip { unicode-bidi: plaintext; }
+[dir="rtl"] .sc-value, [dir="rtl"] .sc-foot { text-align: right; }
+
+/* Top bar: the language button shows the language in two letters beside the globe. */
+.topbar-lang { width: auto; padding: 0 10px; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+.topbar-lang span { font-size: 12px; font-weight: 800; letter-spacing: .3px; }
+
+/* Company Settings: a line of Dari and Pashto to see the chosen font. */
+.erp-font-sample { margin-top: 8px; padding: 10px 14px; border-radius: var(--radius); background: var(--hover); color: var(--heading); font-size: 18px; }
+
+/* Top bar: the name of the company in the middle (wide screens; phones show the page title instead). */
+.topbar-brand { display: none; }
+@media (min-width: 1200px) {
+    .topbar-brand { display: block; position: absolute; left: 50%; transform: translateX(-50%); max-width: 34%; padding: 0 14px; color: var(--heading); font-size: 17px; font-weight: 800; letter-spacing: .2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+    .topbar-brand::after { content: ""; display: block; width: 28px; height: 3px; margin: 3px auto 0; border-radius: 3px; background: var(--primary); }
+    [dir="rtl"] .topbar-brand { letter-spacing: 0; }
+}
+
+/* Excel and PDF buttons in the title bar of a list or report. */
+.export-buttons { display: inline-flex; gap: 8px; }
+@media (max-width: 575.98px) { .export-buttons { display: flex; width: 100%; } .export-buttons .btn { flex: 1; } }
+
+/* ---------- Pick lists: room for the arrow, a clear arrow, and enough width to read the choice ---------- */
+:root { --erp-caret: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m3 6 5 5 5-5'/%3e%3c/svg%3e"); }
+[data-bs-theme="dark"] { --erp-caret: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239aa4b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m3 6 5 5 5-5'/%3e%3c/svg%3e"); }
+.form-select { padding-inline-end: 2.4rem; text-overflow: ellipsis; cursor: pointer; background-image: var(--erp-caret); background-size: 12px; background-position: right .85rem center; transition: border-color .15s, box-shadow .15s; }
+[dir="rtl"] .form-select { background-position: left .85rem center; }
+.form-select:hover:not(:disabled), .ss > .form-control:hover { border-color: rgba(var(--primary-rgb), .45); }
+.form-select:disabled { cursor: not-allowed; opacity: .75; }
+.form-select-sm { padding-inline-end: 2rem; background-position: right .6rem center; }
+[dir="rtl"] .form-select-sm { background-position: left .6rem center; }
+.input-group > .form-select.erp-side { flex: 0 1 auto; width: auto; max-width: 55%; }
+/* filters in a row: wide enough for their words, and never squeezed under the arrow */
+.row > .col-auto > .form-select, .row > [class*="col-md-auto"] > .form-select, .row > .col-auto > .ss, .row > [class*="col-md-auto"] > .ss { min-width: 180px; }
+@media (max-width: 767.98px) {
+    .row > .col > .form-select, .row > [class*="col-md-auto"] > .form-select { min-width: 0; }
+    .ss-list { max-width: 92vw; }
+}
+
+/* ------------------------------------------------------------------ tables
+   Every table sits in a box that scrolls sideways when it is too wide (added by app.js), so a
+   column is never cut off by the edge of its card. A soft shadow shows there is more to see. */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; border-radius: 10px;
+    background:
+        linear-gradient(to right, var(--card), var(--card)) left center / 28px 100% no-repeat local,
+        linear-gradient(to left, var(--card), var(--card)) right center / 28px 100% no-repeat local,
+        linear-gradient(to right, rgba(20, 30, 60, .13), transparent) left center / 12px 100% no-repeat scroll,
+        linear-gradient(to left, rgba(20, 30, 60, .13), transparent) right center / 12px 100% no-repeat scroll; }
+.table-scroll:has(.ss.open), .table-scroll:has(.dropdown-menu.show) { overflow: visible; }
+.table-scroll::-webkit-scrollbar { height: 8px; }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border-strong, var(--border)); border-radius: 8px; }
+.table-scroll > .table { background: transparent; }
+
+/* headings: one calm band with rounded ends; figures line up digit under digit */
+.table thead th { padding-block: .7rem; border-bottom: 1px solid var(--border); }
+.table thead tr:first-child th:first-child { border-start-start-radius: 10px; }
+.table thead tr:first-child th:last-child { border-start-end-radius: 10px; }
+.table td, .table tfoot th { font-variant-numeric: tabular-nums; }
+.table tbody td { font-size: 13.5px; color: var(--text); }
+.table tbody tr { transition: background-color .12s ease; }
+.table:not(.table-cards) tbody tr:hover > * { background: var(--hover); }
+.table tbody tr:last-child > * { border-bottom-color: transparent; }
+.table tbody + tfoot > tr:first-child > * { border-top: 2px solid var(--border); }
+.table tfoot > tr > * { background: var(--hover); font-weight: 700; color: var(--heading); border-bottom: 0; }
+.table tfoot > tr:last-child > :first-child { border-end-start-radius: 10px; }
+.table tfoot > tr:last-child > :last-child { border-end-end-radius: 10px; }
+.table td a:not(.btn) { font-weight: 600; text-decoration: none; }
+.table td a:not(.btn):hover { text-decoration: underline; }
+.table td:empty::after { content: ""; }
+/* a long text (details, a note, an address) wraps instead of pushing the figures off the screen */
+.table td.cell-long { white-space: normal; min-width: 15rem; max-width: 30rem; line-height: 1.45; }
+/* the amounts of a wide table stay readable: never squeezed, never broken */
+.table td.text-end, .table th.text-end { white-space: nowrap; }
+.table .badge { font-weight: 600; }
+@media (max-width: 767.98px) {
+    .table-scroll:has(table.table-cards) { overflow: visible; background: none; border-radius: 0; }
+    .table td.cell-long { min-width: 0; max-width: none; }
+}
+@media print {
+    .table-scroll { overflow: visible !important; background: none !important; }
+    .table td.cell-long { max-width: none; }
+}
+
+/* ------------------------------------------------------ transfer: two accounts side by side */
+.tx-pair { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 14px; align-items: center; }
+.tx-side { border: 1px solid var(--border); border-radius: 14px; padding: 16px; background: var(--card); border-top-width: 3px; }
+.tx-from { border-top-color: #eb6834; }
+.tx-to { border-top-color: #1baf7a; }
+.tx-side-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.tx-dot { flex: 0 0 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; }
+.tx-from .tx-dot { background: rgba(235, 104, 52, .12); color: #d95926; }
+.tx-to .tx-dot { background: rgba(27, 175, 122, .14); color: #199e70; }
+.tx-side-title { font-weight: 700; color: var(--heading); line-height: 1.2; }
+.tx-side-sub { font-size: 12px; color: var(--muted); }
+.tx-arrow { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); font-size: 15px; }
+[dir="rtl"] .tx-arrow svg { transform: scaleX(-1); }
+.tx-pair.tx-same .tx-side { border-color: var(--bs-danger, #dc3545); }
+.tx-section { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-top: 6px; }
+[dir="rtl"] .tx-section { letter-spacing: 0; }
+.tx-summary { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; background: var(--primary-soft); color: var(--heading); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tx-summary svg { color: var(--primary); }
+.tx-check { border: 1px solid var(--border); border-radius: 14px; padding: 16px; background: var(--hover); }
+@media (max-width: 767.98px) {
+    .tx-pair { grid-template-columns: minmax(0, 1fr); }
+    .tx-arrow { margin: -4px auto; transform: rotate(90deg); }
+}
+
+/* ------------------------------------------------------------ help: a "?" with its explanation */
+.help-tip { position: relative; display: inline-grid; place-items: center; width: 18px; height: 18px; margin-inline-start: 4px; vertical-align: -3px; color: var(--muted); cursor: help; border-radius: 50%; outline: 0; font-size: 14px; }
+.help-tip:hover, .help-tip:focus { color: var(--primary); }
+.help-tip:focus-visible { box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .25); }
+.help-tip::after { content: attr(data-tip); position: absolute; z-index: 1080; bottom: calc(100% + 9px); inset-inline-start: 50%; transform: translateX(-50%) translateY(4px); width: max-content; max-width: min(280px, 78vw);
+    padding: 9px 12px; border-radius: 10px; background: #1d2433; color: #fff; font-size: 12.5px; font-weight: 500; line-height: 1.5; text-align: start; text-transform: none; letter-spacing: 0; white-space: normal;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .22); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .12s ease, transform .12s ease; }
+[dir="rtl"] .help-tip::after { transform: translateX(50%) translateY(4px); }
+.help-tip::before { content: ""; position: absolute; z-index: 1081; bottom: calc(100% + 3px); left: 50%; margin-left: -6px; border: 6px solid transparent; border-top-color: #1d2433; border-bottom: 0; opacity: 0; visibility: hidden; transition: opacity .12s ease; }
+.help-tip:hover::after, .help-tip:focus::after { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+[dir="rtl"] .help-tip:hover::after, [dir="rtl"] .help-tip:focus::after { transform: translateX(50%) translateY(0); }
+.help-tip:hover::before, .help-tip:focus::before { opacity: 1; visibility: visible; }
+@media print { .help-tip { display: none; } }
+
+/* ------------------------------------------------------------ Solar Hijri date picker */
+input[data-shamsi-date] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%238a94a6' d='M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.500 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right .8rem center; background-size: 14px; padding-right: 2.2rem; }
+.dp { position: absolute; z-index: 2100; width: 292px; padding: 12px; border-radius: 14px; background: var(--card); border: 1px solid var(--border); box-shadow: 0 16px 40px rgba(15, 23, 42, .18); font-size: 13.5px; color: var(--text); user-select: none; }
+.dp-head { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.dp-nav { flex: 0 0 32px; height: 32px; border: 0; border-radius: 9px; background: var(--hover); color: var(--heading); font-size: 18px; line-height: 1; cursor: pointer; }
+.dp-nav:hover { background: var(--primary-soft); color: var(--primary); }
+[dir="rtl"].dp .dp-nav { transform: scaleX(-1); }
+.dp-month, .dp-year { height: 32px; border: 1px solid var(--border); border-radius: 9px; background: var(--input-bg, var(--card)); color: var(--heading); font-weight: 700; padding: 0 8px; min-width: 0; }
+.dp-month { flex: 1 1 auto; }
+.dp-year { flex: 0 0 74px; text-align: center; direction: ltr; }
+.dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.dp-dow { text-align: center; font-size: 11.5px; font-weight: 800; color: var(--muted); padding: 4px 0; }
+.dp-day { height: 34px; border: 0; border-radius: 9px; background: transparent; color: var(--text); font-variant-numeric: tabular-nums; cursor: pointer; }
+.dp-day:hover { background: var(--primary-soft); color: var(--primary); }
+.dp-fri { color: #d9534f; }
+.dp-today { box-shadow: inset 0 0 0 1.5px var(--primary); font-weight: 700; }
+.dp-chosen, .dp-chosen:hover { background: var(--primary); color: #fff; font-weight: 700; }
+.dp-foot { display: flex; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.dp-link { border: 0; background: transparent; color: var(--primary); font-weight: 700; font-size: 13px; padding: 4px 6px; border-radius: 7px; cursor: pointer; }
+.dp-link:hover { background: var(--primary-soft); }
+@media print { .dp { display: none; } }
+
+/* ------------------------------------------------------------ the buttons of a list row */
+.act-group { display: inline-flex; align-items: center; gap: 6px; vertical-align: middle; }
+.act-group form { display: inline-flex; margin: 0; }
+.btn-act { width: 32px; height: 32px; border-radius: 9px; border: 1px solid transparent; text-decoration: none; cursor: pointer; transition: background-color .12s ease, color .12s ease, transform .12s ease, box-shadow .12s ease; }
+.btn-act.is-blue { background: rgba(42, 120, 214, .12); color: #2a78d6; }
+.btn-act.is-teal { background: rgba(19, 181, 164, .13); color: #0e9f90; }
+.btn-act.is-amber { background: rgba(240, 162, 14, .15); color: #c98500; }
+.btn-act.is-red { background: rgba(220, 53, 69, .11); color: #dc3545; }
+.btn-act:hover { box-shadow: 0 4px 10px rgba(15, 23, 42, .14); }
+.btn-act:focus-visible { outline: 0; box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .3); }
+.table td a.btn-act:hover { text-decoration: none; }
+/* the receipt button of a paper */
+.btn-receipt { background: #0e9f90; border-color: #0e9f90; color: #fff; font-weight: 600; }
+.btn-receipt:hover, .btn-receipt:focus { background: #0b877a; border-color: #0b877a; color: #fff; }
+
+
+/* ---------------------------------------------------------------- currencies */
+/* tiles to tick the currencies a business works with (Settings) */
+
+/* one-of-several switch: the currency filter above lists and reports */
+.seg { display: inline-flex; max-width: 100%; overflow-x: auto; gap: 2px; padding: 4px; border-radius: 999px; background: var(--hover); border: 1px solid var(--border); }
+.seg a { padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--muted); text-decoration: none; white-space: nowrap; }
+.seg a:hover { color: var(--heading); }
+.seg a.active { background: var(--card); color: var(--primary); box-shadow: 0 1px 3px rgba(18, 28, 45, .12); }
+.seg-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+
+/* ------------------------------------------------------------------ Tenders.af: pick tiles
+   A tile that is ticked like a checkbox: currencies and reminder days in Settings. */
+.pick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.pick-grid.is-small { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+.pick-tile { position: relative; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); cursor: pointer; transition: border-color .12s, background-color .12s, box-shadow .12s; min-height: 54px; margin: 0; }
+.pick-tile:hover { border-color: var(--primary); }
+.pick-tile .pick-sign { width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; display: grid; place-items: center; font-weight: 700; font-size: 15px; background: var(--hover); color: var(--heading); }
+.pick-tile .pick-code { display: block; font-weight: 700; color: var(--heading); line-height: 1.2; }
+.pick-tile .pick-name { display: block; font-size: 12px; color: var(--muted); line-height: 1.25; }
+.pick-tile .pick-check { margin-inline-start: auto; width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid var(--border); display: grid; place-items: center; font-size: 10px; color: transparent; }
+.btn-check:checked + .pick-tile { border-color: var(--primary); background: var(--primary-soft); box-shadow: 0 0 0 1px var(--primary) inset; }
+.btn-check:checked + .pick-tile .pick-sign { background: var(--primary); color: #fff; }
+.btn-check:checked + .pick-tile .pick-check { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn-check:focus-visible + .pick-tile { outline: 2px solid var(--primary); outline-offset: 2px; }
+.btn-check:disabled + .pick-tile { cursor: default; }
+.pick-tile .pick-main { display: none; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 20px; background: var(--primary); color: #fff; margin-inline-start: 6px; vertical-align: middle; }
+.pick-tile.is-main .pick-main { display: inline-block; }
+.set-head { display: flex; align-items: center; gap: 12px; }
+.set-head .set-icon { width: 40px; height: 40px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; font-size: 16px; }
+.set-head h5 { margin: 0; font-size: 16px; }
+.set-head p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+.save-bar { position: sticky; bottom: 12px; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); box-shadow: 0 8px 24px rgba(18, 28, 45, .10); }
+@media (max-width: 991.98px) { .save-bar { bottom: 84px; } }
