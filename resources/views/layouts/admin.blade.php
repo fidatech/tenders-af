@@ -15,6 +15,10 @@
         [__('Payments to confirm'), 'receipt', route('admin.subscriptions.index'), $waitingPay],
         $productsOn ? [__('Products and sponsoring'), 'boxes-stacked', route('admin.products.index', ['status' => 'pending']), $waitingProducts] : null,
     ], fn ($row) => $row && $row[3] > 0);
+    // the number on the bell: everything that waits for an administrator, plus unread news that is not
+    // one of those waiting things already (a new company, a message), so nothing is counted twice
+    $bellCount = array_sum(array_column($waitingList, 3))
+        + \App\Models\AdminNotice::where('admin_id', $admin->id)->whereNull('read_at')->whereIn('kind', ['company', 'message', 'info'])->count();
     // [label, icon, route, pattern that marks it current, only for super administrators, number waiting]
     $menu = [
         ['Dashboard', 'gauge-high', 'admin.dashboard', 'admin.dashboard', false, 0],
@@ -75,9 +79,9 @@
             <div class="topbar-brand" aria-hidden="true">{{ __('System administration') }}</div>
             <div class="topbar-right">
                 <div class="dropdown">
-                    <button class="topbar-icon position-relative" data-bs-toggle="dropdown" data-bs-auto-close="outside" type="button" aria-expanded="false" aria-label="{{ __('Notifications') }}" title="{{ __('Notifications') }}">
+                    <button class="topbar-icon position-relative" data-bs-toggle="dropdown" data-bs-auto-close="outside" type="button" aria-expanded="false" aria-label="{{ $bellCount ? __('Notifications, :count waiting', ['count' => $bellCount]) : __('Notifications') }}" title="{{ __('Notifications') }}">
                         <x-icon name="bell" />
-                        @if ($adminUnread)<span class="nt-count">{{ $adminUnread > 99 ? '99+' : $adminUnread }}</span>@endif
+                        @if ($bellCount)<span class="nt-count">{{ $bellCount > 99 ? '99+' : $bellCount }}</span>@endif
                     </button>
                     <div class="dropdown-menu dropdown-menu-end p-0 nt-menu">
                         <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
