@@ -15,6 +15,11 @@ for (const file of process.argv.slice(2)) {
     const it = JSON.stringify(lcpEl.details.items).match(/"snippet":"(.*?)"/);
     if (it) console.log('  LCP element:', it[1].slice(0, 200));
   }
+  for (const k of ['mainthread-work-breakdown', 'long-tasks', 'dom-size', 'bootup-time']) {
+    const a = m[k]; if (!a) continue;
+    const raw = a.details && a.details.items; const items = Array.isArray(raw) ? raw : [];
+    console.log(`  ${k}${a.displayValue ? ' (' + a.displayValue + ')' : ''}: ` + items.slice(0, 5).map(i => JSON.stringify(i).slice(0, 160)).join(' | '));
+  }
   console.log('  -- not passing:');
   for (const [id, a] of Object.entries(m)) {
     if (a.score === null || a.score >= 1 || ['informative', 'notApplicable', 'manual'].includes(a.scoreDisplayMode)) continue;
