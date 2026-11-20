@@ -46,9 +46,9 @@ class DatabaseSeeder extends Seeder
 
         // name => [users, WhatsApp, description, [AFN a month, AFN a year, USD a month, USD a year]]
         $paid = [
-            'Basic' => [1, false, 'Full tenders and email alerts for one person.', [800, 7700, 12, 115]],
-            'Pro' => [3, true, 'Email and WhatsApp alerts for a small team.', [2000, 19200, 29, 278]],
-            'Business' => [10, true, 'For companies that bid every week.', [5000, 48000, 69, 662]],
+            'Basic' => [1, true, 'Every tender in full, with email and WhatsApp alerts, for one person.', [600, 5900, 9, 89]],
+            'Pro' => [3, true, 'For a small team: three people get the tenders and the alerts.', [1000, 9900, 15, 149]],
+            'Business' => [10, true, 'For companies that bid every week.', [2000, 19900, 29, 299]],
         ];
         $sort = 2;
         foreach ($paid as $name => [$users, $whatsapp, $description, $prices]) {

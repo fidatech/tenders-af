@@ -50,6 +50,7 @@ class Plan extends Model
         return array_values(array_filter([
             __('Free company profile in the directory'),
             $this->full_access ? __('Full tender details and documents') : __('Tender summaries and deadlines'),
+            $this->full_access ? __('Tenders of every sector and province') : null,
             $this->instant_alerts ? __('Email alerts the moment a matching tender is published') : __('Weekly email digest of matching tenders'),
             $this->whatsapp_alerts ? __('WhatsApp alerts') : null,
             $this->full_access ? __('Bid price calculator on every tender') : null,

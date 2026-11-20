@@ -60,6 +60,7 @@ class SiteTest extends TestCase
 
         $this->get('/pricing')->assertOk()->assertSee('2,000 <small>AFN a month</small>', false)->assertDontSee('29 <small>USD a month</small>', false);
         $this->get('/pricing?currency=USD')->assertOk()->assertSee('29 <small>USD a month</small>', false)->assertDontSee('2,000 <small>AFN a month</small>', false);
+        $this->get('/pricing')->assertSee('Why companies choose')->assertSee('Plans start at 2,000 AFN a month');
     }
 
     public function test_a_listed_company_has_a_public_page_and_an_unlisted_one_has_none(): void

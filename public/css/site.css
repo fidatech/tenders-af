@@ -337,6 +337,14 @@ details.qa p { margin-top: 10px; color: var(--muted); max-width: 760px; }
 .numbers td { font-variant-numeric: tabular-nums; }
 .numbers td a { color: var(--ink); font-weight: 600; text-decoration: none; }
 .numbers tr:last-child td { border-bottom: 0; }
+/* pricing: what other tender sites charge for, and what it is here */
+.compare { margin-top: 16px; background: #fff; border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); overflow-x: auto; }
+.compare .numbers th, .compare .numbers td { text-align: left; white-space: normal; padding: 14px 20px; }
+.compare .numbers tbody th { font-size: 15px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink); }
+.compare .numbers tr:last-child th { border-bottom: 0; }
+.compare td { color: var(--muted); }
+.compare td.here { color: var(--green); font-weight: 700; }
+.compare thead th:last-child { color: var(--green); }
 
 /* ---------- Select2 pick lists, in the look of the website ---------- */
 /* the closed box of Select2, here and not only in its own file (which loads later), so lists

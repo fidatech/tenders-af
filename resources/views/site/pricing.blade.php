@@ -5,6 +5,19 @@
     $mine = $plans->filter(fn ($plan) => ! $plan->isFree() && $plan->currency === $currency);
     $monthly = $mine->where('interval', 'monthly')->values();
     $yearly = $mine->where('interval', 'yearly')->keyBy('name');
+    $cheapestYear = $mine->where('interval', 'yearly')->sortBy('price')->first();
+    $cheapestMonth = $monthly->sortBy('price')->first();
+    $postingFree = \App\Support\Platform::bool('posting_free');
+    // what other tender sites usually charge for, and what it is here
+    $compare = array_filter([
+        ['Company listing and profile page', 'Part of a paid membership', 'Free, always'],
+        ['Tender summaries and deadlines', 'Members only', 'Free for every company'],
+        $postingFree ? ['Publishing a tender notice', 'Only in the top membership', 'Free for buyers'] : null,
+        ['Tenders of every sector', 'Often only in the top membership', 'In every paid plan'],
+        ['WhatsApp alerts', 'In a paid membership', 'In every paid plan'],
+        ['How you pay', 'A full year at once', 'By the month or by the year'],
+        $cheapestYear ? ['Full tenders for a year', 'Thousands more', 'From '.number_format((float) $cheapestYear->price).' '.$cheapestYear->currency] : null,
+    ]);
 @endphp
 
 @section('hero')
@@ -43,6 +56,21 @@
     @if ($monthly->isEmpty())
         <div class="empty"><h2>The plans are being set up</h2><p>Registering a company is free today.</p></div>
     @endif
+
+    <section class="block">
+        <h2>Why companies choose {{ config('app.name') }}</h2>
+        <p class="text">More is free, and every paid plan has the whole of Afghanistan in it.@if ($cheapestMonth) Plans start at {{ number_format((float) $cheapestMonth->price) }} {{ $cheapestMonth->currency }} a month.@endif</p>
+        <div class="compare">
+            <table class="numbers">
+                <thead><tr><th scope="col">What you get</th><th scope="col">Elsewhere</th><th scope="col">On {{ config('app.name') }}</th></tr></thead>
+                <tbody>
+                    @foreach ($compare as [$what, $elsewhere, $here])
+                        <tr><th scope="row">{{ $what }}</th><td>{{ $elsewhere }}</td><td class="here">{{ $here }}</td></tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </section>
 
     <section class="block prose">
         <h2>How you pay</h2>
