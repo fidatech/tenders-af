@@ -82,7 +82,8 @@ if command -v uapi >/dev/null 2>&1; then
     if uapi --output=json DomainInfo list_domains 2>/dev/null | grep -q "\"$REDIRECT_DOMAIN\""; then
         echo "== $REDIRECT_DOMAIN is a domain of this account"
     else
-        OUT="$(cpapi2 --output=json AddonDomain addaddondomain newdomain="$REDIRECT_DOMAIN" subdomain="${REDIRECT_DOMAIN%%.*}redirect" dir="$REDIRECT_DOMAIN" 2>&1 || true)"
+        CPAPI2="$(command -v cpapi2 || echo /usr/local/cpanel/bin/cpapi2)"
+        OUT="$("$CPAPI2" --output=json AddonDomain addaddondomain newdomain="$REDIRECT_DOMAIN" subdomain="${REDIRECT_DOMAIN%%.*}redirect" dir="$REDIRECT_DOMAIN" 2>&1 || true)"
         if echo "$OUT" | grep -q '"result":1'; then echo "== Addon domain $REDIRECT_DOMAIN added"
         else echo "!! Could not add the addon domain $REDIRECT_DOMAIN. cPanel said:"; echo "$OUT" | tr -d '\r' | head -c 1500; echo; fi
     fi
