@@ -142,6 +142,8 @@ jobs:
           for host in http://tender.af https://tender.af https://www.tenders.af; do
             echo "$(curl -s -o /dev/null -w '%{http_code} -> %{redirect_url}' --max-time 15 "$host/tenders" || echo 'no answer')  $host/tenders"
           done | tee -a .logs/site.log
+          echo "-- verification tags on $APP_URL/" | tee -a .logs/site.log
+          (curl -s --max-time 20 "$APP_URL/" | grep -oE '<meta name="(google-site-verification|msvalidate.01)"[^>]*>' || echo '(none)') | tee -a .logs/site.log
           ssh server "tail -n 80 '$APP_DIR/storage/logs/laravel-'$(date +%F)'.log' 2>/dev/null || tail -n 80 '$APP_DIR/storage/logs/laravel.log' 2>/dev/null || echo '(no error log)'" > .logs/laravel.log 2>&1 || true
 
       - name: Write the result to the branch deploy-log
