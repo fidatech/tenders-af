@@ -17,7 +17,7 @@
     $per = ['monthly' => __('a month'), 'yearly' => __('a year'), 'lifetime' => __('once')];
     [$title, $sub] = match (true) {
         $company->status === 'suspended' => [__('Suspended'), __('Please contact support.')],
-        $onFree => [__('You are on the :plan plan', ['plan' => $planNow->name]), __('Nothing to pay and no end date. Upgrade when you need more.')],
+        $onFree => [__('You are on the :plan plan', ['plan' => $planNow?->name ?? __('Free')]), __('Nothing to pay and no end date. Upgrade when you need more.')],
         $noEnd => [__('Your subscription is active'), __('No end date')],
         ! $ok && $onTrial => [__('Your free trial has ended'), __('It ended on :date. Your company profile stays online. Pay to open the full tenders and the alerts again.', ['date' => fmt_date($info['to'])])],
         ! $ok => [__('Your subscription has ended'), __('It ended on :date. Your company profile stays online. Pay to open the full tenders and the alerts again.', ['date' => fmt_date($info['to'])])],

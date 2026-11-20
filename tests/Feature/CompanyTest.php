@@ -24,7 +24,7 @@ class CompanyTest extends TestCase
         Plan::create(['name' => 'Free', 'price' => 0, 'currency' => 'AFN', 'interval' => 'lifetime']);
 
         $this->post('/register', [
-            'company' => 'Kabul Supplies', 'kind' => 'company', 'name' => 'Ahmad', 'email' => 'ahmad@supplies.test',
+            'company' => 'Kabul Supplies', 'kind' => 'company', 'roles' => ['supplier'], 'name' => 'Ahmad', 'email' => 'ahmad@supplies.test',
             'password' => 'password123', 'password_confirmation' => 'password123', 'terms' => '1',
         ])->assertRedirect('/company');
 

@@ -115,9 +115,9 @@ class ProductTest extends TestCase
     public function test_the_statistics_page_hides_small_numbers_and_shows_real_ones(): void
     {
         $this->tender();
-        $this->get('/statistics')->assertOk()->assertSee('The numbers are still growing')->assertDontSee('By province');
+        $this->get('/statistics')->assertOk()->assertSee('The numbers are still growing')->assertDontSee('Open tenders by province');
 
         Platform::set(['stats_min' => '1']);
-        $this->get('/statistics')->assertOk()->assertSee('Tenders published')->assertSee('By province')->assertSee('Herat')->assertSee('How we count');
+        $this->get('/statistics')->assertOk()->assertSee('Tenders published')->assertSee('Open tenders by province')->assertSee('Herat')->assertSee('How we count');
     }
 }
