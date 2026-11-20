@@ -3,7 +3,7 @@
 @endphp
 <aside class="app-sidebar" id="appSidebar" aria-label="{{ __('app.nav.menu') }}">
     <div class="sidebar-brand">
-        <a href="{{ route('dashboard') }}" class="brand-link"><x-brand-logo /><span class="brand-text">{{ company()?->name ?: config('app.name') }}</span></a>
+        <a href="{{ route('dashboard') }}" class="brand-link"><x-brand-logo /><span class="brand-text">{{ config('app.name') }}</span></a>
     </div>
     <div class="sidebar-scroll" id="sidebarScroll">
         <div class="drawer-profile">
