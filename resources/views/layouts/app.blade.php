@@ -28,7 +28,7 @@
     <link rel="icon" href="{{ asset_v('img/favicon.svg') }}" type="image/svg+xml">
     @include('partials.head-font')
     <link rel="stylesheet" href="{{ asset_v(text_dir() === 'rtl' ? 'css/app.rtl.css' : 'css/app.css') }}">
-    <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset_v('css/select2-fida.css') }}">
     <link rel="stylesheet" href="{{ asset_v('css/portal.css') }}">
 </head>

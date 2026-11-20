@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [StripNumberCommas::class, EnsureUserIsActive::class]);
         // tender.af and the www addresses lead to tenders.af
         $middleware->prepend(\App\Http\Middleware\CanonicalHost::class);
+        $middleware->prepend(\App\Http\Middleware\CompressResponse::class);
         $middleware->alias(['company.active' => EnsureCompanyActive::class, 'owner' => EnsureOwner::class, 'admin.role' => AdminRole::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

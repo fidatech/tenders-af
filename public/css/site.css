@@ -339,6 +339,15 @@ details.qa p { margin-top: 10px; color: var(--muted); max-width: 760px; }
 .numbers tr:last-child td { border-bottom: 0; }
 
 /* ---------- Select2 pick lists, in the look of the website ---------- */
+/* the closed box of Select2, here and not only in its own file (which loads later), so lists
+   do not jump when their look arrives */
+.select2-hidden-accessible { border: 0 !important; clip: rect(0 0 0 0) !important; height: 1px !important; margin: -1px !important; overflow: hidden !important; padding: 0 !important; position: absolute !important; width: 1px !important; white-space: nowrap !important; }
+.select2-container { box-sizing: border-box; display: inline-block; margin: 0; position: relative; vertical-align: middle; }
+.select2-container .select2-selection--single { box-sizing: border-box; cursor: pointer; display: block; user-select: none; -webkit-user-select: none; }
+.select2-container .select2-selection--single .select2-selection__rendered { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.select2-container--default .select2-selection--single .select2-selection__arrow { position: absolute; }
+/* a plain list and its Select2 box are the same size, so nothing moves when one becomes the other */
+.filters select, .filters .select2-container--default .select2-selection--single { box-sizing: border-box; height: 49px; min-height: 49px; }
 .select2-container { max-width: 100%; text-align: left; }
 .select2-container--default .select2-selection--single { height: auto; min-height: 49px; display: flex; align-items: center; background: #F6F8F5; border: 1px solid #E3E8E4; border-radius: 12px; font: inherit; }
 .select2-container--default .select2-selection--single .select2-selection__rendered { flex: 1; min-width: 0; padding: 12px 38px 12px 14px; line-height: 1.5; color: var(--ink); }

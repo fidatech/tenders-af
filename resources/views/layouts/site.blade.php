@@ -171,9 +171,7 @@
     </div>
 </footer>
 {{-- every pick list of the website is a Select2 list --}}
-<script src="{{ asset_v('vendor/jquery/jquery.min.js') }}" defer></script>
-<script src="{{ asset_v('vendor/select2/select2.min.js') }}" defer></script>
-<script src="{{ asset_v('js/select2-init.js') }}" defer></script>
+@include('partials.select2-scripts')
 <script>
 // the bell closes when something else is clicked, or with Escape
 (function () {

@@ -59,9 +59,7 @@
     </footer>
 </div>
 
-<script src="{{ asset_v('vendor/jquery/jquery.min.js') }}" defer></script>
-<script src="{{ asset_v('vendor/select2/select2.min.js') }}" defer></script>
-<script src="{{ asset_v('js/select2-init.js') }}" defer></script>
+@include('partials.select2-scripts')
 <script>
 // "Show" beside a password box, and one press only on the big button
 document.querySelectorAll('.pw button:not([data-toggle-pw])').forEach(function (button) {
