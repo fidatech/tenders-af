@@ -84,12 +84,17 @@ if command -v uapi >/dev/null 2>&1; then
     else
         OUT="$(cpapi2 --output=json AddonDomain addaddondomain newdomain="$REDIRECT_DOMAIN" subdomain="${REDIRECT_DOMAIN%%.*}redirect" dir="$REDIRECT_DOMAIN" 2>&1 || true)"
         if echo "$OUT" | grep -q '"result":1'; then echo "== Addon domain $REDIRECT_DOMAIN added"
-        else echo "!! Could not add the addon domain $REDIRECT_DOMAIN: $(echo "$OUT" | grep -o '"reason":"[^"]*"' | head -n1)"; fi
+        else echo "!! Could not add the addon domain $REDIRECT_DOMAIN. cPanel said:"; echo "$OUT" | tr -d '\r' | head -c 1500; echo; fi
     fi
     uapi --output=json SSL start_autossl_check >/dev/null 2>&1 && echo "== AutoSSL asked to cover the domains" || true
 else
     echo "!! uapi is not available here: add $REDIRECT_DOMAIN in cPanel > Domains, folder $REDIRECT_DOMAIN"
 fi
+# where the domain points, to see why it may not answer
+if command -v dig >/dev/null 2>&1; then
+    echo "   $REDIRECT_DOMAIN NS: $(dig +short NS "$REDIRECT_DOMAIN" | tr '\n' ' ')  A: $(dig +short A "$REDIRECT_DOMAIN" | tr '\n' ' ')"
+    echo "   tenders.af A: $(dig +short A tenders.af | tr '\n' ' ')"
+elif command -v host >/dev/null 2>&1; then host "$REDIRECT_DOMAIN" 2>&1 | head -n 3 | sed 's/^/   /'; fi
 mkdir -p "$REDIRECT_DIR"
 cat > "$REDIRECT_DIR/.htaccess" <<HTACCESS
 # $REDIRECT_DOMAIN leads to the main address, keeping the path (written by deploy.sh)
