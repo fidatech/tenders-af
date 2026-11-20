@@ -72,4 +72,12 @@ class SiteTest extends TestCase
         $company->update(['is_listed' => false]);
         $this->get('/companies/'.$company->slug)->assertNotFound();
     }
+
+    public function test_the_other_addresses_lead_to_the_main_one(): void
+    {
+        config(['app.url' => 'https://tenders.af']);
+        $this->get('http://tender.af/tenders?q=solar')->assertStatus(301)->assertRedirect('https://tenders.af/tenders?q=solar');
+        $this->get('https://www.tenders.af/companies')->assertStatus(301)->assertRedirect('https://tenders.af/companies');
+        $this->get('https://tenders.af/')->assertOk();
+    }
 }

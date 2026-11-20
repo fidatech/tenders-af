@@ -75,5 +75,27 @@ if ! crontab -l 2>/dev/null | grep -qF "$APP_DIR && "; then
     fi
 fi
 
+# tender.af: an addon domain of this account whose folder only redirects to tenders.af
+REDIRECT_DOMAIN="${REDIRECT_DOMAIN:-tender.af}"
+REDIRECT_DIR="$HOME/$REDIRECT_DOMAIN"
+if command -v uapi >/dev/null 2>&1; then
+    if uapi --output=json DomainInfo list_domains 2>/dev/null | grep -q "\"$REDIRECT_DOMAIN\""; then
+        echo "== $REDIRECT_DOMAIN is a domain of this account"
+    else
+        OUT="$(cpapi2 --output=json AddonDomain addaddondomain newdomain="$REDIRECT_DOMAIN" subdomain="${REDIRECT_DOMAIN%%.*}redirect" dir="$REDIRECT_DOMAIN" 2>&1 || true)"
+        if echo "$OUT" | grep -q '"result":1'; then echo "== Addon domain $REDIRECT_DOMAIN added"
+        else echo "!! Could not add the addon domain $REDIRECT_DOMAIN: $(echo "$OUT" | grep -o '"reason":"[^"]*"' | head -n1)"; fi
+    fi
+    uapi --output=json SSL start_autossl_check >/dev/null 2>&1 && echo "== AutoSSL asked to cover the domains" || true
+else
+    echo "!! uapi is not available here: add $REDIRECT_DOMAIN in cPanel > Domains, folder $REDIRECT_DOMAIN"
+fi
+mkdir -p "$REDIRECT_DIR"
+cat > "$REDIRECT_DIR/.htaccess" <<HTACCESS
+# $REDIRECT_DOMAIN leads to the main address, keeping the path (written by deploy.sh)
+RewriteEngine On
+RewriteRule ^ ${APP_URL_FOR_REDIRECT:-https://tenders.af}%{REQUEST_URI} [R=301,L]
+HTACCESS
+
 touch storage/app/.installed
 echo "== Deployed $(date '+%Y-%m-%d %H:%M:%S')"

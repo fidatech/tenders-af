@@ -23,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(fn (Request $request) => $request->is('admin', 'admin/*') ? route('admin.dashboard') : route('dashboard'));
 
         $middleware->web(append: [StripNumberCommas::class, EnsureUserIsActive::class]);
+        // tender.af and the www addresses lead to tenders.af
+        $middleware->prepend(\App\Http\Middleware\CanonicalHost::class);
         $middleware->alias(['company.active' => EnsureCompanyActive::class, 'owner' => EnsureOwner::class, 'admin.role' => AdminRole::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
