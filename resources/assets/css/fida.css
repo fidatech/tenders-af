@@ -44,6 +44,12 @@
     --muted: #8a92a3;
     --hover: #f6f8fc;
     --input-bg: #ffffff;
+    /* form fields: a border you can see on a white card, a darker one under the pointer */
+    --field-border: #cdd5e1;
+    --field-border-hover: #a9b4c4;
+    --field-text: #1f2636;
+    --field-placeholder: #9aa3b2;
+    --field-disabled: #f2f4f8;
 
     --success: #20b26b; --success-rgb: 32, 178, 107;
     --warning: #f4a51c; --warning-rgb: 244, 165, 28;
@@ -104,6 +110,11 @@
     --muted: #8590a6;
     --hover: #1b2234;
     --input-bg: #121827;
+    --field-border: #34405a;
+    --field-border-hover: #4a5875;
+    --field-text: #e6e9f0;
+    --field-placeholder: #6d7891;
+    --field-disabled: #1a2131;
     --primary-soft: rgba(var(--primary-rgb), .14);
     --sidebar-bg: #131927;
     --sidebar-border: #20283a;
@@ -1569,3 +1580,66 @@ div.dt-container .dt-layout-table > .dt-layout-cell, div.dt-container .dt-layout
 .file-drop .fd-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .file-drop .fd-size { flex: 0 0 auto; font-size: 12px; color: var(--muted, var(--bs-secondary-color)); }
 .file-drop .fd-total { margin-top: 6px; }
+
+/* ================================================================ form fields
+   Clear fields: a visible border, one height for boxes and lists, a darker border under the pointer,
+   a soft ring when typing, red for a mistake, grey when it cannot be changed. */
+.form-label { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--heading); margin-bottom: 7px; letter-spacing: .1px; }
+.form-label .text-danger { font-weight: 700; }
+.form-text { margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+.form-control, .form-select {
+    min-height: 44px; padding: .62rem .95rem; font-size: 14px; line-height: 1.45; color: var(--field-text);
+    background-color: var(--input-bg); border: 1px solid var(--field-border); border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .04); transition: border-color .15s, box-shadow .15s, background-color .15s;
+}
+.form-control:hover:not(:disabled):not([readonly]), .form-select:hover:not(:disabled) { border-color: var(--field-border-hover); }
+.form-control:focus, .form-select:focus {
+    color: var(--field-text); background-color: var(--input-bg); border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), .14), 0 1px 2px rgba(16, 24, 40, .04); outline: 0;
+}
+.form-control::placeholder { color: var(--field-placeholder); opacity: 1; }
+.form-control:disabled, .form-select:disabled, .form-control[readonly] { background-color: var(--field-disabled); color: var(--muted); border-color: var(--field-border); box-shadow: none; cursor: not-allowed; }
+.form-control[readonly] { cursor: default; }
+textarea.form-control { min-height: 96px; line-height: 1.6; resize: vertical; }
+.form-control[type="file"] { padding: .5rem .6rem; cursor: pointer; }
+.form-control::file-selector-button { margin: -.5rem .8rem -.5rem -.6rem; padding: .62rem .95rem; border: 0; border-inline-end: 1px solid var(--field-border); background: var(--hover); color: var(--heading); font-weight: 600; }
+.form-control-sm, .form-select-sm { min-height: 36px; padding: .4rem .75rem; font-size: 13px; border-radius: 8px; }
+.form-control-lg, .form-select-lg { min-height: 52px; padding: .8rem 1.05rem; font-size: 15px; border-radius: 12px; }
+
+/* the arrow of a plain list, in the colour of the text */
+.form-select { padding-inline-end: 2.6rem; background-position: right .9rem center; background-size: 14px 10px; cursor: pointer; }
+[dir="rtl"] .form-select { background-position: left .9rem center; }
+
+/* a mistake: red border, a red ring when typing, the message under it */
+.form-control.is-invalid, .form-select.is-invalid, .was-validated .form-control:invalid { border-color: var(--danger); background-image: none; padding-inline-end: .95rem; }
+.form-select.is-invalid { padding-inline-end: 2.6rem; }
+.form-control.is-invalid:focus, .form-select.is-invalid:focus { border-color: var(--danger); box-shadow: 0 0 0 4px rgba(var(--danger-rgb), .14); }
+.invalid-feedback { margin-top: 6px; font-size: 12.5px; font-weight: 500; color: var(--danger); }
+
+/* boxes to tick and switches */
+.form-check { min-height: 1.5rem; padding-inline-start: 1.85em; }
+.form-check .form-check-input { margin-inline-start: -1.85em; }
+.form-check-input { width: 1.15em; height: 1.15em; margin-top: .18em; border: 1.5px solid var(--field-border-hover); background-color: var(--input-bg); cursor: pointer; transition: background-color .15s, border-color .15s, box-shadow .15s; }
+.form-check-input[type="checkbox"] { border-radius: 5px; }
+.form-check-input:hover { border-color: var(--primary); }
+.form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+.form-check-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(var(--primary-rgb), .15); }
+.form-switch { padding-inline-start: 3em; }
+.form-switch .form-check-input { width: 2.4em; height: 1.35em; margin-inline-start: -3em; margin-top: .05em; border-radius: 2em; }
+.form-check-label { font-size: 13.5px; color: var(--text); cursor: pointer; }
+
+/* a box with a word or an icon stuck to it */
+.input-group > .form-control, .input-group > .form-select { min-height: 44px; }
+.input-group-text { min-height: 44px; background: var(--hover); border-color: var(--field-border); color: var(--muted); font-size: 13.5px; border-radius: 10px; }
+.input-group:focus-within .input-group-text { border-color: var(--primary); }
+
+/* the drop box for files takes the same border */
+.file-drop .fd-zone { border-color: var(--field-border-hover); }
+
+/* phones: a bigger box to tap, and 16px so the phone does not zoom in */
+@media (max-width: 767.98px) {
+    .form-control, .form-select, .input-group-text { min-height: 48px; font-size: 16px; border-radius: 12px; }
+    textarea.form-control { min-height: 110px; }
+    .form-control-sm, .form-select-sm { min-height: 40px; font-size: 14px; }
+}

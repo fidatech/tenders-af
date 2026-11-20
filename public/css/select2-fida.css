@@ -2,14 +2,15 @@
 .select2-container { max-width: 100%; }
 .select2-container--default .select2-selection--single,
 .select2-container--default .select2-selection--multiple {
-    min-height: calc(1.5em + 1.16rem + 2px); background-color: var(--input-bg, var(--bs-body-bg)); border: 1px solid var(--border-strong, var(--bs-border-color));
-    border-radius: 9px; font-size: 13.5px; transition: border-color .15s, box-shadow .15s;
+    min-height: 44px; background-color: var(--input-bg, var(--bs-body-bg)); border: 1px solid var(--field-border, var(--bs-border-color));
+    border-radius: 10px; font-size: 14px; box-shadow: 0 1px 2px rgba(16, 24, 40, .04); transition: border-color .15s, box-shadow .15s;
 }
 .select2-container--default .select2-selection--single { height: auto; display: flex; align-items: center; }
-.select2-container--default .select2-selection--single .select2-selection__rendered { flex: 1; min-width: 0; padding: .58rem 2.1rem .58rem .9rem; line-height: 1.5; color: var(--text, var(--bs-body-color)); }
-.select2-container--default[dir="rtl"] .select2-selection--single .select2-selection__rendered { padding: .58rem .9rem .58rem 2.1rem; }
-.select2-container--default .select2-selection--single .select2-selection__placeholder { color: var(--muted, var(--bs-secondary-color)); }
-.select2-container--default .select2-selection--single .select2-selection__arrow { height: 100%; top: 0; right: .55rem; width: 1.2rem; }
+.select2-container--default .select2-selection--single .select2-selection__rendered { flex: 1; min-width: 0; padding: .62rem 2.4rem .62rem .95rem; line-height: 1.45; color: var(--field-text, var(--bs-body-color)); }
+.select2-container--default[dir="rtl"] .select2-selection--single .select2-selection__rendered { padding: .62rem .95rem .62rem 2.4rem; }
+.select2-container--default .select2-selection--single .select2-selection__placeholder { color: var(--field-placeholder, var(--bs-secondary-color)); }
+.select2-container--default:not(.select2-container--disabled) .select2-selection:hover { border-color: var(--field-border-hover, var(--bs-border-color)); }
+.select2-container--default .select2-selection--single .select2-selection__arrow { height: 100%; top: 0; right: .7rem; width: 1.2rem; }
 .select2-container--default[dir="rtl"] .select2-selection--single .select2-selection__arrow { right: auto; left: .55rem; }
 .select2-container--default .select2-selection--single .select2-selection__arrow b { border-color: var(--muted, #6c757d) transparent transparent; }
 .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b { border-color: transparent transparent var(--muted, #6c757d); }
@@ -17,16 +18,16 @@
 .select2-container--default.select2-container--focus .select2-selection--multiple,
 .select2-container--default.select2-container--open .select2-selection--single,
 .select2-container--default.select2-container--open .select2-selection--multiple {
-    border-color: rgba(var(--primary-rgb, var(--bs-primary-rgb)), .6); box-shadow: 0 0 0 3px rgba(var(--primary-rgb, var(--bs-primary-rgb)), .14); outline: 0;
+    border-color: var(--primary, var(--bs-primary)); box-shadow: 0 0 0 4px rgba(var(--primary-rgb, var(--bs-primary-rgb)), .14); outline: 0;
 }
 .select2-container--default.select2-container--disabled .select2-selection--single,
-fieldset:disabled .select2-container--default .select2-selection--single { background-color: var(--hover, var(--bs-secondary-bg)); cursor: default; pointer-events: none; }
+fieldset:disabled .select2-container--default .select2-selection--single { background-color: var(--field-disabled, var(--bs-secondary-bg)); box-shadow: none; cursor: not-allowed; pointer-events: none; }
 .select2-container--default .select2-selection--multiple .select2-selection__choice { background-color: rgba(var(--primary-rgb, var(--bs-primary-rgb)), .1); border: 0; border-radius: 6px; color: var(--text, var(--bs-body-color)); }
 
 /* a list with a mistake keeps its red border */
-.form-select.is-invalid + .select2-container--default .select2-selection--single { border-color: var(--bs-form-invalid-border-color, #dc3545); }
+.form-select.is-invalid + .select2-container--default .select2-selection--single { border-color: var(--danger, #dc3545); }
 /* small lists (filters of a table) */
-.form-select-sm + .select2-container--default .select2-selection--single { min-height: 0; font-size: 12.5px; border-radius: 7px; }
+.form-select-sm + .select2-container--default .select2-selection--single { min-height: 36px; font-size: 13px; border-radius: 8px; }
 .form-select-sm + .select2-container--default .select2-selection--single .select2-selection__rendered { padding-top: .35rem; padding-bottom: .35rem; }
 
 /* the list that opens */
@@ -46,3 +47,18 @@ fieldset:disabled .select2-container--default .select2-selection--single { backg
 .select2-results__message { color: var(--muted, var(--bs-secondary-color)); }
 /* the real list stays in the page for the form, but is not seen before Select2 has drawn itself */
 select.select2-hidden-accessible { position: absolute !important; }
+
+/* a phone: as tall as the boxes, 16px so the phone does not zoom in */
+@media (max-width: 767.98px) {
+    .select2-container--default .select2-selection--single { min-height: 48px; font-size: 16px; border-radius: 12px; }
+    .select2-container--default .select2-search--dropdown .select2-search__field { font-size: 16px; }
+}
+
+/* a chevron like the other lists, not the small triangle; it turns when the list is open */
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border: solid var(--muted, #6c757d); border-width: 0 1.8px 1.8px 0; width: 7px; height: 7px; margin: -5px 0 0 -4px;
+    transform: rotate(45deg); transition: transform .15s, margin .15s;
+}
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    border-color: var(--primary, var(--bs-primary)); border-width: 0 1.8px 1.8px 0; transform: rotate(225deg); margin-top: -1px;
+}
