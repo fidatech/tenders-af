@@ -27,7 +27,7 @@ for (const file of process.argv.slice(2)) {
     const raw = a.details && a.details.items; const items = Array.isArray(raw) ? raw : (raw ? [raw] : []);
     for (const it of items.slice(0, 6)) {
       const s = JSON.stringify(it).replace(/\s+/g, ' ');
-      console.log('      ' + s.slice(0, id.startsWith('cls') || id === 'layout-shifts' ? 1500 : 300));
+      console.log('      ' + s.slice(0, id.startsWith('cls') || id === 'layout-shifts' ? 6000 : 300));
     }
   }
   console.log('');
