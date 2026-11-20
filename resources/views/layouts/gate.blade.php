@@ -18,10 +18,8 @@
 <meta name="robots" content="noindex, follow">
 <meta name="theme-color" content="#F6F8F5">
 <link rel="icon" href="{{ asset_v('img/favicon.svg') }}" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
-<link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}">
+@include('partials.head-font')
+<link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="{{ asset_v('css/site.css') }}">
 <script>document.documentElement.className += ' js';</script>
 </head>

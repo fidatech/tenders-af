@@ -58,6 +58,7 @@ jobs:
         if: env.HAS_SERVER == 'yes'
         run: |
           rm -f .env
+          python3 tools/fetch-fonts.py || echo "font not fetched: the pages load it from Google instead"
           composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist
           umask 077
           cat > .env.server <<EOF
@@ -144,6 +145,9 @@ jobs:
           done | tee -a .logs/site.log
           echo "-- verification tags on $APP_URL/" | tee -a .logs/site.log
           (curl -s --max-time 20 "$APP_URL/" | grep -oE '<meta name="(google-site-verification|msvalidate.01)"[^>]*>' || echo '(none)') | tee -a .logs/site.log
+          for path in / /companies /css/site.css; do
+            echo "-- headers of $path: $(curl -s -o /dev/null -D - -H 'Accept-Encoding: gzip, br' --max-time 20 "$APP_URL$path" | grep -iE '^(content-encoding|content-type|cache-control|vary):' | tr -d '\r' | tr '\n' ' ')"
+          done | tee -a .logs/site.log
           ssh server "tail -n 80 '$APP_DIR/storage/logs/laravel-'$(date +%F)'.log' 2>/dev/null || tail -n 80 '$APP_DIR/storage/logs/laravel.log' 2>/dev/null || echo '(no error log)'" > .logs/laravel.log 2>&1 || true
 
       - name: Lighthouse on the live site

@@ -64,10 +64,8 @@
 <meta name="twitter:image" content="{{ $image }}">
 <link rel="icon" href="{{ asset_v('img/favicon.svg') }}" type="image/svg+xml">
 <link rel="alternate" type="text/plain" href="{{ url('/llms.txt') }}" title="{{ $name }} for AI assistants">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
-<link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}">
+@include('partials.head-font')
+<link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="{{ asset_v('css/site.css') }}">
 <script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@graph' => $graph], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
 </head>

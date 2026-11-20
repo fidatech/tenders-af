@@ -26,11 +26,9 @@
     <meta name="robots" content="noindex, nofollow">
     <title>{{ $title ?? '' }}{{ isset($title) ? ' | ' : '' }}{{ config('app.name') }}</title>
     <link rel="icon" href="{{ asset_v('img/favicon.svg') }}" type="image/svg+xml">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
+    @include('partials.head-font')
     <link rel="stylesheet" href="{{ asset_v(text_dir() === 'rtl' ? 'css/app.rtl.css' : 'css/app.css') }}">
-    <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="{{ asset_v('css/select2-fida.css') }}">
     <link rel="stylesheet" href="{{ asset_v('css/portal.css') }}">
 </head>

@@ -19,10 +19,10 @@ for (const file of process.argv.slice(2)) {
   for (const [id, a] of Object.entries(m)) {
     if (a.score === null || a.score >= 1 || ['informative', 'notApplicable', 'manual'].includes(a.scoreDisplayMode)) continue;
     console.log(`  [${a.score}] ${id}: ${a.title}${a.displayValue ? ' (' + a.displayValue + ')' : ''}`);
-    const items = (a.details && a.details.items) || [];
+    const raw = a.details && a.details.items; const items = Array.isArray(raw) ? raw : (raw ? [raw] : []);
     for (const it of items.slice(0, 6)) {
       const s = JSON.stringify(it).replace(/\s+/g, ' ');
-      console.log('      ' + s.slice(0, 300));
+      console.log('      ' + s.slice(0, id.startsWith('cls') || id === 'layout-shifts' ? 1500 : 300));
     }
   }
   console.log('');

@@ -31,6 +31,16 @@
             templateResult: function (item) { return item.element && item.element.hidden ? null : item.text; }
         });
 
+        // the box gets the list's name, so screen readers say what it is for
+        var name = select.getAttribute('aria-label')
+            || (select.labels && select.labels[0] ? select.labels[0].textContent.replace(/\s+/g, ' ').trim() : '')
+            || select.getAttribute('data-placeholder') || (empty ? empty.textContent : '') || select.name;
+        var box = $select.data('select2') && $select.data('select2').$selection;
+        if (box && name) {
+            box.attr('aria-label', name);
+            box.find('.select2-selection__rendered').attr('aria-label', name);
+        }
+
         // Select2 tells jQuery about a change; scripts written with addEventListener hear it too.
         // (A list with onchange="..." already hears jQuery's own event.)
         if (!select.getAttribute('onchange')) {
