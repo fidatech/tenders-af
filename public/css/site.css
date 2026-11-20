@@ -390,7 +390,7 @@ details.qa p { margin-top: 10px; color: var(--muted); max-width: 760px; }
 /* fields */
 .acc form { display: grid; gap: 18px; }
 .acc .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 18px; }
-.acc .fld { display: grid; gap: 7px; min-width: 0; }
+.acc .fld { display: grid; gap: 7px; min-width: 0; align-content: start; }
 .acc .fld > label, .acc .lbl { font-size: 13.5px; font-weight: 600; color: var(--ink2); }
 .acc .fld > label .optional { font-weight: 400; color: var(--muted); }
 .acc input[type=text], .acc input[type=email], .acc input[type=password], .acc input[type=tel] {
@@ -401,13 +401,38 @@ details.qa p { margin-top: 10px; color: var(--muted); max-width: 760px; }
 .acc input:focus { border-color: var(--green2); box-shadow: 0 0 0 4px rgba(24,160,90,.15); }
 .acc input.bad { border-color: var(--red2); }
 .acc input.bad:focus { box-shadow: 0 0 0 4px rgba(232,50,63,.14); }
+.acc input.good { border-color: var(--green2); }
 .acc .err { color: var(--red); font-size: 13px; font-weight: 500; }
 .acc .help { color: var(--muted); font-size: 13px; }
 .acc .pw { position: relative; }
 .acc .pw input { padding-right: 70px; }
 .acc .pw button { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: 0; background: #F1F5F2; color: var(--ink2); font: 600 12.5px var(--body); padding: 7px 10px; cursor: pointer; border-radius: 8px; }
 .acc .pw button:hover { background: #E5ECE7; }
-.acc .meter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 2px; }
+.acc .meter { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.acc .pwbox { display: grid; gap: 12px; }
+.acc .pw .state { position: absolute; right: 14px; top: 50%; width: 20px; height: 20px; margin-top: -10px; border-radius: 50%; pointer-events: none; }
+.acc .pw .state.ok { background: var(--green2); }
+.acc .pw .state.ok::after { content: ""; position: absolute; left: 7px; top: 3.5px; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.acc .pw .state.no { background: var(--red2); }
+.acc .pw .state.no::before, .acc .pw .state.no::after { content: ""; position: absolute; left: 9px; top: 5px; width: 2px; height: 10px; background: #fff; border-radius: 1px; transform: rotate(45deg); }
+.acc .pw .state.no::before { transform: rotate(-45deg); }
+.acc .pw input#password_confirmation { padding-right: 44px; }
+.acc .pwmeta { display: grid; gap: 10px; background: #F6F8F5; border: 1px solid #E6ECE8; border-radius: 14px; padding: 12px 14px; }
+.acc .strength { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.acc .strength span { flex: 0 0 auto; min-width: 116px; text-align: right; }
+.acc .strength .lvl-1 { color: var(--red); }
+.acc .strength .lvl-2 { color: #B26B00; }
+.acc .strength .lvl-3 { color: #3E8F2F; }
+.acc .strength .lvl-4 { color: var(--green); }
+.acc .rules { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 6px 14px; }
+.acc .rules li { position: relative; padding-left: 22px; font-size: 13px; color: var(--muted); transition: color .15s; }
+.acc .rules li::before { content: ""; position: absolute; left: 0; top: 2px; width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid #C6D0CA; background: #fff; transition: all .15s; }
+.acc .rules li.ok { color: var(--ink); }
+.acc .rules li.ok::before { border-color: var(--green2); background: var(--green2); }
+.acc .rules li.ok::after { content: ""; position: absolute; left: 5px; top: 4.5px; width: 4px; height: 7px; border: solid #fff; border-width: 0 1.8px 1.8px 0; transform: rotate(45deg); }
+.acc .match { font-size: 13px; font-weight: 600; margin: 0; padding-top: 8px; border-top: 1px dashed #DCE3DE; }
+.acc .match.ok { color: var(--green); }
+.acc .match.no { color: var(--red); }
 .acc .meter i { height: 4px; border-radius: 4px; background: #E6EBE8; transition: background .2s; }
 .acc .meter[data-level="1"] i:nth-child(-n+1) { background: var(--red2); }
 .acc .meter[data-level="2"] i:nth-child(-n+2) { background: #E8A13F; }

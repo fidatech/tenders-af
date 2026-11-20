@@ -110,17 +110,28 @@
             <input type="email" id="email" name="email" value="{{ old('email') }}" class="@error('email') bad @enderror" autocomplete="username" required placeholder="you@company.af">
             @error('email')<span class="err">{{ $message }}</span>@enderror
         </div>
-        <div class="two">
-            <div class="fld">
-                <label for="password">Password</label>
-                <div class="pw"><input type="password" id="password" name="password" class="@error('password') bad @enderror" autocomplete="new-password" minlength="8" required><button type="button">Show</button></div>
-                <div class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-                @error('password')<span class="err">{{ $message }}</span>@else<span class="help" data-meter-text>At least 8 characters.</span>@enderror
+        {{-- the password: two boxes side by side, then one strength bar and the rules for both --}}
+        <div class="pwbox">
+            <div class="two">
+                <div class="fld">
+                    <label for="password">Password</label>
+                    <div class="pw"><input type="password" id="password" name="password" class="@error('password') bad @enderror" autocomplete="new-password" minlength="8" required aria-describedby="pw-rules"><button type="button" data-toggle-pw aria-label="Show the passwords">Show</button></div>
+                </div>
+                <div class="fld">
+                    <label for="password_confirmation">Password again</label>
+                    <div class="pw"><input type="password" id="password_confirmation" name="password_confirmation" autocomplete="new-password" minlength="8" required aria-describedby="pw-match"><span class="state" data-match-icon aria-hidden="true"></span></div>
+                </div>
             </div>
-            <div class="fld">
-                <label for="password_confirmation">Password again</label>
-                <input type="password" id="password_confirmation" name="password_confirmation" autocomplete="new-password" minlength="8" required>
-                <span class="err" data-msg="match" hidden>The two passwords are not the same.</span>
+            <div class="pwmeta" id="pw-rules">
+                <div class="strength"><div class="meter" aria-hidden="true"><i></i><i></i><i></i><i></i></div><span data-meter-text>Choose a password</span></div>
+                <ul class="rules">
+                    <li data-rule="length">8 characters or more</li>
+                    <li data-rule="case">Upper and lower case</li>
+                    <li data-rule="number">A number</li>
+                    <li data-rule="symbol">A sign like ! or #</li>
+                </ul>
+                <p class="match" id="pw-match" data-match aria-live="polite" hidden></p>
+                @error('password')<span class="err">{{ $message }}</span>@enderror
             </div>
         </div>
         <label class="tick"><input type="checkbox" name="terms" value="1" @checked(old('terms')) required><span>I accept the <a href="{{ route('site.terms') }}" target="_blank" rel="noopener">terms</a> and the <a href="{{ route('site.privacy') }}" target="_blank" rel="noopener">privacy policy</a>.</span></label>
@@ -202,11 +213,7 @@
             if (field.closest('[hidden]') || field.type === 'hidden') continue;
             if (!field.checkValidity()) { field.reportValidity(); return false; }
         }
-        if (step === 3) {
-            var same = form.querySelector('#password').value === form.querySelector('#password_confirmation').value;
-            form.querySelector('[data-msg="match"]').hidden = same;
-            if (!same) { form.querySelector('#password_confirmation').focus(); return false; }
-        }
+        if (step === 3 && !checkMatch()) { again.focus(); return false; }
         return true;
     };
 
@@ -221,17 +228,49 @@
         for (var s = 1; s <= 3; s++) { if (!valid(s)) { e.preventDefault(); show(s, false); valid(s); return; } }
     });
 
-    // how strong the password is: length, upper and lower case, numbers, signs
-    var pass = form.querySelector('#password'), meter = form.querySelector('.meter'), meterText = form.querySelector('[data-meter-text]');
+    // how strong the password is, which rules it meets, and whether the second box matches
+    var pass = form.querySelector('#password'), again = form.querySelector('#password_confirmation');
+    var meter = form.querySelector('.meter'), meterText = form.querySelector('[data-meter-text]');
+    var match = form.querySelector('[data-match]'), matchIcon = form.querySelector('[data-match-icon]');
+    var rules = {
+        length: function (v) { return v.length >= 8; },
+        'case': function (v) { return /[a-z]/.test(v) && /[A-Z]/.test(v); },
+        number: function (v) { return /\d/.test(v); },
+        symbol: function (v) { return /[^A-Za-z0-9]/.test(v); }
+    };
+    var checkMatch = function () {
+        var touched = again.value.length > 0;
+        var same = pass.value === again.value;
+        match.hidden = !touched;
+        match.className = 'match ' + (same ? 'ok' : 'no');
+        match.textContent = same ? 'The passwords match.' : 'The passwords are not the same yet.';
+        matchIcon.className = 'state' + (touched ? (same ? ' ok' : ' no') : '');
+        again.classList.toggle('bad', touched && !same);
+        again.classList.toggle('good', touched && same && pass.value.length >= 8);
+        return same;
+    };
     pass.addEventListener('input', function () {
-        var v = pass.value, n = 0;
-        if (v.length >= 8) n++;
-        if (v.length >= 12) n++;
-        if (/[a-z]/.test(v) && /[A-Z]/.test(v)) n++;
-        if (/\d/.test(v) && /[^A-Za-z0-9]/.test(v)) n++;
-        if (v.length < 8) n = v.length ? 1 : 0;
-        meter.setAttribute('data-level', n);
-        if (meterText) meterText.textContent = !v.length ? 'At least 8 characters.' : v.length < 8 ? 'Too short.' : ['', 'Weak.', 'Fair.', 'Good.', 'Strong.'][n];
+        var v = pass.value, met = 0;
+        Object.keys(rules).forEach(function (key) {
+            var ok = rules[key](v);
+            if (ok) met++;
+            form.querySelector('[data-rule="' + key + '"]').classList.toggle('ok', ok);
+        });
+        var level = !v.length ? 0 : v.length < 8 ? 1 : Math.max(1, met);
+        meter.setAttribute('data-level', level);
+        meterText.textContent = !v.length ? 'Choose a password' : v.length < 8 ? 'Too short' : ['', 'Weak', 'Fair', 'Good', 'Strong'][level];
+        meterText.className = 'lvl-' + level;
+        pass.classList.remove('bad');
+        if (again.value.length) checkMatch();
+    });
+    again.addEventListener('input', checkMatch);
+    // one "Show" shows both boxes
+    form.querySelector('[data-toggle-pw]').addEventListener('click', function (e) {
+        e.stopImmediatePropagation();
+        var hidden = pass.type === 'password';
+        pass.type = again.type = hidden ? 'text' : 'password';
+        this.textContent = hidden ? 'Hide' : 'Show';
+        this.setAttribute('aria-label', hidden ? 'Hide the passwords' : 'Show the passwords');
     });
 
     show(at, false);

@@ -66,7 +66,7 @@
 <script src="{{ asset_v('js/select2-init.js') }}" defer></script>
 <script>
 // "Show" beside a password box, and one press only on the big button
-document.querySelectorAll('.pw button').forEach(function (button) {
+document.querySelectorAll('.pw button:not([data-toggle-pw])').forEach(function (button) {
     button.addEventListener('click', function () {
         var input = button.parentNode.querySelector('input');
         var hidden = input.type === 'password';
@@ -74,10 +74,24 @@ document.querySelectorAll('.pw button').forEach(function (button) {
         button.textContent = hidden ? 'Hide' : 'Show';
     });
 });
+// the big button is pressed once only, but only when the form really goes: a page script
+// that stops the form (a mistake found) leaves the button as it was
 document.querySelectorAll('.acc form').forEach(function (form) {
-    form.addEventListener('submit', function () {
+    form.addEventListener('submit', function (e) {
         var go = form.querySelector('.go');
-        if (go) setTimeout(function () { go.disabled = true; }, 0);
+        setTimeout(function () {
+            if (!go || e.defaultPrevented) return;
+            go.disabled = true;
+            go.dataset.label = go.dataset.label || go.textContent;
+            go.textContent = 'Please wait…';
+        }, 0);
+    });
+});
+// coming back with the browser's back button shows the page from memory: wake the button again
+window.addEventListener('pageshow', function () {
+    document.querySelectorAll('.acc .go[disabled]').forEach(function (go) {
+        go.disabled = false;
+        if (go.dataset.label) go.textContent = go.dataset.label;
     });
 });
 </script>
