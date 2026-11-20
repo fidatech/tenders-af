@@ -42,11 +42,11 @@
                     @endunless
                     <div class="form-check form-switch mb-3">
                         <input type="hidden" name="alert_whatsapp" value="0">
-                        <input class="form-check-input" type="checkbox" role="switch" id="a-whatsapp" name="alert_whatsapp" value="1" @checked(old('alert_whatsapp', $company->alert_whatsapp))>
+                        <input class="form-check-input" type="checkbox" role="switch" id="a-whatsapp" name="alert_whatsapp" value="1" @checked($whatsappPlan && old('alert_whatsapp', $company->alert_whatsapp)) @disabled(! $whatsappPlan)>
                         <label class="form-check-label" for="a-whatsapp">{{ __('Yes, send tender alerts to my WhatsApp') }}</label>
                     </div>
                     <label class="form-label" for="a-number">{{ __('WhatsApp number') }}</label>
-                    <input type="text" class="form-control @error('whatsapp') is-invalid @enderror" id="a-number" name="whatsapp" value="{{ old('whatsapp', $company->whatsapp) }}" maxlength="50" dir="ltr" placeholder="+93 70 000 0000">
+                    <input type="text" class="form-control @error('whatsapp') is-invalid @enderror" id="a-number" name="whatsapp" value="{{ old('whatsapp', $company->whatsapp) }}" maxlength="50" dir="ltr" placeholder="+93 70 000 0000" @disabled(! $whatsappPlan)>
                     @error('whatsapp')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                     <div class="form-text">{{ __('With the country code. You can switch the messages off here at any time.') }}</div>
                 </div>

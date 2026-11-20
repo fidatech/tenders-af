@@ -174,4 +174,20 @@ class CompanyTest extends TestCase
         $this->put('/company', ['name' => $company->name, 'website' => 'fida', 'country' => 'Afghanistan'])->assertSessionHasErrors('website');
         $this->put('/company', ['name' => $company->name, 'country' => 'Narnia'])->assertSessionHasErrors('country');
     }
+
+    public function test_whatsapp_alerts_are_locked_on_a_plan_without_them(): void
+    {
+        $company = $this->business();
+        $company->update(['whatsapp' => '+93 70 111 2222', 'alert_whatsapp' => false]);
+        $this->signIn($company);
+
+        $this->get('/alerts')->assertOk()->assertSee('WhatsApp alerts are part of')->assertSee('id="a-number"', false);
+        $this->assertMatchesRegularExpression('/id="a-number"[^>]*disabled/', $this->get('/alerts')->getContent());
+
+        // a form sent around the locked boxes changes neither the number nor the switch
+        $this->put('/alerts', ['alert_email' => '1', 'alert_whatsapp' => '1', 'whatsapp' => '+93 79 999 9999'])->assertRedirect();
+        $company->refresh();
+        $this->assertSame('+93 70 111 2222', $company->whatsapp);
+        $this->assertFalse((bool) $company->alert_whatsapp);
+    }
 }

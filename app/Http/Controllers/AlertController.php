@@ -35,14 +35,19 @@ class AlertController extends Controller
             'alert_types.*' => [Rule::in(array_keys(config('tenders.types')))],
         ], ['whatsapp.regex' => __('Write the WhatsApp number with its country code, for example +93 70 000 0000.')]);
 
-        company()->update([
+        $company = company();
+        $changes = [
             'notify_email' => $data['notify_email'] ?? null,
-            'whatsapp' => $data['whatsapp'] ?? null,
             'alert_email' => $request->boolean('alert_email'),
-            // WhatsApp messages go only to a company that asked for them
-            'alert_whatsapp' => $request->boolean('alert_whatsapp') && filled($data['whatsapp'] ?? null),
             'alert_types' => array_values($data['alert_types'] ?? []),
-        ]);
+        ];
+        // the WhatsApp boxes are locked on a plan without WhatsApp alerts: what was saved stays as it is
+        if ($company->isUsable() && (bool) $company->plan?->whatsapp_alerts) {
+            $changes['whatsapp'] = $data['whatsapp'] ?? null;
+            // WhatsApp messages go only to a company that asked for them
+            $changes['alert_whatsapp'] = $request->boolean('alert_whatsapp') && filled($data['whatsapp'] ?? null);
+        }
+        $company->update($changes);
 
         return back()->with('success', __('Your tender alerts are saved.'));
     }
