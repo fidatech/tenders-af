@@ -107,68 +107,30 @@ The stylesheet, the script and the icons of the panel are built without Node: `c
 
 ## Putting it online (WHM / cPanel, tenders.af)
 
-**Before the first install**
+Once, in **cPanel > Terminal** of the account that holds tenders.af:
 
-- DNS: at the registrar of the domain, point tenders.af to the server (its nameservers, or an A record
-  to its IP address).
-- WHM: create the cPanel account for tenders.af, give it shell access (Manage Shell Access > Normal
-  Shell), and make sure EasyApache has PHP 8.3 or newer with the extensions `mbstring`, `pdo_mysql`,
-  `fileinfo`, `openssl`, `ctype`, `tokenizer`, `xml`, `curl`. Set that PHP for the domain in MultiPHP Manager.
-- cPanel: create a MySQL database and user (all privileges), a mailbox such as `no-reply@tenders.af`,
-  and run AutoSSL for the domain.
-
-**First install**, signed in over SSH as the cPanel user (replace `ea-php83` with the version you set):
-
-```
-cd ~
-P=/opt/cpanel/ea-php83/root/usr/bin/php
-git clone -b main https://github.com/fidatech/tenders-af.git tenders-af
-cd tenders-af
-$P $(which composer) install --no-dev --optimize-autoloader     # no Composer on the server? see below
-cp .env.example .env            # then fill it in: see below
-$P artisan key:generate
-$P artisan migrate --force --seed
-$P artisan app:create-admin
-$P artisan config:cache && $P artisan route:cache && $P artisan view:cache
-
-# the web server shows ~/public_html: make it the public folder of the project
-cd ~
-mv public_html public_html.old
-ln -s tenders-af/public public_html
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/fidatech/tenders-af/main/tools/cpanel-setup.sh)
 ```
 
-**Or inside `public_html` itself** (no separate folder): clone the project into `~/public_html` and add
-these lines to `~/public_html/.htaccess`, below anything cPanel wrote there. Every request is then sent to
-`public/`, so nothing else in the folder (`.env`, `vendor`, `storage`) can be opened from the web. The file
-is not part of the repository, so cPanel can keep its own lines in it and deploys leave it alone.
+It asks for a GitHub token (fine-grained, only this repository, permission **Secrets: Read and write**), your name
+and email, and the SSH port. It then makes a deploy key and allows it to sign in, the MySQL database and user, and
+the mailbox `noreply@tenders.af`, and saves everything as encrypted secrets of the repository. It prints the
+admin password and keeps a copy in `~/.tenders-setup.txt`. The cPanel account needs SSH (shell) access, which is
+switched on in WHM > Manage Shell Access.
 
-```
-<IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteCond %{REQUEST_URI} !^/\.well-known/
-RewriteCond %{REQUEST_URI} !^/public/
-RewriteRule ^(.*)$ public/$1 [L]
-</IfModule>
-```
+After that, **every push to `main` deploys by itself** (`.github/workflows/deploy.yml`):
 
-No Composer on the server: `cd ~/tenders-af && curl -sS https://getcomposer.org/installer | $P`, then use
-`$P composer.phar install ...` in place of the Composer line (`deploy.sh` finds `composer.phar` by itself).
+1. GitHub installs the packages and runs the tests.
+2. It copies the project to `~/tenders-af` on the server (never `storage/` or `.env`, which it writes from the secrets).
+3. It runs `deploy.sh` there: migrations (and, the first time, the sectors, provinces and plans), the administrator
+   from the setup, the caches, `public_html` pointing at `tenders-af/public` (the old folder is kept beside it), and the
+   cron line for the scheduler.
+4. It opens the main pages of the site and writes everything (tests, deploy, page checks, the end of Laravel's log) to
+   the branch **`deploy-log`**.
 
-In `.env` on the server: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://tenders.af`, the
-`DB_*` lines of the database (cPanel names look like `USERNAME_tenders`), and the mailbox:
-`MAIL_MAILER=smtp`, `MAIL_HOST=mail.tenders.af`, `MAIL_PORT=465`, `MAIL_SCHEME=smtps`,
-`MAIL_USERNAME=no-reply@tenders.af`, `MAIL_PASSWORD=...`, `MAIL_FROM_ADDRESS=no-reply@tenders.af`.
-
-Cron job (cPanel > Cron Jobs), every minute:
-
-```
-/opt/cpanel/ea-php83/root/usr/bin/php /home/USERNAME/tenders-af/artisan schedule:run >/dev/null 2>&1
-```
-
-**Updates.** `bash deploy.sh` in `~/tenders-af` brings the server up to date with the `main` branch: it
-fetches the code, installs packages, runs new migrations and rebuilds the caches, using the newest
-EasyApache PHP it finds. The workflow `.github/workflows/deploy.yml` runs it over SSH after every push to
-`main`, once the five secrets named at the top of that file are added to the repository.
+The server needs PHP 8.3 or newer with mbstring, pdo_mysql, intl, gd, zip, bcmath and sodium (WHM > EasyApache 4), and
+an SSL certificate for tenders.af (cPanel > SSL/TLS Status > Run AutoSSL).
 
 ## Tests
 

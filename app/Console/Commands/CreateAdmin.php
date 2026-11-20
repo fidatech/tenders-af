@@ -9,7 +9,7 @@ use Illuminate\Validation\Rules\Password;
 
 class CreateAdmin extends Command
 {
-    protected $signature = 'app:create-admin {--name=} {--email=} {--password=}';
+    protected $signature = 'app:create-admin {--name=} {--email=} {--password=} {--sync : When the email already exists, give that administrator this name and password instead of failing}';
 
     protected $description = 'Create a system administrator who signs in at /admin';
 
@@ -20,6 +20,14 @@ class CreateAdmin extends Command
             'email' => strtolower((string) ($this->option('email') ?: $this->ask('Email address'))),
             'password' => $this->option('password') ?: $this->secret('Password (at least 8 characters)'),
         ];
+
+        // used by the deploy: the administrator from the server's setup always exists and has its password
+        if ($this->option('sync') && ($admin = Admin::where('email', $data['email'])->first())) {
+            $admin->update(['name' => $data['name'], 'password' => $data['password'], 'role' => 'super', 'is_active' => true]);
+            $this->info('Administrator '.$data['email'].' is up to date.');
+
+            return self::SUCCESS;
+        }
 
         $validator = Validator::make($data, [
             'name' => ['required', 'string', 'max:150'],
