@@ -212,3 +212,10 @@ A tender can get up to 20 documents in one save (50 in all), 20 MB each, chosen 
 `public/.user.ini` raises PHP's limits on servers that read it (cPanel with PHP-FPM). With `php artisan serve` on your
 own computer, PHP's own `php.ini` decides: set `upload_max_filesize = 25M`, `post_max_size = 420M` and
 `max_file_uploads = 30` there (`php --ini` shows which file), or files above 2 MB are dropped.
+
+## Panel of companies and buyers
+
+The panel that companies and buyers use (`layouts/app.blade.php`) sits inside the website: the site's header and
+links, a dark band with the company's name, verification and plan, the account menu on the left and the page on the
+right, and the site's footer. Its frame and colours are in `public/css/portal.css` (hand-written, not built); the parts
+inside the pages still come from `app.css`. The admin panel keeps the fida-admin look (`layouts/admin.blade.php`).

@@ -1,0 +1,162 @@
+/* The panel of companies and buyers, in the look of the website (public/css/site.css):
+   the same paper background with dots, ink, green and red, Plus Jakarta Sans for titles.
+   The parts inside the pages (cards, forms, tables, buttons) come from app.css and are
+   given the website's colours and shapes here. Written by hand; the build does not touch it. */
+html.portal {
+    --ink: #0E1512; --ink2: #2B3530; --paper: #F6F8F5; --line: #E4EAE6;
+    --g-green: linear-gradient(135deg, #18A05A 0%, #0B6B3A 100%);
+    --g-red: linear-gradient(135deg, #E8323F 0%, #B10F1C 100%);
+    --g-line: linear-gradient(90deg, #0E1512 0%, #C1121F 50%, #18A05A 100%);
+    --g-dark: radial-gradient(700px 300px at 88% -30%, rgba(193,18,31,.40), rgba(193,18,31,0) 62%), radial-gradient(600px 300px at 6% 140%, rgba(24,160,90,.38), rgba(24,160,90,0) 60%), linear-gradient(135deg, #060B08 0%, #0A2A1A 55%, #0B5A33 100%);
+    --dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='2' cy='2' r='1.2' fill='%230E1512' fill-opacity='.08'/%3E%3C/svg%3E");
+    --lattice: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M24 0 48 24 24 48 0 24Z' fill='none' stroke='%23fff' stroke-opacity='.07'/%3E%3C/svg%3E");
+    --head: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+    /* the colours of the panel's own parts */
+    --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --primary: #12884A; --primary-rgb: 18, 136, 74; --primary-600: #0B6B3A; --primary-soft: #E7F5EC;
+    --brand-from: #18A05A; --brand-to: #0B6B3A;
+    --bg: var(--paper); --card: #fff; --card-border: var(--line); --border: #E8EDE9; --border-strong: #D8E0DB;
+    --text: #2B3530; --heading: #0E1512; --muted: #66726B; --hover: #F3F7F4;
+    --field-border: #CFD8D2; --field-border-hover: #AEBBB3; --field-text: #0E1512; --field-placeholder: #9AA59F; --field-disabled: #F1F4F2;
+    --success: #18A05A; --success-rgb: 24, 160, 90; --danger: #D3202D; --danger-rgb: 211, 32, 45;
+    --radius: 16px; --radius-sm: 10px;
+    --shadow-sm: 0 1px 2px rgba(14, 21, 18, .04);
+    --shadow: 0 1px 2px rgba(14, 21, 18, .04), 0 10px 30px -14px rgba(14, 21, 18, .14);
+    --shadow-lg: 0 24px 60px -20px rgba(14, 21, 18, .25);
+    --bs-body-font-family: var(--font);
+}
+html.portal body { background: var(--paper) var(--dots); color: var(--text); font-family: var(--font); min-height: 100vh; display: flex; flex-direction: column; }
+html.portal h1, html.portal h2, html.portal h3, html.portal h4, html.portal h5, html.portal .card-title { font-family: var(--head); letter-spacing: -.015em; color: var(--heading); }
+
+.pt-wrap { width: 100%; max-width: 1400px; margin: 0 auto; padding: 0 32px; }
+.pt-skip { position: absolute; left: -999px; top: 8px; z-index: 100; background: #fff; padding: 8px 12px; border-radius: 8px; }
+.pt-skip:focus { left: 8px; }
+
+/* ---------- the website's header, light ---------- */
+.pt-top { position: sticky; top: 0; z-index: 1030; background: rgba(255,255,255,.88); -webkit-backdrop-filter: saturate(160%) blur(12px); backdrop-filter: saturate(160%) blur(12px); border-bottom: 1px solid var(--line); }
+.pt-top::before { content: ""; display: block; height: 3px; background: var(--g-line); }
+.pt-top-in { display: flex; align-items: center; gap: 28px; min-height: 66px; }
+.pt-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font: 800 21px/1 var(--head); letter-spacing: -.4px; flex: 0 0 auto; }
+.pt-brand:hover { color: var(--ink); }
+.pt-brand i { width: 36px; height: 36px; border-radius: 11px; background: var(--g-green); display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px -6px rgba(11,107,58,.6); }
+.pt-brand b { color: #18A05A; font-weight: 800; }
+.pt-nav { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+.pt-nav a { color: var(--ink2); text-decoration: none; font-weight: 600; font-size: 14.5px; padding: 8px 12px; border-radius: 10px; white-space: nowrap; }
+.pt-nav a:hover { background: #EEF3EF; color: var(--ink); }
+.pt-actions { display: flex; align-items: center; gap: 8px; margin-inline-start: auto; }
+.pt-post { border-radius: 11px; padding: 9px 14px; font-weight: 700; }
+.pt-icon { position: relative; width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--ink2); display: inline-flex; align-items: center; justify-content: center; font-size: 17px; cursor: pointer; transition: border-color .15s, background .15s; }
+.pt-icon:hover { border-color: #C9D4CD; background: #F7FAF8; }
+.pt-dot { position: absolute; top: -5px; inset-inline-end: -5px; min-width: 19px; height: 19px; padding: 0 5px; border-radius: 10px; background: #E8323F; color: #fff; font: 700 10.5px/19px var(--font); text-align: center; border: 2px solid #fff; }
+.pt-user { display: flex; align-items: center; gap: 10px; padding: 4px 10px 4px 4px; border: 1px solid var(--line); border-radius: 14px; background: #fff; cursor: pointer; transition: border-color .15s; max-width: 260px; }
+.pt-user:hover { border-color: #C9D4CD; }
+.pt-avatar { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 10px; background: var(--g-green); color: #fff; font: 700 13px/34px var(--head); text-align: center; }
+.pt-user-meta { display: flex; flex-direction: column; min-width: 0; text-align: start; line-height: 1.2; }
+.pt-user-meta strong { font-size: 13.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pt-user-meta small { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pt-caret { font-size: 11px; color: var(--muted); }
+.pt-burger { display: none; }
+.pt-menu { border-radius: 14px; border: 1px solid var(--line); box-shadow: var(--shadow-lg); }
+
+/* ---------- a dark band with the name of the company, like the website's page heads ---------- */
+.pt-band { background: var(--lattice), var(--g-dark); color: #fff; }
+.pt-band-in { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; padding-top: 26px; padding-bottom: 74px; }
+.pt-eyebrow { font: 600 12px/1 var(--font); letter-spacing: 1.4px; text-transform: uppercase; color: #9FE8C2; }
+.pt-company { margin-top: 8px; font: 800 clamp(24px, 3vw, 32px)/1.1 var(--head); letter-spacing: -.6px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+.pt-badge { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; color: #fff; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.2); text-decoration: none; }
+a.pt-badge:hover { color: #fff; background: rgba(255,255,255,.18); }
+.pt-badge.ok { background: rgba(95,224,160,.18); border-color: rgba(95,224,160,.45); color: #C9F7DE; }
+.pt-badge.warn { background: rgba(244,165,28,.16); border-color: rgba(244,165,28,.45); color: #FFE3B0; }
+
+/* ---------- the account menu and the page ---------- */
+.pt-body { flex: 1; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 28px; margin-top: -48px; padding-bottom: 48px; align-items: start; }
+.pt-side { position: sticky; top: 92px; }
+.pt-side-card { background: #fff; border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); padding: 10px; display: flex; flex-direction: column; gap: 2px; }
+.pt-head { padding: 14px 12px 6px; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+.pt-head:first-child { padding-top: 6px; }
+.pt-link { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 12px; color: var(--ink2); text-decoration: none; font-weight: 600; font-size: 14px; border: 0; background: none; width: 100%; text-align: start; cursor: pointer; transition: background .15s, color .15s; }
+.pt-link .fi, .pt-link svg { font-size: 15px; color: var(--muted); flex: 0 0 auto; }
+.pt-link span { flex: 1; min-width: 0; }
+.pt-link em { font-style: normal; font-size: 11.5px; font-weight: 700; color: #fff; background: #E8323F; border-radius: 999px; padding: 2px 7px; }
+.pt-link:hover { background: #F1F6F2; color: var(--ink); }
+.pt-link.active { background: var(--g-green); color: #fff; box-shadow: 0 8px 18px -10px rgba(11,107,58,.8); }
+.pt-link.active .fi, .pt-link.active svg { color: #fff; }
+.pt-out { margin-top: 8px; border-top: 1px solid var(--line); border-radius: 0 0 12px 12px; padding-top: 14px; color: #B3202B; }
+.pt-out .fi, .pt-out svg { color: #B3202B; }
+.pt-out:hover { background: #FCEFF0; color: #B3202B; }
+.pt-main { min-width: 0; }
+
+/* the first thing on a page is its title, on the band's edge, not in a card */
+html.portal .page-header.card-soft { background: #fff; border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); padding: 20px 24px; margin-bottom: 22px; }
+html.portal .page-header.card-soft { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; }
+html.portal .page-header-main { flex: 1 1 420px; min-width: 0; }
+html.portal .page-header-actions { margin: 0; flex: 0 0 auto; }
+html.portal .page-header h1 { font-family: var(--head); font-size: 24px; font-weight: 800; letter-spacing: -.5px; }
+html.portal .page-header-icon { background: var(--g-green); color: #fff; border-radius: 14px; }
+html.portal .page-header-sub { color: var(--muted); }
+
+/* cards, buttons, tables, badges and alerts in the website's shapes */
+html.portal .card { border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); }
+html.portal .card-header { background: transparent; border-bottom: 1px solid var(--line); padding: 18px 22px; }
+html.portal .card-body { padding: 22px; }
+html.portal .card-title { font-size: 16.5px; font-weight: 800; }
+html.portal .btn { border-radius: 11px; font-weight: 700; }
+html.portal .btn-primary { background: var(--g-green); border: 0; box-shadow: 0 8px 18px -10px rgba(11,107,58,.8); }
+html.portal .btn-primary:hover, html.portal .btn-primary:focus { background: linear-gradient(135deg, #14904F 0%, #08562E 100%); }
+html.portal .btn-danger { background: var(--g-red); border: 0; }
+html.portal .table > thead th { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); font-weight: 700; background: #F7FAF8; border-bottom: 1px solid var(--line); }
+html.portal .table > tbody td { border-color: var(--line); }
+html.portal .badge { border-radius: 999px; font-weight: 600; padding: .38em .7em; }
+html.portal .alert { border-radius: 14px; border: 0; }
+html.portal .alert-warning { background: #FFF5E0; color: #7A4B00; }
+html.portal .alert-success { background: #E3F4EA; color: #0A5A31; }
+html.portal .alert-danger { background: #FCE8EA; color: #8E0D17; }
+html.portal .empty-state .es-icon { background: #E7F5EC; color: var(--primary); }
+html.portal .sc-icon.icon-soft.primary, html.portal .icon-soft.primary { background: #E7F5EC; color: var(--primary); }
+html.portal .form-control:focus, html.portal .form-select:focus { box-shadow: 0 0 0 4px rgba(24,160,90,.15); }
+html.portal .dropdown-item { border-radius: 8px; }
+html.portal .dropdown-item:active { background: var(--primary); }
+/* the sticky save bar of long forms sits above the page's own bottom edge */
+html.portal .form-actions-sticky, html.portal .sticky-actions { border-radius: 16px; }
+
+/* ---------- the website's footer, slim ---------- */
+.pt-foot { border-top: 1px solid var(--line); background: #fff; }
+.pt-foot-in { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; padding-top: 18px; padding-bottom: 18px; font-size: 13px; color: var(--muted); }
+.pt-foot a { color: var(--muted); text-decoration: none; }
+.pt-foot a:hover { color: var(--ink); }
+.pt-foot nav { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+
+/* ---------- tablets and phones ---------- */
+@media (max-width: 1199.98px) {
+    .pt-nav a { padding: 8px 9px; font-size: 14px; }
+    .pt-user-meta { display: none; }
+    .pt-user { padding: 4px; }
+    .pt-caret { display: none; }
+}
+@media (max-width: 991.98px) {
+    .pt-wrap { padding: 0 18px; }
+    .pt-top-in { gap: 12px; min-height: 60px; flex-wrap: wrap; }
+    .pt-burger { display: inline-flex; }
+    .pt-nav { display: none; order: 9; flex: 0 0 100%; flex-direction: column; align-items: stretch; padding: 0 0 12px; }
+    .pt-top.nav-open .pt-nav { display: flex; }
+    .pt-nav a { padding: 11px 12px; }
+    .pt-post { display: none; }
+    .pt-band-in { padding-top: 20px; padding-bottom: 66px; }
+    .pt-body { grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: -50px; }
+    .pt-side { position: static; }
+    /* the account menu becomes one row of buttons to slide */
+    .pt-side-card { flex-direction: row; overflow-x: auto; gap: 6px; padding: 8px; border-radius: 16px; scrollbar-width: none; }
+    .pt-side-card::-webkit-scrollbar { display: none; }
+    .pt-head { display: none; }
+    .pt-link { width: auto; flex: 0 0 auto; white-space: nowrap; padding: 9px 12px; }
+    .pt-out { margin: 0; border-top: 0; border-radius: 12px; padding-top: 9px; }
+    html.portal .page-header.card-soft { padding: 16px 18px; }
+    html.portal .page-header h1 { font-size: 21px; }
+}
+@media (max-width: 575.98px) {
+    .pt-company { font-size: 22px; white-space: normal; }
+    html.portal .card-body { padding: 16px; }
+    html.portal .card-header { padding: 14px 16px; }
+}
