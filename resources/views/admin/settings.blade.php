@@ -32,6 +32,10 @@
             $text('whatsapp_url', 'Address of the sender service', 'For example https://sender.example.af/api/send', 8, 'url'),
             $text('whatsapp_token', 'Access token', 'Sent as "Authorization: Bearer ...".', 4),
         ]],
+        [__('Search engines'), __('Codes that prove to Google and Bing that you own this site. Paste the code, or the whole meta tag; only the code is kept.'), [
+            $text('google_site_verification', 'Google Search Console code', 'From Search Console → Add property → URL prefix → HTML tag.', 6),
+            $text('bing_site_verification', 'Bing Webmaster code', 'From Bing Webmaster Tools → HTML meta tag. Leave empty if not used.', 6),
+        ]],
         [__('Support'), __('How companies reach you. Shown in emails and on receipts.'), [
             $text('support_email', 'Support email', null, 6, 'email'),
             $text('support_whatsapp', 'Support WhatsApp or phone'),

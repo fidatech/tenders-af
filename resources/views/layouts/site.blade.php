@@ -41,6 +41,12 @@
 <title>{{ $pageTitle }}</title>
 <meta name="description" content="{{ $description }}">
 <link rel="canonical" href="{{ $canonical }}">
+@if (platform('google_site_verification'))
+<meta name="google-site-verification" content="{{ platform('google_site_verification') }}">
+@endif
+@if (platform('bing_site_verification'))
+<meta name="msvalidate.01" content="{{ platform('bing_site_verification') }}">
+@endif
 <meta name="robots" content="{{ $noindex ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-image-preview:large' }}">
 <meta name="theme-color" content="#0A2A1A">
 <meta property="og:type" content="website">

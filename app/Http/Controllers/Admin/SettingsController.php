@@ -53,6 +53,8 @@ class SettingsController extends Controller
             'sponsor_week_usd' => ['required', 'numeric', 'min:0'],
             'sponsor_month_usd' => ['required', 'numeric', 'min:0'],
             'stats_min' => ['required', 'integer', 'between:0,100000'],
+            'google_site_verification' => ['nullable', 'string', 'max:200'],
+            'bing_site_verification' => ['nullable', 'string', 'max:200'],
         ], [
             'trial_warn_days.regex' => __('Write the days as numbers with commas between them, for example 7, 1.'),
             'renew_warn_days.regex' => __('Write the days as numbers with commas between them, for example 7, 1.'),
@@ -62,6 +64,16 @@ class SettingsController extends Controller
         $data['posting_free'] = $request->boolean('posting_free') ? '1' : '0';
         $data['products_enabled'] = $request->boolean('products_enabled') ? '1' : '0';
         $data['billing_email'] = implode(', ', preg_split('/[\s,;]+/', (string) ($data['billing_email'] ?? ''), -1, PREG_SPLIT_NO_EMPTY));
+
+        foreach (['google_site_verification', 'bing_site_verification'] as $key) {
+            // Accept the whole meta tag, "google-site-verification=CODE" or the code alone.
+            $code = trim((string) ($data[$key] ?? ''));
+            if (preg_match('/content=["\']([^"\']+)["\']/', $code, $m)) {
+                $code = $m[1];
+            }
+            $code = preg_replace('/^[a-z\-]*verification\s*=\s*/i', '', $code);
+            $data[$key] = preg_replace('/[^A-Za-z0-9_\-]/', '', $code);
+        }
 
         Platform::set($data);
         AdminLog::record('changed settings');

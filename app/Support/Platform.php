@@ -26,6 +26,8 @@ class Platform
         'sponsor_month_usd' => '75',
         // public statistics: a figure smaller than this is not shown yet
         'stats_min' => '10',
+        'google_site_verification' => 'J8acjyDxEnvrlerggEuM0d1dpHi1GSlmrVjdZ4YoNU4',
+        'bing_site_verification' => '',
         'billing_email' => '',
         'support_email' => '',
         'support_whatsapp' => '',
