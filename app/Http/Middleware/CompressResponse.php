@@ -17,6 +17,7 @@ class CompressResponse
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
+        $response->headers->set('X-Gz', 'seen '.get_class($response).' '.$response->headers->get('Content-Type', '-').' '.strlen((string) $response->getContent()));
 
         if ($response instanceof BinaryFileResponse || $response instanceof StreamedResponse
             || ! function_exists('gzencode')
