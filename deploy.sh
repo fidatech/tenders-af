@@ -85,7 +85,7 @@ if command -v uapi >/dev/null 2>&1; then
         CPAPI2="$(command -v cpapi2 || echo /usr/local/cpanel/bin/cpapi2)"
         OUT="$("$CPAPI2" --output=json AddonDomain addaddondomain newdomain="$REDIRECT_DOMAIN" subdomain="${REDIRECT_DOMAIN%%.*}redirect" dir="$REDIRECT_DOMAIN" 2>&1 || true)"
         if echo "$OUT" | grep -q '"result":1'; then echo "== Addon domain $REDIRECT_DOMAIN added"
-        else echo "!! Could not add the addon domain $REDIRECT_DOMAIN. cPanel said:"; echo "$OUT" | tr -d '\r' | head -c 1500; echo; fi
+        else echo "!! $REDIRECT_DOMAIN is not a domain of this account yet: add it in cPanel > Domains, document root $REDIRECT_DOMAIN (its redirect is ready)"; fi
     fi
     uapi --output=json SSL start_autossl_check >/dev/null 2>&1 && echo "== AutoSSL asked to cover the domains" || true
 else
