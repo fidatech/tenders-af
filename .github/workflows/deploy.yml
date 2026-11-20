@@ -146,6 +146,19 @@ jobs:
           (curl -s --max-time 20 "$APP_URL/" | grep -oE '<meta name="(google-site-verification|msvalidate.01)"[^>]*>' || echo '(none)') | tee -a .logs/site.log
           ssh server "tail -n 80 '$APP_DIR/storage/logs/laravel-'$(date +%F)'.log' 2>/dev/null || tail -n 80 '$APP_DIR/storage/logs/laravel.log' 2>/dev/null || echo '(no error log)'" > .logs/laravel.log 2>&1 || true
 
+      - name: Lighthouse on the live site
+        if: always() && env.HAS_SERVER == 'yes'
+        continue-on-error: true
+        run: |
+          npm install -g lighthouse@12 >/dev/null 2>&1 || true
+          for page in / /tenders /companies; do
+            name=$(echo "$page" | tr -c 'a-z0-9' '_')
+            lighthouse "$APP_URL$page" --quiet --output=json --output-path=".logs/lh-mobile$name.json" --chrome-flags="--headless=new --no-sandbox" || true
+            lighthouse "$APP_URL$page" --quiet --preset=desktop --output=json --output-path=".logs/lh-desktop$name.json" --chrome-flags="--headless=new --no-sandbox" || true
+          done
+          node tools/lighthouse-summary.js .logs/lh-*.json > .logs/lighthouse.txt 2>&1 || true
+          rm -f .logs/lh-*.json
+
       - name: Write the result to the branch deploy-log
         if: always()
         run: |
