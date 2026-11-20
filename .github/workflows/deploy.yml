@@ -110,7 +110,7 @@ jobs:
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
           ssh-keyscan -p "$SSH_PORT" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
-          printf 'Host server\n  HostName %s\n  Port %s\n  User %s\n  IdentityFile ~/.ssh/id_deploy\n  ServerAliveInterval 30\n' \
+          printf 'Host server\n  HostName %s\n  Port %s\n  User %s\n  IdentityFile ~/.ssh/id_deploy\n  ServerAliveInterval 30\n  LogLevel ERROR\n' \
             "${{ secrets.SSH_HOST }}" "$SSH_PORT" "${{ secrets.SSH_USER }}" > ~/.ssh/config
 
       - name: Copy to the server and deploy
@@ -119,15 +119,16 @@ jobs:
           set -o pipefail
           {
             echo "== Copying files"
-            ssh server "mkdir -p '$APP_DIR'"
-            rsync -az --delete --stats \
-              --exclude='.git/' --exclude='.github/' --exclude='.logs/' --exclude='node_modules/' --exclude='tests/' \
-              --exclude='/.env' --exclude='/.env.server' --exclude='/.deploy-env' \
-              --exclude='/storage/' --exclude='/public/storage' --exclude='/bootstrap/cache/*.php' \
-              ./ "server:$APP_DIR/" | grep -E 'Number of (regular )?files transferred|Total transferred file size' || true
-            rsync -a --ignore-existing storage/ "server:$APP_DIR/storage/"
-            scp -q .env.server "server:$APP_DIR/.env" && ssh server "chmod 600 '$APP_DIR/.env'"
-            scp -q .deploy-env "server:$APP_DIR/.deploy-env" && ssh server "chmod 600 '$APP_DIR/.deploy-env'"
+            # tar over SSH: works on a cPanel account without rsync or scp (jailed shell)
+            tar -czf /tmp/site.tgz --exclude='./.git' --exclude='./.github' --exclude='./.logs' --exclude='./node_modules' \
+              --exclude='./tests' --exclude='./storage' --exclude='./.env' --exclude='./.env.server' --exclude='./.deploy-env' \
+              --exclude='./public/storage' --exclude='./bootstrap/cache/*.php' .
+            echo "   package: $(du -h /tmp/site.tgz | cut -f1)"
+            ssh server "mkdir -p '$APP_DIR' && rm -rf '$APP_DIR/.incoming' && mkdir '$APP_DIR/.incoming' && tar -xzf - -C '$APP_DIR/.incoming'" < /tmp/site.tgz
+            ssh server "cat > '$APP_DIR/.incoming/.env' && chmod 600 '$APP_DIR/.incoming/.env'" < .env.server
+            ssh server "cat > '$APP_DIR/.incoming/.deploy-env' && chmod 600 '$APP_DIR/.incoming/.deploy-env'" < .deploy-env
+            # swap in the new files; storage/ (uploads, logs) stays where it is
+            ssh server "cd '$APP_DIR' && find . -mindepth 1 -maxdepth 1 ! -name storage ! -name .incoming -exec rm -rf {} + && (cd .incoming && tar -cf - .) | tar -xf - && rm -rf .incoming"
             ssh server "cd '$APP_DIR' && bash deploy.sh"
           } 2>&1 | tee .logs/deploy.log
 

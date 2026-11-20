@@ -67,8 +67,12 @@ fi
 # The scheduler (tender alerts every ten minutes, the weekly digest, deadlines) runs every minute.
 CRON="* * * * * cd $APP_DIR && $PHP artisan schedule:run >> /dev/null 2>&1"
 if ! crontab -l 2>/dev/null | grep -qF "$APP_DIR && "; then
-    (crontab -l 2>/dev/null; echo "$CRON") | crontab -
-    echo "== Cron added: schedule:run every minute"
+    if (crontab -l 2>/dev/null; echo "$CRON") | crontab - 2>/dev/null; then
+        echo "== Cron added: schedule:run every minute"
+    else
+        echo "!! Could not add the cron line. Add it in cPanel > Cron Jobs (every minute):"
+        echo "   cd $APP_DIR && $PHP artisan schedule:run >> /dev/null 2>&1"
+    fi
 fi
 
 touch storage/app/.installed
