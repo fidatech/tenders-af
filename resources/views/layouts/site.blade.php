@@ -139,5 +139,6 @@
 <script src="{{ asset_v('vendor/jquery/jquery.min.js') }}" defer></script>
 <script src="{{ asset_v('vendor/select2/select2.min.js') }}" defer></script>
 <script src="{{ asset_v('js/select2-init.js') }}" defer></script>
+@stack('scripts')
 </body>
 </html>
