@@ -2,11 +2,10 @@
 # over SSH and run deploy.sh there. The result of every run (tests and deploy) is written to
 # the branch "deploy-log", so it can be read without opening GitHub Actions.
 #
-# The secrets are made once by tools/cpanel-setup.sh, run in cPanel > Terminal:
-#   SSH_HOST SSH_PORT SSH_USER SSH_KEY APP_DIR APP_URL APP_KEY
-#   DB_DATABASE DB_USERNAME DB_PASSWORD
-#   MAIL_HOST MAIL_PORT MAIL_USERNAME MAIL_PASSWORD MAIL_FROM_ADDRESS
-#   ADMIN_NAME ADMIN_EMAIL ADMIN_PASSWORD
+# Secrets (GitHub > Settings > Secrets and variables > Actions):
+#   needed:   SSH_HOST SSH_USER SSH_KEY APP_KEY DB_DATABASE DB_USERNAME DB_PASSWORD ADMIN_EMAIL ADMIN_PASSWORD
+#   optional: SSH_PORT (22) APP_DIR (/home/SSH_USER/tenders-af) APP_URL (https://tenders.af) ADMIN_NAME
+#             MAIL_USERNAME MAIL_PASSWORD MAIL_HOST (mail.tenders.af) MAIL_PORT (465) MAIL_FROM_ADDRESS
 name: Deploy
 
 on:
@@ -26,7 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      APP_DIR: ${{ secrets.APP_DIR }}
+      APP_DIR: ${{ secrets.APP_DIR || format('/home/{0}/tenders-af', secrets.SSH_USER) }}
+      APP_URL: ${{ secrets.APP_URL || 'https://tenders.af' }}
+      SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
       # empty until tools/cpanel-setup.sh has run: then only the packages and the tests run
       HAS_SERVER: ${{ secrets.SSH_HOST != '' && 'yes' || 'no' }}
     steps:
@@ -64,7 +65,7 @@ jobs:
           APP_ENV=production
           APP_KEY=${{ secrets.APP_KEY }}
           APP_DEBUG=false
-          APP_URL=${{ secrets.APP_URL }}
+          APP_URL=${{ env.APP_URL }}
           APP_TIMEZONE=Asia/Kabul
           APP_LOCALE=en
           APP_FALLBACK_LOCALE=en
@@ -84,15 +85,17 @@ jobs:
           CACHE_STORE=file
           QUEUE_CONNECTION=sync
           FILESYSTEM_DISK=local
-          MAIL_MAILER=smtp
-          MAIL_SCHEME=smtps
-          MAIL_HOST=${{ secrets.MAIL_HOST }}
-          MAIL_PORT=${{ secrets.MAIL_PORT }}
-          MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
-          MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}"
-          MAIL_FROM_ADDRESS=${{ secrets.MAIL_FROM_ADDRESS }}
           MAIL_FROM_NAME="Tenders.af"
           EOF
+          # email goes out once a mailbox is given (MAIL_USERNAME and MAIL_PASSWORD); until then it is only logged
+          if [ -n "${{ secrets.MAIL_USERNAME }}" ]; then
+            { echo "MAIL_MAILER=smtp"; echo "MAIL_SCHEME=smtps"
+              echo "MAIL_HOST=${{ secrets.MAIL_HOST || 'mail.tenders.af' }}"; echo "MAIL_PORT=${{ secrets.MAIL_PORT || '465' }}"
+              echo "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}"; echo "MAIL_PASSWORD=\"${{ secrets.MAIL_PASSWORD }}\""
+              echo "MAIL_FROM_ADDRESS=${{ secrets.MAIL_FROM_ADDRESS || secrets.MAIL_USERNAME }}"; } >> .env.server
+          else
+            { echo "MAIL_MAILER=log"; echo "MAIL_FROM_ADDRESS=noreply@tenders.af"; } >> .env.server
+          fi
           sed -i 's/^ *//' .env.server
           cat > .deploy-env <<EOF
           ADMIN_NAME="${{ secrets.ADMIN_NAME }}"
@@ -106,9 +109,9 @@ jobs:
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
-          ssh-keyscan -p "${{ secrets.SSH_PORT }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -p "$SSH_PORT" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
           printf 'Host server\n  HostName %s\n  Port %s\n  User %s\n  IdentityFile ~/.ssh/id_deploy\n  ServerAliveInterval 30\n' \
-            "${{ secrets.SSH_HOST }}" "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}" > ~/.ssh/config
+            "${{ secrets.SSH_HOST }}" "$SSH_PORT" "${{ secrets.SSH_USER }}" > ~/.ssh/config
 
       - name: Copy to the server and deploy
         if: env.HAS_SERVER == 'yes'
@@ -132,7 +135,7 @@ jobs:
         if: always() && env.HAS_SERVER == 'yes'
         run: |
           for path in / /tenders /companies /register /login /admin/login /sitemap.xml; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "${{ secrets.APP_URL }}$path" || echo 000)
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$APP_URL$path" || echo 000)
             echo "$code  $path"
           done | tee .logs/site.log
           ssh server "tail -n 80 '$APP_DIR/storage/logs/laravel-'$(date +%F)'.log' 2>/dev/null || tail -n 80 '$APP_DIR/storage/logs/laravel.log' 2>/dev/null || echo '(no error log)'" > .logs/laravel.log 2>&1 || true
