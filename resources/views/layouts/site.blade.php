@@ -111,44 +111,58 @@
 <footer class="foot">
     <div class="flagline" style="height:3px"></div>
     <div class="wrap">
-        <div class="in">
-            <div class="about">
-                <a class="brand" href="{{ route('site.home') }}"><span>Tenders<b>.af</b></span></a>
+        <div class="foot-grid">
+            <div class="foot-brand">
+                <a class="brand" href="{{ route('site.home') }}"><i aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 17 9 11l4 3 7-8"/><path d="M15 6h5v5"/></svg></i><span>Tenders<b>.af</b></span></a>
                 <p>{{ config('site.tagline') }} With a free directory of verified companies.</p>
+                <div class="foot-cta">
+                    @if ($signedIn)
+                        <a class="btn btn-green btn-sm" href="{{ route('dashboard') }}">My account</a>
+                    @else
+                        @if ($signup)<a class="btn btn-green btn-sm" href="{{ route('register') }}">Register free</a>@endif
+                        <a class="foot-ghost" href="{{ route('login') }}">Sign in</a>
+                    @endif
+                </div>
             </div>
-            <nav aria-label="Tenders">
+            <nav class="foot-col" aria-label="Tenders">
                 <h2>Tenders</h2>
-                <a href="{{ route('site.tenders') }}">All open tenders</a>
-                <a href="{{ route('site.sectors') }}">By sector</a>
-                <a href="{{ route('site.provinces') }}">By province</a>
-                <a href="{{ $signup ? route('register', ['as' => 'buyer']) : route('site.contact') }}">Post a tender</a>
+                <ul>
+                    <li><a href="{{ route('site.tenders') }}">All open tenders</a></li>
+                    <li><a href="{{ route('site.sectors') }}">By sector</a></li>
+                    <li><a href="{{ route('site.provinces') }}">By province</a></li>
+                    <li><a href="{{ $signup ? route('register', ['as' => 'buyer']) : route('site.contact') }}">Post a tender</a></li>
+                </ul>
             </nav>
-            <nav aria-label="Companies">
+            <nav class="foot-col" aria-label="Companies">
                 <h2>Companies</h2>
-                <a href="{{ route('site.companies') }}">Company directory</a>
-                @if ($productsOn)<a href="{{ route('site.products') }}">Wholesale products</a>@endif
-                <a href="{{ route('site.statistics') }}">Statistics</a>
-                @if ($signup)<a href="{{ route('register') }}">Register your company</a>@endif
-                <a href="{{ route('login') }}">Sign in</a>
-                <a href="{{ route('site.pricing') }}">Pricing</a>
+                <ul>
+                    <li><a href="{{ route('site.companies') }}">Company directory</a></li>
+                    @if ($productsOn)<li><a href="{{ route('site.products') }}">Wholesale products</a></li>@endif
+                    <li><a href="{{ route('site.statistics') }}">Statistics</a></li>
+                    <li><a href="{{ route('site.pricing') }}">Pricing</a></li>
+                </ul>
             </nav>
-            <nav aria-label="About">
-                <h2>{{ $name }}</h2>
-                <a href="{{ route('site.how') }}">How it works</a>
-                <a href="{{ route('site.faq') }}">Questions</a>
-                <a href="{{ route('site.terms') }}">Terms</a>
-                <a href="{{ route('site.privacy') }}">Privacy</a>
+            <nav class="foot-col" aria-label="Help">
+                <h2>Help</h2>
+                <ul>
+                    <li><a href="{{ route('site.how') }}">How it works</a></li>
+                    <li><a href="{{ route('site.faq') }}">Questions</a></li>
+                    <li><a href="{{ route('site.contact') }}">Write to us</a></li>
+                </ul>
             </nav>
-            <div class="contact">
+            <div class="foot-col foot-contact">
                 <h2>Contact</h2>
-                @if (platform('support_whatsapp'))<span dir="ltr">{{ platform('support_whatsapp') }}</span>@endif
-                @if (platform('support_email'))<a href="mailto:{{ platform('support_email') }}">{{ platform('support_email') }}</a>@endif
-                <a href="{{ route('site.contact') }}">Write to us</a>
-                <span>Kabul, Afghanistan</span>
+                <ul>
+                    @if (platform('support_email'))<li><a href="mailto:{{ platform('support_email') }}"><span class="ci"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>{{ platform('support_email') }}</a></li>@endif
+                    @if (platform('support_whatsapp'))<li><a href="https://wa.me/{{ preg_replace('/\D+/', '', platform('support_whatsapp')) }}" rel="noopener"><span class="ci"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.2A8.5 8.5 0 1 1 20 11.5Z"/><path d="M9 9.5c.3 1.7 1.8 3.4 3.6 4.2l1.2-1.1 2 .8-.4 1.7c-3.6.4-7.6-3.3-7.4-6.9l1.7-.4.8 2Z"/></svg></span><span dir="ltr">{{ platform('support_whatsapp') }}</span></a></li>@endif
+                    <li><a href="{{ route('site.contact') }}"><span class="ci"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg></span>Send us a message</a></li>
+                    <li><span class="ci"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>Kabul, Afghanistan</li>
+                </ul>
             </div>
         </div>
-        <div class="bottom">
+        <div class="foot-bottom">
             <span>© {{ date('Y') }} {{ $name }} · A <a href="https://fida.af" rel="noopener">Fida Technologies</a> product</span>
+            <nav aria-label="Legal"><a href="{{ route('site.terms') }}">Terms</a><a href="{{ route('site.privacy') }}">Privacy</a><a href="{{ route('site.sitemap') }}">Sitemap</a></nav>
         </div>
     </div>
 </footer>
