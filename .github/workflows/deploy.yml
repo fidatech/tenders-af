@@ -149,7 +149,7 @@ jobs:
             echo "-- headers of $path: $(curl -s -o /dev/null -D - -H 'Accept-Encoding: gzip, br' --max-time 20 "$APP_URL$path" | grep -iE '^(content-encoding|content-type|cache-control|vary):' | tr -d '\r' | tr '\n' ' ')"
           done | tee -a .logs/site.log
           echo "-- compression by address (size of the gzipped answer):" | tee -a .logs/site.log
-          for path in / /companies /tenders /sectors /provinces /pricing /robots.txt /sitemap.xml /llms.txt /js/select2-init.js /manifest.webmanifest; do
+          for path in / /index.php /index.php/companies /companies /tenders /sectors /provinces /pricing /robots.txt /sitemap.xml /llms.txt /js/select2-init.js /manifest.webmanifest; do
             echo "$(curl -s -o /dev/null -w '%{size_download} bytes' -D /tmp/h -H 'Accept-Encoding: gzip' --max-time 20 "$APP_URL$path") $(grep -iE '^(content-encoding|transfer-encoding|content-length):' /tmp/h | tr -d '\r' | tr '\n' ' ')  $path"
           done | tee -a .logs/site.log
           echo "-- full headers of /companies:" | tee -a .logs/site.log

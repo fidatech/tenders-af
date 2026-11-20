@@ -1,5 +1,6 @@
-{{-- Select2 (with jQuery) only matters once someone opens a list, so it loads after the page
-     has shown, and only on pages that have a list. The plain lists work until then. --}}
+{{-- Select2 (with jQuery) only matters once someone uses the page, so it loads on the first scroll,
+     touch, mouse move or key press, and only on pages that have a list. The plain lists, styled the
+     same, work until then. --}}
 <script>
 (function () {
     if (!document.querySelector('select:not([data-native])')) return;
@@ -11,6 +12,11 @@
         s.onload = next;
         document.body.appendChild(s);
     };
-    if (document.readyState === 'complete') next(); else window.addEventListener('load', next);
+    var events = ['pointerdown', 'pointermove', 'touchstart', 'keydown', 'scroll', 'focusin', 'wheel'];
+    var start = function () {
+        events.forEach(function (e) { window.removeEventListener(e, start, true); });
+        next();
+    };
+    events.forEach(function (e) { window.addEventListener(e, start, { capture: true, passive: true }); });
 })();
 </script>
