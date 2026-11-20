@@ -20,7 +20,7 @@ fi
 PHP="${PHP:-php}"
 "$PHP" -r 'exit(version_compare(PHP_VERSION, "8.3.0", ">=") ? 0 : 1);' || { echo "!! PHP 8.3 or newer is needed; $PHP is $("$PHP" -r 'echo PHP_VERSION;'). Install it in WHM > EasyApache 4."; exit 1; }
 echo "== PHP $("$PHP" -r 'echo PHP_VERSION;') ($PHP)"
-for ext in mbstring pdo_mysql openssl tokenizer xml ctype fileinfo curl gd intl zip bcmath sodium; do
+for ext in mbstring pdo_mysql openssl tokenizer xml ctype fileinfo curl gd intl zip bcmath; do
     "$PHP" -r "exit(extension_loaded('$ext') ? 0 : 1);" || echo "!! PHP extension missing: $ext (WHM > EasyApache 4 > PHP Extensions)"
 done
 
