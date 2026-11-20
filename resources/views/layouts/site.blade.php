@@ -132,7 +132,6 @@
         </div>
         <div class="bottom">
             <span>© {{ date('Y') }} {{ $name }} · A <a href="https://fida.af" rel="noopener">Fida Technologies</a> product</span>
-            <span>Province boundaries: Natural Earth</span>
         </div>
     </div>
 </footer>
