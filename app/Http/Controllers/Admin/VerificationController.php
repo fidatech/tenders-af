@@ -54,8 +54,13 @@ class VerificationController extends Controller
     public function reject(Request $request, int $id): RedirectResponse
     {
         $company = Company::where('verify_status', 'pending')->findOrFail($id);
-        $data = $request->validate(['reason' => ['required', Rule::in(array_keys(self::REASONS))]]);
-        $text = self::REASONS[$data['reason']];
+        $data = $request->validate([
+            'reason' => ['required', Rule::in([...array_keys(self::REASONS), 'other'])],
+            'note' => ['nullable', 'required_if:reason,other', 'string', 'max:300'],
+        ], ['note.required_if' => __('Write the reason for the company.')]);
+        // a reason from the list, an own reason, or a reason from the list with a note added
+        $note = trim((string) ($data['note'] ?? ''));
+        $text = $data['reason'] === 'other' ? $note : trim(self::REASONS[$data['reason']].($note !== '' ? ' '.$note : ''));
         $company->update(['verify_status' => 'rejected', 'verify_note' => $text, 'verified_at' => null]);
         AdminLog::record('refused verification', $company->name, $text);
         $this->tell($company, 'Your verification was not accepted', [$text, 'You can send the document again from the Verification page.'], route('verification.show'));

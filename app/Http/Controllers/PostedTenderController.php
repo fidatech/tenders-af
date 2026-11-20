@@ -62,6 +62,9 @@ class PostedTenderController extends Controller
             'submitted_at' => $send ? now() : null,
         ]);
         TenderForm::addDocuments($tender, $request);
+        if ($send) {
+            $this->tellAdmins($tender);
+        }
 
         return redirect()->route('posted.edit', ['id' => $tender->id])->with('success', $send
             ? __('Your tender is sent. We check it and publish it, usually within one working day.')
@@ -92,6 +95,9 @@ class PostedTenderController extends Controller
         }
         $tender->update($data);
         TenderForm::addDocuments($tender, $request);
+        if ($send) {
+            $this->tellAdmins($tender);
+        }
 
         return back()->with('success', $send ? __('Your tender is sent for approval.') : __('The tender is saved.'));
     }
@@ -181,6 +187,11 @@ class PostedTenderController extends Controller
         $file->delete();
 
         return back()->with('success', __('The document is removed.'));
+    }
+
+    private function tellAdmins(Tender $tender): void
+    {
+        \App\Models\AdminNotice::toAll('tender', 'Tender to approve: '.$tender->title, $tender->buyer_name, route('admin.tenders.edit', ['id' => $tender->id]));
     }
 
     /** The signed-in company, which must be a buyer. */

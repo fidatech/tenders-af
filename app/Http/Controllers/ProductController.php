@@ -68,6 +68,10 @@ class ProductController extends Controller
             return redirect()->route('products.edit', ['id' => $product->id])->with('danger', __('Add at least one picture before you send the product.'));
         }
 
+        if ($send) {
+            \App\Models\AdminNotice::toAll('product', 'Product to approve: '.$product->name, $company->name, route('admin.products.show', ['id' => $product->id]));
+        }
+
         return redirect()->route('products.edit', ['id' => $product->id])->with('success', $send
             ? __('Your product is sent. We check it and publish it, usually within one working day.')
             : __('Your product is saved as a draft.'));
@@ -101,6 +105,7 @@ class ProductController extends Controller
         }
         if ($send) {
             $product->update(['status' => Product::PENDING, 'submitted_at' => now(), 'reject_reason' => null]);
+            \App\Models\AdminNotice::toAll('product', 'Product to approve: '.$product->name, company()->name, route('admin.products.show', ['id' => $product->id]));
         }
 
         return back()->with('success', $send ? __('Saved. We check the product before it is shown.') : __('The product is saved.'));
@@ -182,6 +187,8 @@ class ProductController extends Controller
             'reference' => $data['reference'] ?? null,
             'receipt_path' => $request->file('receipt')->store('receipts/'.$company->id, 'local'),
         ]);
+
+        \App\Models\AdminNotice::toAll('payment', $company->name.' paid to sponsor a product', $product->name.' · '.number_format($prices[$data['period']]).' '.$company->currency, route('admin.products.index'));
 
         return redirect()->route('products.index')->with('success', __('Thank you. We check your payment and then your product is sponsored.'));
     }

@@ -4,8 +4,10 @@ namespace App\Console\Commands;
 
 use App\Mail\TenderAlertMail;
 use App\Models\Company;
+use App\Models\Notice;
 use App\Models\Tender;
 use App\Models\TenderAlert;
+use App\Models\User;
 use App\Support\WhatsApp;
 use Illuminate\Console\Command;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -35,8 +37,8 @@ class SendTenderAlerts extends Command
             $tender->update(['alerted_at' => now()]);
             $sent = 0;
 
+            // every matching company on instant alerts: the bell on the site is always told, email and WhatsApp when switched on
             Company::query()->where('status', '!=', Company::SUSPENDED)
-                ->where(fn ($q) => $q->where('alert_email', true)->orWhere('alert_whatsapp', true))
                 ->whereHas('plan', fn ($q) => $q->where('instant_alerts', true))
                 ->where(fn ($q) => $q->whereHas('industries', fn ($i) => $i->whereKey($tender->industry_id))
                     ->when($tender->category_id, fn ($q2) => $q2->orWhereHas('categories', fn ($c) => $c->whereKey($tender->category_id))))
@@ -70,6 +72,11 @@ class SendTenderAlerts extends Command
         }
 
         $sent = 0;
+        // the bell in the panel and on the website, for every user of the company
+        if ($this->claim($company, $tender, 'site')) {
+            $this->notify($company, $tender, 'New tender matches your alerts', $tender->title.' · '.$tender->buyer_name);
+            $sent++;
+        }
         if ($company->alert_email && ($to = $company->alertEmail()) && $this->claim($company, $tender, 'email')) {
             try {
                 Mail::to($to)->send(new TenderAlertMail($company, collect([$tender])));
@@ -89,6 +96,15 @@ class SendTenderAlerts extends Command
         }
 
         return $sent;
+    }
+
+    /** A notification under the bell of every active user of the company. */
+    private function notify(Company $company, Tender $tender, string $title, string $body): void
+    {
+        $url = route('tenders.show', ['id' => $tender->id]);
+        foreach (User::where('company_id', $company->id)->where('is_active', true)->pluck('id') as $userId) {
+            Notice::create(['company_id' => $company->id, 'user_id' => $userId, 'title' => $title, 'body' => mb_substr($body, 0, 250), 'url' => $url]);
+        }
     }
 
     /** Write the row of this alert. False when it was already there: the company is never told twice. */

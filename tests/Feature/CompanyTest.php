@@ -117,10 +117,14 @@ class CompanyTest extends TestCase
         Mail::assertSent(TenderAlertMail::class, fn (TenderAlertMail $mail) => $mail->hasTo('owner@builders.test'));
         $this->assertSame(1, TenderAlert::where('channel', 'email')->count());
         $this->assertNotNull($tender->fresh()->alerted_at);
+        // the bell of the matching company is told once; the other two hear nothing yet
+        $this->assertSame(1, \App\Models\Notice::where('company_id', $match->id)->where('title', 'New tender matches your alerts')->count());
+        $this->assertSame(0, \App\Models\Notice::whereIn('company_id', [$elsewhere->id, $freeOne->id])->count());
 
         // the company on the free plan gets the weekly digest instead
         $this->artisan('tenders:digest')->assertSuccessful();
         Mail::assertSent(TenderAlertMail::class, fn (TenderAlertMail $mail) => $mail->hasTo('owner@small.test') && $mail->digest);
+        $this->assertSame(1, \App\Models\Notice::where('company_id', $freeOne->id)->where('title', '1 new tender matches your sectors this week')->count());
     }
 
     public function test_a_company_sends_its_licence_and_an_administrator_verifies_it(): void
@@ -189,5 +193,23 @@ class CompanyTest extends TestCase
         $company->refresh();
         $this->assertSame('+93 70 111 2222', $company->whatsapp);
         $this->assertFalse((bool) $company->alert_whatsapp);
+    }
+
+    public function test_administrators_are_told_about_new_companies_and_licences(): void
+    {
+        $this->seed();
+        $admin = $this->systemAdmin();
+        auth('admin')->logout();
+
+        $this->post('/register', ['company' => 'Kabul Solar', 'kind' => 'company', 'roles' => ['supplier'], 'name' => 'Ahmad', 'email' => 'ahmad@solar.test',
+            'password' => 'password123', 'password_confirmation' => 'password123', 'terms' => '1'])->assertRedirect();
+        $this->assertSame(1, \App\Models\AdminNotice::where('admin_id', $admin->id)->where('kind', 'company')->count());
+
+        auth('web')->logout();
+        $this->actingAs($admin, 'admin');
+        $this->get('/admin/notifications')->assertOk()->assertSee('New company: Kabul Solar');
+        $notice = \App\Models\AdminNotice::where('admin_id', $admin->id)->firstOrFail();
+        $this->get('/admin/notifications/'.$notice->id)->assertRedirect();
+        $this->assertNotNull($notice->fresh()->read_at);
     }
 }

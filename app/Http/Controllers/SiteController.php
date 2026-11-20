@@ -439,6 +439,8 @@ class SiteController extends Controller
             }
         }
 
+        \App\Models\AdminNotice::toAll('message', 'Message from '.$data['name'], mb_substr($data['message'], 0, 200), 'mailto:'.$data['email']);
+
         return redirect()->route('site.contact')->with('sent', true);
     }
 

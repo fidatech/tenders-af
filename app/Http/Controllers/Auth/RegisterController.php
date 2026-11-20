@@ -63,6 +63,8 @@ class RegisterController extends Controller
         Auth::guard('web')->login($company->owner());
         $request->session()->regenerate();
 
+        \App\Models\AdminNotice::toAll('company', 'New '.($company->is_buyer ? 'buyer' : 'company').': '.$company->name, $company->kindLabel().($company->province?->name ? ' · '.$company->province->name : ''), route('admin.companies.edit', ['id' => $company->id]));
+
         // a buyer goes straight to its tenders; a company that looks for tenders first chooses its sectors
         if (! $company->is_supplier) {
             return redirect()->route('posted.index')->with('success', __('Welcome! Your organisation is registered. Post your first tender.'));

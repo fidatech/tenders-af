@@ -54,6 +54,8 @@ class VerificationController extends Controller
 
         $this->tellAdministrators($company->name);
 
+        \App\Models\AdminNotice::toAll('verification', $company->name.' asks to be verified', 'Licence '.($company->license_no ?: '—'), route('admin.verification.index'));
+
         return back()->with('success', __('Thank you. We will check your licence and tell you the result.'));
     }
 

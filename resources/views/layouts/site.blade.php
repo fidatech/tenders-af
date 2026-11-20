@@ -6,6 +6,9 @@
     $menu = ['site.tenders' => ['site.tenders', 'site.sector', 'site.province', 'site.tenders.show'], 'site.companies' => ['site.companies', 'site.companies.show'], 'site.sectors' => ['site.sectors'], 'site.provinces' => ['site.provinces'], 'site.pricing' => ['site.pricing']];
     $productsOn = \App\Support\Platform::bool('products_enabled');
     $signedIn = auth('web')->check();
+    // the bell of a signed-in company: its notifications and tender alerts
+    $bellUnread = $signedIn ? \App\Models\Notice::where('user_id', auth('web')->id())->whereNull('read_at')->count() : 0;
+    $bellLatest = $signedIn ? \App\Models\Notice::where('user_id', auth('web')->id())->orderByDesc('id')->limit(6)->get() : collect();
 
     // structured data: who runs the site and what it is. No ratings or reviews: there are none to quote.
     $graph = [
@@ -77,6 +80,20 @@
         </nav>
         <div class="top-actions">
             @if ($signedIn)
+                <details class="bell">
+                    <summary aria-label="Notifications{{ $bellUnread ? ', '.$bellUnread.' new' : '' }}"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0"/></svg>@if ($bellUnread)<b>{{ $bellUnread > 99 ? '99+' : $bellUnread }}</b>@endif</summary>
+                    <div class="bell-menu">
+                        <div class="bell-head"><strong>Notifications</strong>@if ($bellUnread)<form method="POST" action="{{ route('notices.read') }}">@csrf<button type="submit">Mark all as read</button></form>@endif</div>
+                        <div class="bell-list">
+                            @forelse ($bellLatest as $notice)
+                                <a href="{{ route('notices.open', ['id' => $notice->id]) }}" class="{{ $notice->read_at ? '' : 'new' }}"><i aria-hidden="true"></i><span><b>{{ $notice->title }}</b>@if ($notice->body)<small>{{ $notice->body }}</small>@endif<em>{{ $notice->created_at?->diffForHumans() }}</em></span></a>
+                            @empty
+                                <p class="bell-empty">No notifications yet. Tenders that match your sectors will appear here.</p>
+                            @endforelse
+                        </div>
+                        <a class="bell-all" href="{{ route('notices.index') }}">All notifications</a>
+                    </div>
+                </details>
                 <a class="btn btn-red btn-sm" href="{{ route('dashboard') }}">My account</a>
             @else
                 <a class="plain" href="{{ route('login') }}">Sign in</a>
@@ -139,6 +156,15 @@
 <script src="{{ asset_v('vendor/jquery/jquery.min.js') }}" defer></script>
 <script src="{{ asset_v('vendor/select2/select2.min.js') }}" defer></script>
 <script src="{{ asset_v('js/select2-init.js') }}" defer></script>
+<script>
+// the bell closes when something else is clicked, or with Escape
+(function () {
+    var bell = document.querySelector('details.bell');
+    if (!bell) return;
+    document.addEventListener('click', function (e) { if (bell.open && !bell.contains(e.target)) bell.open = false; });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') bell.open = false; });
+})();
+</script>
 @stack('scripts')
 </body>
 </html>

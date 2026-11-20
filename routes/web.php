@@ -178,6 +178,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('products/payments/{id}/approve', [Admin\ProductController::class, 'approvePayment'])->whereNumber('id')->name('products.payments.approve');
         Route::post('products/payments/{id}/reject', [Admin\ProductController::class, 'rejectPayment'])->whereNumber('id')->name('products.payments.reject');
         Route::get('products/payments/{id}/receipt', [Admin\ProductController::class, 'receipt'])->whereNumber('id')->name('products.payments.receipt');
+        Route::get('notifications', [Admin\NoticeController::class, 'index'])->name('notices.index');
+        Route::get('notifications/{id}', [Admin\NoticeController::class, 'open'])->whereNumber('id')->name('notices.open');
+        Route::post('notifications/read', [Admin\NoticeController::class, 'read'])->name('notices.read');
         crud_routes('industries', Admin\IndustryController::class, 'industries');
         crud_routes('categories', Admin\CategoryController::class, 'categories');
 

@@ -113,6 +113,8 @@ class BillingController extends Controller
 
         $this->tellAdministrators($subscription);
 
+        \App\Models\AdminNotice::toAll('payment', company()->name.' sent a payment', number_format((float) $subscription->amount).' '.$subscription->currency, route('admin.subscriptions.index'));
+
         return redirect()->route('billing.show')->with('success', __('Thank you. We will check your payment and switch your subscription on.'));
     }
 

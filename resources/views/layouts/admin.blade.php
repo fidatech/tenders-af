@@ -6,6 +6,15 @@
     $productsOn = \App\Support\Platform::bool('products_enabled');
     $waitingProducts = $productsOn ? \App\Models\Product::where('status', 'pending')->count() + \App\Models\ProductPromotion::where('status', 'pending')->count() : 0;
     $waitingPay = \App\Models\Subscription::waiting()->count();
+    // the bell: what waits for an administrator, then the newest notifications
+    $adminUnread = \App\Models\AdminNotice::where('admin_id', $admin->id)->whereNull('read_at')->count();
+    $adminLatest = \App\Models\AdminNotice::where('admin_id', $admin->id)->orderByDesc('id')->limit(8)->get();
+    $waitingList = array_filter([
+        [__('Licences to check'), 'shield-halved', route('admin.verification.index'), $waitingVerify],
+        [__('Tenders to approve'), 'gavel', route('admin.tenders.index', ['status' => 'pending']), $waitingTenders],
+        [__('Payments to confirm'), 'receipt', route('admin.subscriptions.index'), $waitingPay],
+        $productsOn ? [__('Products and sponsoring'), 'boxes-stacked', route('admin.products.index', ['status' => 'pending']), $waitingProducts] : null,
+    ], fn ($row) => $row && $row[3] > 0);
     // [label, icon, route, pattern that marks it current, only for super administrators, number waiting]
     $menu = [
         ['Dashboard', 'gauge-high', 'admin.dashboard', 'admin.dashboard', false, 0],
@@ -65,6 +74,37 @@
             <div class="appbar-title" id="appbarTitle">{{ $title ?? config('app.name') }}</div>
             <div class="topbar-brand" aria-hidden="true">{{ __('System administration') }}</div>
             <div class="topbar-right">
+                <div class="dropdown">
+                    <button class="topbar-icon position-relative" data-bs-toggle="dropdown" data-bs-auto-close="outside" type="button" aria-expanded="false" aria-label="{{ __('Notifications') }}" title="{{ __('Notifications') }}">
+                        <x-icon name="bell" />
+                        @if ($adminUnread)<span class="nt-count">{{ $adminUnread > 99 ? '99+' : $adminUnread }}</span>@endif
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end p-0 nt-menu">
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                            <strong>{{ __('Notifications') }}</strong>
+                            @if ($adminUnread)<button type="submit" form="adminNoticesRead" class="btn btn-sm btn-link p-0 text-decoration-none">{{ __('Mark all as read') }}</button>@endif
+                        </div>
+                        @if ($waitingList)
+                            <div class="nt-waiting">
+                                <div class="nt-label">{{ __('Waiting for you') }}</div>
+                                @foreach ($waitingList as [$label, $icon, $url, $count])
+                                    <a href="{{ $url }}"><x-icon :name="$icon" /><span>{{ $label }}</span><b>{{ $count }}</b></a>
+                                @endforeach
+                            </div>
+                        @endif
+                        <div class="nt-list">
+                            @forelse ($adminLatest as $notice)
+                                <a href="{{ route('admin.notices.open', ['id' => $notice->id]) }}" class="nt-row {{ $notice->read_at ? '' : 'unread' }}">
+                                    <span class="nt-ico nt-{{ $notice->kind }}"><x-icon :name="$notice->icon()" /></span>
+                                    <span class="min-w-0 flex-grow-1"><span class="d-block nt-title">{{ $notice->title }}</span>@if ($notice->body)<span class="d-block small text-muted text-truncate">{{ $notice->body }}</span>@endif<span class="d-block nt-time">{{ $notice->created_at?->diffForHumans() }}</span></span>
+                                </a>
+                            @empty
+                                <div class="text-center text-muted small py-4">{{ __('No notifications yet') }}</div>
+                            @endforelse
+                        </div>
+                        <a class="d-block text-center py-2 border-top text-decoration-none small fw-semibold" href="{{ route('admin.notices.index') }}">{{ __('All notifications') }}</a>
+                    </div>
+                </div>
                 <button class="topbar-icon" type="button" data-theme-toggle title="{{ __('app.nav.toggle_theme') }}"><x-icon name="moon" /></button>
                 <div class="dropdown">
                     <button class="topbar-user" data-bs-toggle="dropdown" type="button" aria-expanded="false">
@@ -104,6 +144,7 @@
       data-confirm="{{ __('app.nav.sign_out_question') }}" data-confirm-text="{{ __('app.nav.sign_out_text') }}"
       data-confirm-ok="{{ __('app.nav.sign_out') }}" data-confirm-style="primary">@csrf</form>
 
+<form id="adminNoticesRead" method="POST" action="{{ route('admin.notices.read') }}" hidden>@csrf</form>
 @include('partials.flash')
 @include('partials.scripts')
 </body>

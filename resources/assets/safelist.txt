@@ -48,3 +48,6 @@ avatar-soft-warning avatar-soft-danger avatar-soft-primary
 #s-print #s-shield #s-screwdriver-wrench #s-boxes-stacked #s-car #s-box #s-calculator #s-map-location-dot #s-hourglass-half
 #s-circle-check #s-circle-xmark #s-lock #s-file-lines #s-download #s-envelope #s-message #s-filter #s-id-card #s-eye #s-trash #s-check #s-xmark
 avatar-soft-success icon-soft
+
+# kinds of admin notifications (nt-{kind})
+nt-company nt-verification nt-tender nt-product nt-payment nt-message nt-info
