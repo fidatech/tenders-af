@@ -1,16 +1,11 @@
-@extends('layouts.gate', ['title' => 'Choose a new password'])
+@extends('layouts.gate', ['title' => 'Choose a new password', 'narrow' => true])
 
-@section('story')
-<span class="chip">Almost there</span>
-<h1>Choose a password <em>only you know.</em></h1>
-<p class="lead">At least 8 characters. After saving you sign in with the new password.</p>
+@section('heading')
+<h1>Choose a new password</h1>
+<p>At least 8 characters. Then you sign in with it.</p>
 @endsection
 
 @section('content')
-<div class="eyebrow">Password</div>
-<h2>Choose a new password</h2>
-<p class="sub">At least 8 characters.</p>
-
 <form method="POST" action="{{ route('password.store') }}">
     @csrf
     <input type="hidden" name="token" value="{{ $token }}">
@@ -21,7 +16,7 @@
     </div>
     <div class="fld">
         <label for="password">New password</label>
-        <div class="pw"><input type="password" id="password" name="password" class="@error('password') bad @enderror" autocomplete="new-password" minlength="8" required autofocus><button type="button" aria-label="Show the password">Show</button></div>
+        <div class="pw"><input type="password" id="password" name="password" class="@error('password') bad @enderror" autocomplete="new-password" minlength="8" required autofocus><button type="button">Show</button></div>
         @error('password')<span class="err">{{ $message }}</span>@enderror
     </div>
     <div class="fld">
