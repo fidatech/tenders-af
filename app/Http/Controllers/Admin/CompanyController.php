@@ -127,7 +127,7 @@ class CompanyController extends Controller
             'name' => ['required', 'string', 'max:150'],
             'kind' => ['required', Rule::in(array_keys(Company::KINDS))],
             'phone' => ['nullable', 'string', 'max:50'],
-            'country' => ['nullable', 'string', 'max:100'],
+            'country' => ['nullable', 'string', Rule::in(array_values(config('countries')))],
             'timezone' => ['required', 'timezone'],
             'currency' => ['required', 'alpha', 'size:3'],
             'plan_id' => ['nullable', 'exists:plans,id'],

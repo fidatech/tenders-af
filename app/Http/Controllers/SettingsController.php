@@ -32,11 +32,13 @@ class SettingsController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $company = company();
+        // "https://www.x.af/" or "x.af": only the address is kept, https:// is put back when it is saved
+        $request->merge(['website' => Company::websiteHost($request->input('website'))]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'phone' => ['nullable', 'string', 'max:50'],
-            'website' => ['nullable', 'url', 'max:255'],
-            'country' => ['nullable', 'string', 'max:100'],
+            'website' => ['nullable', 'string', 'max:200', 'regex:'.Company::DOMAIN],
+            'country' => ['nullable', 'string', Rule::in(array_values(config('countries')))],
             'province_id' => ['nullable', 'exists:provinces,id'],
             'address' => ['nullable', 'string', 'max:255'],
             'about' => ['nullable', 'string', 'max:3000'],
@@ -49,7 +51,8 @@ class SettingsController extends Controller
             'industries.*' => ['integer', Rule::exists('industries', 'id')->where('is_active', true)],
             'categories' => ['nullable', 'array'],
             'categories.*' => ['integer', Rule::exists('categories', 'id')->where('is_active', true)],
-        ]);
+        ], ['website.regex' => __('Write only the address of the website, like yourcompany.af.')]);
+        $data['website'] = $data['website'] ? 'https://'.$data['website'] : null;
 
         $industries = array_map('intval', $data['industries'] ?? []);
         // a category only counts under a sector that is ticked

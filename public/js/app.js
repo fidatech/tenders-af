@@ -1052,6 +1052,20 @@ if (e.dataTransfer && e.dataTransfer.files) add(e.dataTransfer.files);
 });
 };
 $$('[data-file-drop]').forEach(fileDrop);
+var bareDomain = function (value) {
+return value.trim().replace(/^[a-z][a-z0-9+.-]*:\/\//i, '').replace(/^www\./i, '').replace(/\s+/g, '');
+};
+$$('input[data-domain]').forEach(function (input) {
+var clean = function () {
+var next = bareDomain(input.value);
+if (next !== input.value) input.value = next;
+};
+input.addEventListener('input', function () {
+if (/^(https?:\/\/|www\.)/i.test(input.value.trim())) clean();
+});
+input.addEventListener('paste', function () { setTimeout(clean, 0); });
+input.addEventListener('blur', function () { clean(); input.value = input.value.replace(/\/+$/, ''); });
+});
 if (!$('.app-content h1')) body.classList.add('no-large-title');
 var onScroll = function () { body.classList.toggle('is-scrolled', window.scrollY > 28); };
 window.addEventListener('scroll', onScroll, { passive: true });

@@ -41,7 +41,7 @@ class RegisterController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:50'],
             'province_id' => ['nullable', 'exists:provinces,id'],
-            'country' => ['nullable', 'string', 'max:100'],
+            'country' => ['nullable', 'string', Rule::in(array_values(config('countries')))],
             'password' => ['required', 'confirmed', Password::min(8)],
             'terms' => ['accepted'],
         ], ['terms.accepted' => __('Please accept the terms to register.'), 'roles.required' => __('Please choose what you want to do: find tenders, post tenders, or both.')]);

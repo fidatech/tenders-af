@@ -81,7 +81,7 @@
             </div>
             <div class="fld" data-for-kind="ngo international">
                 <label for="country">Country</label>
-                <input type="text" id="country" name="country" value="{{ old('country', 'Afghanistan') }}" class="@error('country') bad @enderror" maxlength="100" autocomplete="country-name">
+                <x-country-select :value="old('country')" class="@error('country') bad @enderror" />
                 @error('country')<span class="err">{{ $message }}</span>@enderror
             </div>
         </div>

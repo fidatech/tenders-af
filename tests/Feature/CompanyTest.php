@@ -161,4 +161,17 @@ class CompanyTest extends TestCase
         $this->get('/tender/supply-of-cement')->assertOk()->assertSee('Supply of cement');
         $this->get('/admin/tenders')->assertOk()->assertSee('Supply of cement');
     }
+
+    public function test_the_website_is_saved_with_https_and_the_country_comes_from_the_list(): void
+    {
+        $company = $this->business();
+        $this->signIn($company);
+
+        $this->put('/company', ['name' => $company->name, 'website' => 'HTTPS://www.Fida.af/', 'country' => 'Afghanistan'])->assertRedirect();
+        $this->assertSame('https://fida.af', $company->refresh()->website);
+        $this->get('/company')->assertOk()->assertSee('value="fida.af"', false);
+
+        $this->put('/company', ['name' => $company->name, 'website' => 'fida', 'country' => 'Afghanistan'])->assertSessionHasErrors('website');
+        $this->put('/company', ['name' => $company->name, 'country' => 'Narnia'])->assertSessionHasErrors('country');
+    }
 }

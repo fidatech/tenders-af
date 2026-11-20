@@ -1171,6 +1171,24 @@
     };
     $$('[data-file-drop]').forEach(fileDrop);
 
+    // ------------------------------------------------------- website boxes
+    // <input data-domain> behind a fixed "https://": a pasted or typed https:// and www. are taken off
+    var bareDomain = function (value) {
+        return value.trim().replace(/^[a-z][a-z0-9+.-]*:\/\//i, '').replace(/^www\./i, '').replace(/\s+/g, '');
+    };
+    $$('input[data-domain]').forEach(function (input) {
+        var clean = function () {
+            var next = bareDomain(input.value);
+            if (next !== input.value) input.value = next;
+        };
+        input.addEventListener('input', function () {
+            // only once something that looks like a prefix is there, so typing is not disturbed
+            if (/^(https?:\/\/|www\.)/i.test(input.value.trim())) clean();
+        });
+        input.addEventListener('paste', function () { setTimeout(clean, 0); });
+        input.addEventListener('blur', function () { clean(); input.value = input.value.replace(/\/+$/, ''); });
+    });
+
     // -------------------------------------------------------------------- boot
     if (!$('.app-content h1')) body.classList.add('no-large-title');
     var onScroll = function () { body.classList.toggle('is-scrolled', window.scrollY > 28); };

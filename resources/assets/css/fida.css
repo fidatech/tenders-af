@@ -1643,3 +1643,9 @@ textarea.form-control { min-height: 96px; line-height: 1.6; resize: vertical; }
     textarea.form-control { min-height: 110px; }
     .form-control-sm, .form-select-sm { min-height: 40px; font-size: 14px; }
 }
+
+/* a website box behind a fixed "https://" that cannot be changed */
+.domain-group .input-group-text { font: 600 13px/1 var(--bs-font-monospace, ui-monospace, monospace); color: var(--muted); background: var(--field-disabled); user-select: none; padding-inline: .8rem; }
+.domain-group .input-group-text svg { font-size: 11px; opacity: .7; }
+.domain-group .form-control { font-family: var(--bs-font-monospace, ui-monospace, monospace); font-size: 13.5px; }
+.domain-group:focus-within .input-group-text { color: var(--primary); }

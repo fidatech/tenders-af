@@ -142,6 +142,22 @@ class Company extends Model
         return \App\Support\Platform::bool('posting_free') || ($this->isUsable() && (bool) $this->plan?->can_post);
     }
 
+    /** What a website address may be once https:// and www. are taken off: example.af, shop.example.com/en */
+    public const DOMAIN = '/^(?=.{4,200}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}(\/[^\s]*)?$/i';
+
+    /** "HTTPS://www.Example.af/" becomes "example.af"; empty stays null. */
+    public static function websiteHost(?string $value): ?string
+    {
+        $value = trim((string) $value);
+        $value = preg_replace('#^[a-z][a-z0-9+.-]*://#i', '', $value);
+        $value = preg_replace('#^www\.#i', '', $value);
+        $value = rtrim($value, '/');
+        // the name of the site in small letters; a path after it stays as written
+        $value = preg_replace_callback('#^[^/]+#', fn ($m) => strtolower($m[0]), $value);
+
+        return $value === '' ? null : $value;
+    }
+
     public function kindLabel(): string
     {
         return __(self::KINDS[$this->kind][0] ?? 'Company');

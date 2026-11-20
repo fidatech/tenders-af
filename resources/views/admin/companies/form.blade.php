@@ -39,7 +39,7 @@
                     </div>
                     <div class="col-12 col-md-6">
                         <label class="form-label" for="t-country">{{ __('Country') }}</label>
-                        <input type="text" class="form-control @error('country') is-invalid @enderror" id="t-country" name="country" value="{{ $value('country') }}" maxlength="100">
+                        <x-country-select id="t-country" :value="old('country', $company?->country)" class="form-select @error('country') is-invalid @enderror" />
                         @error('country')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-12 col-md-6">

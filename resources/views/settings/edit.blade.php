@@ -39,12 +39,16 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label" for="s-website">{{ __('Website') }}</label>
-                            <input type="url" class="form-control @error('website') is-invalid @enderror" id="s-website" name="website" value="{{ old('website', $company->website) }}" maxlength="255" dir="ltr" placeholder="https://">
+                            <div class="input-group domain-group">
+                                <span class="input-group-text" aria-hidden="true"><x-icon name="lock" class="me-1" />https://</span>
+                                <input type="text" class="form-control @error('website') is-invalid @enderror" id="s-website" name="website" value="{{ old('website', \App\Models\Company::websiteHost($company->website)) }}" maxlength="200" dir="ltr" inputmode="url" autocomplete="url" autocapitalize="off" spellcheck="false" placeholder="yourcompany.af" data-domain aria-describedby="s-website-help">
+                            </div>
+                            <div class="form-text" id="s-website-help">{{ __('Only the address, like yourcompany.af. No www or https.') }}</div>website) }}" maxlength="255" dir="ltr" placeholder="https://">
                             @error('website')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label" for="s-country">{{ __('Country') }}</label>
-                            <input type="text" class="form-control @error('country') is-invalid @enderror" id="s-country" name="country" value="{{ old('country', $company->country) }}" maxlength="100">
+                            <x-country-select id="s-country" :value="old('country', $company->country)" class="form-select @error('country') is-invalid @enderror" />country) }}" maxlength="100">
                             @error('country')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-12 col-md-6">
