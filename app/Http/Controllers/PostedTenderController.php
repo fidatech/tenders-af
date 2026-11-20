@@ -116,7 +116,7 @@ class PostedTenderController extends Controller
     public function addDocuments(Request $request, int $id): RedirectResponse
     {
         $tender = $this->mine($id);
-        $request->validate(['documents' => ['required', 'array', 'max:10'], 'documents.*' => TenderForm::rules()['documents.*']]);
+        $request->validate(['documents' => ['required', 'array', 'max:'.TenderForm::MAX_PER_SAVE], 'documents.*' => TenderForm::rules()['documents.*']]);
         TenderForm::addDocuments($tender, $request);
 
         return back()->with('success', __('The documents are added.'));

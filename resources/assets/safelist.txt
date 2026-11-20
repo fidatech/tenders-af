@@ -46,5 +46,5 @@ avatar-soft-warning avatar-soft-danger avatar-soft-primary
 #s-layer-group #s-tags #s-coins #s-building-columns #s-money-bill-wave #s-chart-line #s-user-shield #s-clock-rotate-left #s-gear #s-user
 #s-helmet-safety #s-kit-medical #s-laptop #s-seedling #s-utensils #s-truck #s-bolt #s-comments #s-graduation-cap #s-droplet #s-shirt
 #s-print #s-shield #s-screwdriver-wrench #s-boxes-stacked #s-car #s-box #s-calculator #s-map-location-dot #s-hourglass-half
-#s-circle-check #s-circle-xmark #s-lock #s-file-lines #s-download #s-envelope #s-message #s-filter #s-id-card #s-eye #s-trash #s-check
+#s-circle-check #s-circle-xmark #s-lock #s-file-lines #s-download #s-envelope #s-message #s-filter #s-id-card #s-eye #s-trash #s-check #s-xmark
 avatar-soft-success icon-soft

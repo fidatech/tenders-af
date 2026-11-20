@@ -143,10 +143,7 @@
                         </ul>
                     @endif
                     <label class="form-label" for="f-documents">{{ __('Add documents') }}</label>
-                    <input type="file" class="form-control @error('documents') is-invalid @enderror @error('documents.*') is-invalid @enderror" id="f-documents" name="documents[]" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,image/*">
-                    @error('documents')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
-                    @error('documents.*')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
-                    <div class="form-text">{{ __('PDF, Word, Excel, zip or pictures, up to 20 MB each. Only subscribers download them.') }}</div>
+                    <x-file-drop accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.zip,.rar,image/*" :hint="__('PDF, Word, Excel, PowerPoint, zip, rar or pictures. Up to 20 files at a time, 20 MB each. Only subscribers download them.')" />
                 </div>
             </div>
         </div>
@@ -234,7 +231,7 @@
                     <div class="card-body">
                         <div class="fw-semibold mb-1">{{ __('Add documents') }}</div>
                         <div class="small text-muted mb-3">{{ __('A clarification or an amendment for the bidders.') }}</div>
-                        <input type="file" class="form-control mb-2" name="documents[]" multiple required accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,image/*" aria-label="{{ __('Documents') }}">
+                        <div class="mb-2"><x-file-drop id="f-more-documents" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.zip,.rar,image/*" required :hint="__('Up to 20 files, 20 MB each.')" /></div>
                         <button type="submit" class="btn btn-outline-soft w-100"><x-icon name="plus" class="me-1" /> {{ __('Add') }}</button>
                     </div>
                 </form>

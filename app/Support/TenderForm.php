@@ -14,6 +14,11 @@ use Illuminate\Validation\Rule;
  */
 class TenderForm
 {
+    /** Files that can be added in one save, and files a tender may have in all. */
+    public const MAX_PER_SAVE = 20;
+
+    public const MAX_PER_TENDER = 50;
+
     /** The boxes both forms have. */
     public static function rules(): array
     {
@@ -37,8 +42,8 @@ class TenderForm
             'budget_currency' => ['nullable', 'required_unless:budget_type,undisclosed', Rule::in(config('tenders.currencies'))],
             'questions_until' => ['nullable', 'date'],
             'deadline' => ['nullable', 'date'],
-            'documents' => ['nullable', 'array', 'max:10'],
-            'documents.*' => ['file', 'mimes:pdf,doc,docx,xls,xlsx,zip,jpg,jpeg,png', 'max:20480'],
+            'documents' => ['nullable', 'array', 'max:'.self::MAX_PER_SAVE],
+            'documents.*' => ['file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,csv,txt,zip,rar,jpg,jpeg,png,webp', 'max:20480'],
         ];
     }
 
@@ -71,6 +76,10 @@ class TenderForm
 
     public static function addDocuments(Tender $tender, Request $request): void
     {
+        $files = $request->file('documents', []);
+        if ($files && $tender->documents()->count() + count($files) > self::MAX_PER_TENDER) {
+            throw new \App\Exceptions\UserError(__('A tender can have up to :count documents. Remove some, or put them in one zip file.', ['count' => self::MAX_PER_TENDER]));
+        }
         foreach ($request->file('documents', []) as $file) {
             TenderDocument::create([
                 'tender_id' => $tender->id,

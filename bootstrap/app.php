@@ -34,5 +34,14 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return back()->withInput()->with('danger', $e->getMessage());
         });
+        // the files sent together are larger than the server takes in one go
+        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, Request $request) {
+            $message = __('The files are too large to send together. Send fewer files at a time, or make them smaller.');
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 413);
+            }
+
+            return back()->with('danger', $message);
+        });
         $exceptions->dontReport(UserError::class);
     })->create();

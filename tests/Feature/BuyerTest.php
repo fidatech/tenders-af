@@ -82,6 +82,27 @@ class BuyerTest extends TestCase
         $this->assertSame(1, Notice::where('company_id', $buyer->id)->where('title', 'Your tender is published')->count());
     }
 
+    public function test_a_buyer_adds_several_documents_at_once(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('local');
+        $this->signIn($this->buyer());
+
+        $this->post('/my/posted', $this->form(['documents' => [
+            \Illuminate\Http\UploadedFile::fake()->create('terms of reference.pdf', 900, 'application/pdf'),
+            \Illuminate\Http\UploadedFile::fake()->create('bill of quantities.xlsx', 120, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+            \Illuminate\Http\UploadedFile::fake()->create('drawings.zip', 3000, 'application/zip'),
+        ]]))->assertRedirect();
+        $tender = Tender::firstOrFail();
+        $this->assertSame(['bill of quantities.xlsx', 'drawings.zip', 'terms of reference.pdf'], $tender->documents()->orderBy('name')->pluck('name')->all());
+
+        // later more are added to the same tender
+        $this->put('/my/posted/'.$tender->id, $this->form(['documents' => [
+            \Illuminate\Http\UploadedFile::fake()->create('site photos.pdf', 400, 'application/pdf'),
+            \Illuminate\Http\UploadedFile::fake()->create('annex.docx', 80, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+        ]]))->assertRedirect();
+        $this->assertSame(5, $tender->documents()->count());
+    }
+
     public function test_a_tender_is_sent_back_with_a_reason_and_the_buyer_sends_it_again(): void
     {
         Mail::fake();

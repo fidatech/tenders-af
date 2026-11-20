@@ -205,3 +205,10 @@ and `public/css/select2-fida.css` gives them the look of the form boxes in the p
 8 choices or more gets a search box. Add `data-native` to a `<select>` to keep the plain browser list.
 
 Sign in, register and the password pages use `layouts/gate.blade.php`, in the look of the website. The admin sign-in keeps the look of the panel.
+
+## Upload limits
+
+A tender can get up to 20 documents in one save (50 in all), 20 MB each, chosen or dropped in several rounds.
+`public/.user.ini` raises PHP's limits on servers that read it (cPanel with PHP-FPM). With `php artisan serve` on your
+own computer, PHP's own `php.ini` decides: set `upload_max_filesize = 25M`, `post_max_size = 420M` and
+`max_file_uploads = 30` there (`php --ini` shows which file), or files above 2 MB are dropped.
