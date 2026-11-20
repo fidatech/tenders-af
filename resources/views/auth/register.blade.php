@@ -81,7 +81,7 @@
             </div>
             <div class="fld" data-for-kind="ngo international">
                 <label for="country">Country</label>
-                <x-country-select :value="old('country')" class="@error('country') bad @enderror" />
+                <x-country-select :value="old('country')" :class="$errors->has('country') ? 'bad' : ''" />
                 @error('country')<span class="err">{{ $message }}</span>@enderror
             </div>
         </div>

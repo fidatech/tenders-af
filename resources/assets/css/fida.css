@@ -1649,3 +1649,14 @@ textarea.form-control { min-height: 96px; line-height: 1.6; resize: vertical; }
 .domain-group .input-group-text svg { font-size: 11px; opacity: .7; }
 .domain-group .form-control { font-family: var(--bs-font-monospace, ui-monospace, monospace); font-size: 13.5px; }
 .domain-group:focus-within .input-group-text { color: var(--primary); }
+
+/* help: a small "?" beside the name of a field, and its tooltip */
+.help-tip { display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px; margin-inline-start: 2px; border-radius: 50%; color: var(--muted); cursor: help; vertical-align: middle; transition: color .15s, background-color .15s; }
+.help-tip .fi, .help-tip svg { width: 14px; height: 14px; }
+.help-tip:hover, .help-tip:focus-visible { color: var(--primary); background: rgba(var(--primary-rgb), .1); outline: 0; }
+.form-check-label .help-tip { margin-inline-start: 6px; }
+.help-tooltip { position: absolute; z-index: 2000; max-width: 280px; padding: 8px 11px; border-radius: 9px; background: #1d2433; color: #f3f5f9; font-size: 12.5px; font-weight: 500; line-height: 1.45; box-shadow: 0 12px 30px -10px rgba(10, 16, 30, .45); pointer-events: none; opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .12s; }
+.help-tooltip.on { opacity: 1; transform: none; }
+.help-tooltip::after { content: ""; position: absolute; left: var(--arrow, 50%); bottom: -5px; width: 10px; height: 10px; margin-left: -5px; background: inherit; transform: rotate(45deg); border-radius: 2px; }
+.help-tooltip.below::after { bottom: auto; top: -5px; }
+[data-bs-theme="dark"] .help-tooltip { background: #eef1f6; color: #1d2433; }

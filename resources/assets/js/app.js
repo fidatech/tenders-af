@@ -1189,6 +1189,63 @@
         input.addEventListener('blur', function () { clean(); input.value = input.value.replace(/\/+$/, ''); });
     });
 
+    // ------------------------------------------------------- help as a "?"
+    // The grey help line under a field becomes a small "?" beside the field's name; the text shows
+    // in a tooltip on hover, on keyboard focus, and on tap. The line stays for screen readers.
+    var tip = null;
+    var showTip = function (anchor) {
+        if (!tip) {
+            tip = document.createElement('div');
+            tip.className = 'help-tooltip';
+            tip.setAttribute('role', 'tooltip');
+            tip.id = 'help-tooltip';
+            document.body.appendChild(tip);
+        }
+        tip.textContent = anchor.getAttribute('data-tip');
+        tip.classList.add('on');
+        var r = anchor.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+        var left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), window.innerWidth - w - 8);
+        var top = r.top - h - 10;
+        tip.classList.toggle('below', top < 8);
+        if (top < 8) top = r.bottom + 10;
+        tip.style.left = (left + window.scrollX) + 'px';
+        tip.style.top = (top + window.scrollY) + 'px';
+        tip.style.setProperty('--arrow', (r.left + r.width / 2 - left) + 'px');
+        anchor.setAttribute('aria-describedby', 'help-tooltip');
+    };
+    var hideTip = function () { if (tip) tip.classList.remove('on'); };
+    var helpIcons = function (scope) {
+        $$('.form-text:not([data-keep])', scope).forEach(function (help) {
+            if (help._tipped || !help.textContent.trim()) return;
+            var box = help.parentNode;
+            // the name of the field: the form-label of this column, or the label of a switch
+            var label = $('.form-label', box) || $('.form-check-label', box);
+            if (!label) return;
+            help._tipped = true;
+            var icon = document.createElement('span');
+            icon.className = 'help-tip';
+            icon.tabIndex = 0;
+            icon.setAttribute('role', 'button');
+            icon.setAttribute('aria-label', help.textContent.trim());
+            icon.setAttribute('data-tip', help.textContent.trim().replace(/\s+/g, ' '));
+            icon.innerHTML = ERP.icon('s-circle-question');
+            label.appendChild(icon);
+            help.classList.add('visually-hidden');
+        });
+    };
+    document.addEventListener('mouseover', function (e) { var t = e.target.closest && e.target.closest('.help-tip'); if (t) showTip(t); });
+    document.addEventListener('mouseout', function (e) { if (e.target.closest && e.target.closest('.help-tip')) hideTip(); });
+    document.addEventListener('focusin', function (e) { if (e.target.classList && e.target.classList.contains('help-tip')) showTip(e.target); });
+    document.addEventListener('focusout', function (e) { if (e.target.classList && e.target.classList.contains('help-tip')) hideTip(); });
+    document.addEventListener('click', function (e) {
+        var t = e.target.closest && e.target.closest('.help-tip');
+        if (t) { e.preventDefault(); e.stopPropagation(); showTip(t); } else hideTip();
+    }, true);
+    window.addEventListener('scroll', hideTip, { passive: true });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hideTip(); });
+    helpIcons(document);
+    window.helpIcons = helpIcons;
+
     // -------------------------------------------------------------------- boot
     if (!$('.app-content h1')) body.classList.add('no-large-title');
     var onScroll = function () { body.classList.toggle('is-scrolled', window.scrollY > 28); };
