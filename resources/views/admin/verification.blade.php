@@ -91,7 +91,8 @@
                     <div class="modal-body">
                         <div class="row g-4">
                             <div class="col-12 col-lg-7">
-                                <div class="vr-doc">
+                                <div class="vr-doc" data-label-exit="{{ __('Exit full screen') }}">
+                                    <button type="button" class="vr-exit" data-vr-full hidden><x-icon name="compress" class="me-1" />{{ __('Exit full screen') }} <kbd>Esc</kbd></button>
                                     @if (! $doc)
                                         <div class="vr-doc-empty"><x-icon name="file-circle-xmark" /><span>{{ __('No document was sent.') }}</span></div>
                                     @elseif ($isPdf)
@@ -101,7 +102,10 @@
                                     @endif
                                 </div>
                                 @if ($doc)
-                                    <a class="small fw-semibold text-decoration-none d-inline-flex align-items-center gap-1 mt-2" href="{{ $docUrl }}" target="_blank" rel="noopener"><x-icon name="up-right-from-square" /> {{ __('Open the licence in a new tab') }}</a>
+                                    <div class="d-flex flex-wrap gap-3 mt-2">
+                                        <button type="button" class="btn btn-sm btn-light-secondary" data-vr-full aria-pressed="false"><x-icon name="expand" class="me-1" /><span>{{ __('Full screen') }}</span></button>
+                                        <a class="small fw-semibold text-decoration-none d-inline-flex align-items-center gap-1" href="{{ $docUrl }}" target="_blank" rel="noopener"><x-icon name="up-right-from-square" /> {{ __('Open the licence in a new tab') }}</a>
+                                    </div>
                                 @endif
                             </div>
                             <div class="col-12 col-lg-5">
@@ -152,6 +156,33 @@
 
 @push('scripts')
 <script>
+// the licence over the whole screen; Esc or the button brings it back. Without the browser's
+// full-screen mode (some phones), the licence fills the window instead.
+document.querySelectorAll('[data-vr-full]').forEach(function (button) {
+    button.addEventListener('click', function () {
+        var doc = button.closest('.modal-body').querySelector('.vr-doc');
+        var on = document.fullscreenElement === doc || doc.classList.contains('is-full');
+        if (on) {
+            if (document.fullscreenElement) document.exitFullscreen(); else doc.classList.remove('is-full');
+        } else if (doc.requestFullscreen) {
+            doc.requestFullscreen().catch(function () { doc.classList.add('is-full'); });
+        } else {
+            doc.classList.add('is-full');
+        }
+    });
+});
+var syncFull = function () {
+    document.querySelectorAll('.vr-doc').forEach(function (doc) {
+        var on = document.fullscreenElement === doc || doc.classList.contains('is-full');
+        doc.querySelector('.vr-exit').hidden = !on;
+    });
+};
+document.addEventListener('fullscreenchange', syncFull);
+document.addEventListener('click', function () { setTimeout(syncFull, 0); });
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') document.querySelectorAll('.vr-doc.is-full').forEach(function (doc) { doc.classList.remove('is-full'); e.stopPropagation(); syncFull(); });
+}, true);
+
 // the decision switches the form between "verify" and "refuse", and shows the reasons only when refusing
 document.querySelectorAll('.vr-decide').forEach(function (form) {
     var reasons = form.querySelector('.vr-reasons'), button = form.querySelector('button[type=submit]'), note = form.querySelector('textarea');

@@ -1721,3 +1721,12 @@ textarea.form-control { min-height: 96px; line-height: 1.6; resize: vertical; }
 .nt-tender { background: rgba(var(--warning-rgb), .16); color: #b26b00; }
 .nt-payment { background: rgba(var(--danger-rgb), .1); color: var(--danger); }
 .nt-message { background: rgba(139, 92, 246, .12); color: #7c3aed; }
+
+/* the licence over the whole screen */
+.vr-doc { position: relative; }
+.vr-doc:fullscreen, .vr-doc.is-full { height: 100%; width: 100%; border: 0; border-radius: 0; background: #2b2f36; }
+.vr-doc.is-full { position: fixed; inset: 0; z-index: 3000; height: 100vh; }
+.vr-doc:fullscreen img, .vr-doc.is-full img { max-width: 100vw; max-height: 100vh; }
+.vr-exit { position: absolute; top: 14px; right: 14px; z-index: 2; display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; border: 0; border-radius: 10px; background: rgba(15, 20, 30, .78); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
+.vr-exit:hover { background: rgba(15, 20, 30, .92); }
+.vr-exit kbd { margin-inline-start: 6px; padding: 1px 6px; border-radius: 5px; background: rgba(255,255,255,.18); font-size: 11px; }
