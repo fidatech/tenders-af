@@ -16,11 +16,16 @@ class Admin extends Authenticatable
         return ['password' => 'hashed', 'is_active' => 'boolean'];
     }
 
-    public const ROLES = ['super' => 'Super administrator', 'manager' => 'Manager', 'viewer' => 'Viewer'];
+    public const ROLES = ['super' => 'Super administrator', 'manager' => 'Manager', 'viewer' => 'Viewer', 'focal' => 'Focal point'];
 
     public function isSuper(): bool
     {
         return ($this->role ?? 'super') === 'super';
+    }
+
+    public function homeRoute(): string
+    {
+        return $this->role === 'focal' ? 'admin.messages.index' : 'admin.dashboard';
     }
 
     public function roleLabel(): string

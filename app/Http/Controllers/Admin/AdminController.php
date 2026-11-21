@@ -36,6 +36,7 @@ class AdminController extends CrudController
                 'options' => [
                     'super' => __('Super administrator: everything'),
                     'manager' => __('Manager: businesses and money, but not administrators, settings, the activity log or deleting a business'),
+                    'focal' => __('Focal point: messages and own account'),
                     'viewer' => __('Viewer: looks at what a manager sees and changes nothing'),
                 ]],
             ['name' => 'is_active', 'label' => 'May sign in', 'type' => 'checkbox', 'default' => true],

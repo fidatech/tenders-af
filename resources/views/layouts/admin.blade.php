@@ -1,6 +1,6 @@
 @php
     $admin = auth('admin')->user();
-    // [label, icon, route, pattern that marks it current, only for super administrators]
+    $focal = $admin->role === 'focal';
     $waitingVerify = \App\Models\Company::where('verify_status', 'pending')->count();
     $waitingTenders = \App\Models\Tender::where('status', 'pending')->count();
     $productsOn = \App\Support\Platform::bool('products_enabled');
@@ -22,6 +22,7 @@
     // [label, icon, route, pattern that marks it current, only for super administrators, number waiting]
     $menu = [
         ['Dashboard', 'gauge-high', 'admin.dashboard', 'admin.dashboard', false, 0],
+        ['Messages', 'envelope', 'admin.messages.index', 'admin.messages.*', false, \App\Models\DirectMessage::where('from_admin', false)->whereNull('read_at')->count()],
         ['Notifications', 'bell', 'admin.notices.index', 'admin.notices.*', false, $adminUnread],
         ['Tenders', 'gavel', 'admin.tenders.index', 'admin.tenders.*', false, $waitingTenders],
         ['Products', 'boxes-stacked', 'admin.products.index', 'admin.products.*', false, $waitingProducts],
@@ -41,7 +42,7 @@
     ];
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ text_dir() }}" data-bs-theme="light" data-sidebar="light" data-layout="vertical" data-primary="green" data-width="fluid" data-icons="{{ asset_v('icons.svg') }}" data-home="{{ route('admin.dashboard') }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ text_dir() }}" data-bs-theme="light" data-sidebar="light" data-layout="vertical" data-primary="green" data-width="fluid" data-icons="{{ asset_v('icons.svg') }}" data-home="{{ route($admin->homeRoute()) }}">
 <head>
     @include('partials.head')
 </head>
@@ -49,7 +50,7 @@
 <div class="app-wrapper">
     <aside class="app-sidebar" id="appSidebar" aria-label="{{ __('app.nav.menu') }}">
         <div class="sidebar-brand">
-            <a href="{{ route('admin.dashboard') }}" class="brand-link"><x-brand-logo /><span class="brand-text">{{ config('app.name') }}</span></a>
+            <a href="{{ route($admin->homeRoute()) }}" class="brand-link"><x-brand-logo /><span class="brand-text">{{ config('app.name') }}</span></a>
         </div>
         <div class="sidebar-scroll" id="sidebarScroll">
             <div class="drawer-profile">
@@ -63,7 +64,7 @@
             <ul class="sidebar-menu" id="sidebarMenu">
                 <li class="menu-heading"><span>{{ __('System administration') }}</span></li>
                 @foreach ($menu as [$label, $icon, $route, $pattern, $superOnly, $waitingCount])
-                    @continue($superOnly && ! $admin->isSuper())
+                    @continue(($superOnly && ! $admin->isSuper()) || ($focal && ! in_array($route, ['admin.messages.index', 'admin.profile.edit'])))
                     <li class="menu-item {{ request()->routeIs($pattern) ? 'active' : '' }}">
                         <a class="menu-link" href="{{ route($route) }}"><span class="menu-icon"><x-icon :name="$icon" /></span><span class="menu-text">{{ __($label) }}</span>@if ($waitingCount)<span class="badge bg-danger rounded-pill ms-auto">{{ $waitingCount }}</span>@endif</a>
                     </li>
@@ -79,6 +80,7 @@
             <div class="appbar-title" id="appbarTitle">{{ $title ?? config('app.name') }}</div>
             <div class="topbar-brand" aria-hidden="true">{{ __('System administration') }}</div>
             <div class="topbar-right">
+                @unless ($focal)
                 <div class="dropdown">
                     <button class="topbar-icon position-relative" data-bs-toggle="dropdown" data-bs-auto-close="outside" type="button" aria-expanded="false" aria-label="{{ $bellCount ? __('Notifications, :count waiting', ['count' => $bellCount]) : __('Notifications') }}" title="{{ __('Notifications') }}">
                         <x-icon name="bell" />
@@ -110,6 +112,7 @@
                         <a class="d-block text-center py-2 border-top text-decoration-none small fw-semibold" href="{{ route('admin.notices.index') }}">{{ __('All notifications') }}</a>
                     </div>
                 </div>
+                @endunless
                 <button class="topbar-icon" type="button" data-theme-toggle title="{{ __('app.nav.toggle_theme') }}"><x-icon name="moon" /></button>
                 <div class="dropdown">
                     <button class="topbar-user" data-bs-toggle="dropdown" type="button" aria-expanded="false">
@@ -139,9 +142,12 @@
 </div>
 
 <nav class="app-tabbar" aria-label="{{ __('app.nav.menu') }}">
-    <a href="{{ route('admin.dashboard') }}" class="tab-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><x-icon name="house" /><em>{{ __('app.nav.home') }}</em></a>
+    @unless ($focal)
+    <a href="{{ route($admin->homeRoute()) }}" class="tab-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><x-icon name="house" /><em>{{ __('app.nav.home') }}</em></a>
     <a href="{{ route('admin.tenders.index') }}" class="tab-item {{ request()->routeIs('admin.tenders.*') ? 'active' : '' }}"><x-icon name="gavel" /><em>{{ __('Tenders') }}</em></a>
     <a href="{{ route('admin.subscriptions.index') }}" class="tab-item {{ request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}"><x-icon name="receipt" /><em>{{ __('Subscriptions') }}</em></a>
+    @endunless
+    <a href="{{ route('admin.messages.index') }}" class="tab-item {{ request()->routeIs('admin.messages.*') ? 'active' : '' }}"><x-icon name="envelope" /><em>{{ __('Messages') }}</em></a>
     <button type="button" class="tab-item" id="tabMenu"><x-icon name="grip" /><em>{{ __('app.nav.menu') }}</em></button>
 </nav>
 

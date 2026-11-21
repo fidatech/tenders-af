@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CompanyMessageController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DirectMessageController;
 use App\Http\Controllers\PostedTenderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -132,7 +133,11 @@ Route::middleware('auth:web')->group(function () {
     Route::get('subscription/receipt/{id}', [BillingController::class, 'receipt'])->whereNumber('id')->name('billing.receipt');
     Route::get('subscription/qr/{id}', [BillingController::class, 'qr'])->whereNumber('id')->name('billing.qr');
 
-    Route::get('contact-admin', [CompanyMessageController::class, 'create'])->name('company-message.create');
+    Route::get('contact-admin', fn () => redirect()->route('messages.show'))->name('company-message.create');
+    Route::get('messages', [DirectMessageController::class, 'show'])->name('messages.show');
+    Route::post('messages', [DirectMessageController::class, 'store'])->middleware('throttle:30,1')->name('messages.store');
+    Route::get('messages/updates', [DirectMessageController::class, 'updates'])->name('messages.updates');
+    Route::get('messages/files/{message}/{file}', [DirectMessageController::class, 'attachment'])->whereNumber(['message', 'file'])->name('messages.attachment');
     Route::post('contact-admin', [CompanyMessageController::class, 'store'])->middleware('throttle:5,10')->name('company-message.store');
 
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -155,6 +160,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['auth:admin', 'admin.role'])->group(function () {
         Route::post('logout', [Admin\LoginController::class, 'destroy'])->name('logout');
         Route::get('/', Admin\DashboardController::class)->name('dashboard');
+        Route::prefix('messages')->name('messages.')->group(function () {
+            Route::get('/', [DirectMessageController::class, 'inbox'])->name('index');
+            Route::get('{recipient}', [DirectMessageController::class, 'show'])->whereNumber('recipient')->name('show');
+            Route::post('{recipient}', [DirectMessageController::class, 'store'])->whereNumber('recipient')->middleware('throttle:30,1')->name('store');
+            Route::get('{recipient}/updates', [DirectMessageController::class, 'updates'])->whereNumber('recipient')->name('updates');
+            Route::get('{recipient}/files/{message}/{file}', [DirectMessageController::class, 'attachment'])->whereNumber(['recipient', 'message', 'file'])->name('attachment');
+        });
 
         Route::get('companies', [Admin\CompanyController::class, 'index'])->name('companies.index');
         Route::get('companies/create', [Admin\CompanyController::class, 'create'])->name('companies.create');

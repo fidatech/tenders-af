@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
  *   super    everything
  *   manager  everything except administrators, settings, the activity log and deleting a company
  *   viewer   may look at everything a manager sees, and change nothing
+ *   focal   can read and send messages
  * Everyone may sign out and change his own account.
  */
 class AdminRole
@@ -26,7 +27,18 @@ class AdminRole
         $admin = auth('admin')->user();
         $name = (string) $request->route()?->getName();
 
+        abort_if($admin?->is_active === false && $name !== 'admin.logout', 403);
+
         if (! $admin || $admin->isSuper() || in_array($name, self::OWN, true)) {
+            return $next($request);
+        }
+        if ($admin->role === 'focal') {
+            if ($name === 'admin.dashboard') {
+                return redirect()->route($admin->homeRoute());
+            }
+
+            abort_unless($request->routeIs('admin.messages.*'), 403);
+
             return $next($request);
         }
         if (Str::is(self::SUPER_ONLY, $name)) {

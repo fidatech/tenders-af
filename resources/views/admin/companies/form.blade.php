@@ -7,6 +7,9 @@
 @section('content')
 <x-page-header :title="$company ? $company->name : __('New company')" icon="building" :crumbs="[[__('Companies'), route('admin.companies.index')], [$company ? __('Edit') : __('Add')]]">
     @if ($company)
+        @if ($owner = $company->owner())
+            <a class="btn btn-outline-soft" href="{{ route('admin.messages.show', $owner) }}"><x-icon name="envelope" class="me-1" /> {{ __('Message company') }}</a>
+        @endif
         <a class="btn btn-primary" href="{{ route('admin.subscriptions.create', ['company' => $company->id]) }}"><x-icon name="receipt" class="me-1" /> {{ __('New subscription') }}</a>
     @endif
 </x-page-header>

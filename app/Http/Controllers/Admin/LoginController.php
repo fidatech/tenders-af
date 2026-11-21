@@ -47,7 +47,11 @@ class LoginController extends Controller
         $request->session()->regenerate();
         \App\Models\AdminLog::record('signed in');
 
-        return redirect()->intended(route('admin.dashboard'));
+        $admin = Auth::guard('admin')->user();
+
+        return $admin->role === 'focal'
+            ? redirect()->route($admin->homeRoute())
+            : redirect()->intended(route($admin->homeRoute()));
     }
 
     public function destroy(Request $request): RedirectResponse

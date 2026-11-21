@@ -253,8 +253,7 @@ class CompanyTest extends TestCase
         $sender = $this->signIn($company);
         $body = str_repeat('پیام شرکت ', 60)."\n".'<script>End of message</script>';
 
-        $this->get(route('dashboard'))->assertOk()->assertSee($form);
-        $this->get($form)->assertOk()->assertSee('Send message');
+        $this->get($form)->assertRedirect(route('messages.show'));
         $this->from($form)->post($send, ['subject' => 'Pricing question'])->assertSessionHasErrors('message');
         $this->post($send, ['subject' => 'Pricing question', 'message' => $body, 'email' => 'other@example.test'])
             ->assertRedirect($form)->assertSessionHas('success');
