@@ -3,6 +3,7 @@
     $pageTitle = $title.' | '.$name;
     $canonical = url()->current();
     $image = asset('img/og.png');
+    $imageAlt = $name.' banner reading “Every tender in Afghanistan.”';
     $menu = ['site.tenders' => ['site.tenders', 'site.sector', 'site.province', 'site.tenders.show'], 'site.companies' => ['site.companies', 'site.companies.show'], 'site.sectors' => ['site.sectors'], 'site.provinces' => ['site.provinces'], 'site.pricing' => ['site.pricing']];
     $productsOn = \App\Support\Platform::bool('products_enabled');
     $signedIn = auth('web')->check();
@@ -34,7 +35,7 @@
     }
 @endphp
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -51,17 +52,23 @@
 <meta name="theme-color" content="#0A2A1A">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{{ $name }}">
+<meta property="og:locale" content="en_US">
+<meta property="og:determiner" content="">
 <meta property="og:title" content="{{ $pageTitle }}">
 <meta property="og:description" content="{{ $description }}">
 <meta property="og:url" content="{{ $canonical }}">
 <meta property="og:image" content="{{ $image }}">
+<meta property="og:image:url" content="{{ $image }}">
+<meta property="og:image:secure_url" content="{{ secure_asset('img/og.png') }}">
+<meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="{{ $name }}: {{ config('site.tagline') }}">
+<meta property="og:image:alt" content="{{ $imageAlt }}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $pageTitle }}">
 <meta name="twitter:description" content="{{ $description }}">
 <meta name="twitter:image" content="{{ $image }}">
+<meta name="twitter:image:alt" content="{{ $imageAlt }}">
 <link rel="icon" href="{{ asset_v('img/favicon.svg') }}" type="image/svg+xml">
 <link rel="alternate" type="text/plain" href="{{ url('/llms.txt') }}" title="{{ $name }} for AI assistants">
 @include('partials.head-font')
