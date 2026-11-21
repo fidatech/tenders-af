@@ -1,0 +1,49 @@
+200  /
+200  /tenders
+200  /companies
+200  /register
+200  /login
+200  /admin/login
+200  /sitemap.xml
+000 -> no answer  http://tender.af/tenders
+000 -> no answer  https://tender.af/tenders
+301 -> https://tenders.af/tenders  https://www.tenders.af/tenders
+-- verification tags on https://tenders.af/
+<meta name="google-site-verification" content="J8acjyDxEnvrlerggEuM0d1dpHi1GSlmrVjdZ4YoNU4">
+-- headers of /: Cache-Control: no-cache, private Vary: Accept-Encoding Content-Encoding: gzip Content-Type: text/html; charset=utf-8 
+-- headers of /companies: Cache-Control: no-cache, private Vary: Accept-Encoding Content-Type: text/html; charset=utf-8 
+-- headers of /css/site.css: Vary: Accept-Encoding Content-Encoding: gzip Cache-Control: public, max-age=31536000, immutable Content-Type: text/css 
+-- compression by address (size of the gzipped answer):
+37984 bytes Content-Encoding: gzip Content-Length: 37984   /
+38028 bytes Content-Encoding: gzip Content-Length: 38028   /index.php
+4787 bytes Content-Encoding: gzip Content-Length: 4787   /index.php/companies
+20587 bytes Transfer-Encoding: chunked   /companies
+17411 bytes Transfer-Encoding: chunked   /tenders
+16287 bytes Transfer-Encoding: chunked   /sectors
+61257 bytes Transfer-Encoding: chunked   /provinces
+20611 bytes Transfer-Encoding: chunked   /pricing
+332 bytes Transfer-Encoding: chunked   /robots.txt
+7400 bytes Transfer-Encoding: chunked   /sitemap.xml
+7756 bytes Transfer-Encoding: chunked   /llms.txt
+1497 bytes Content-Encoding: gzip Content-Length: 1497   /js/select2-init.js
+419 bytes Content-Length: 419   /manifest.webmanifest
+-- full headers of /companies:
+HTTP/1.1 200 OK
+Date: Sat, 21 Nov 2026 18:43:54 GMT
+Server: Apache
+Cache-Control: no-cache, private
+Vary: Accept-Encoding
+Content-Encoding: gzip
+Content-Length: 37984
+Content-Type: text/html; charset=utf-8
+
+HTTP/1.1 200 OK
+Date: Sat, 21 Nov 2026 18:43:54 GMT
+Server: Apache
+Cache-Control: no-cache, private
+Vary: Accept-Encoding
+Transfer-Encoding: chunked
+Content-Type: text/html; charset=utf-8
+
+8.4.28 gzencode: yes output_compression: 
+8.3.37 gzencode: yes output_compression: 

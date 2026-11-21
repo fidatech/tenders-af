@@ -1,0 +1,64 @@
+
+   PASS  Tests\Unit\HelpersTest
+  ✓ initials
+  ✓ money and sums
+  ✓ grouped numbers
+
+   PASS  Tests\Feature\BuyerTest
+  ✓ an organisation registers as a buyer and only sees the buyer menu    0.27s  
+  ✓ a posted tender waits for an administrator and is published after a… 0.06s  
+  ✓ a buyer adds several documents at once                               0.02s  
+  ✓ a tender is sent back with a reason and the buyer sends it again     0.04s  
+  ✓ a buyer extends cancels and awards only its own published tenders    0.02s  
+  ✓ a company that only looks for tenders has no posting pages           0.03s  
+  ✓ when posting is no longer free a buyer needs a plan that includes i… 0.02s  
+
+   PASS  Tests\Feature\CompanyTest
+  ✓ registration is free and the kind of company decides the currency    0.02s  
+  ✓ a free company sees the summary and a paid one the full tender       0.05s  
+  ✓ the subscription page offers plans and payment methods in the curre… 0.04s  
+  ✓ a company saves a tender and finds it under saved tenders            0.02s  
+  ✓ a matching tender is emailed once to a company with instant alerts   0.02s  
+  ✓ a company sends its licence and an administrator verifies it         0.03s  
+  ✓ an administrator enters a tender and publishes it                    0.05s  
+  ✓ the website is saved with https and the country comes from the list  0.03s  
+  ✓ whatsapp alerts are locked on a plan without them                    0.03s  
+  ✓ administrators are told about new companies and licences             0.06s  
+  ✓ admin sidebar links to notifications and mark all covers every page  0.07s  
+  ✓ a company can send a full message to the administrators              0.03s  
+
+   PASS  Tests\Feature\CompressionTest
+  ✓ pages are gzipped when the browser accepts it                        0.02s  
+  ✓ pages are plain without gzip                                         0.01s  
+
+   PASS  Tests\Feature\DirectMessageTest
+  ✓ a focal point and bidder can exchange private messages and attachme… 0.06s  
+  ✓ messages reject empty posts and unsafe file types                    0.01s  
+
+   PASS  Tests\Feature\OfficeRegisterTest
+  ✓ owner reviews employee collections expenses and handovers without d… 0.11s  
+  ✓ verifier and custom staff have only their assigned capabilities      0.04s  
+  ✓ hesabpay requires a reference and can only be recorded once          0.02s  
+
+   PASS  Tests\Feature\ProductTest
+  ✓ the module is off until an administrator switches it on              0.04s  
+  ✓ a product with a picture and a video is shown after approval         0.24s  
+  ✓ a product needs a smallest order and a company lists a limited numb… 0.03s  
+  ✓ a company pays to sponsor a product and it is shown first            0.06s  
+  ✓ the statistics page hides small numbers and shows real ones          0.03s  
+
+   PASS  Tests\Feature\SiteTest
+  ✓ every page of the website opens for a visitor                        0.18s  
+  ✓ a visitor reads the summary of a tender but not its full details     0.01s  
+  ✓ a draft tender is not on the website                                 0.01s  
+  ✓ the pricing page shows afn prices first and usd prices on request    0.03s  
+  ✓ a listed company has a public page and an unlisted one has none      0.02s  
+  ✓ the other addresses lead to the main one                             0.01s  
+
+   PASS  Tests\Feature\SiteVerificationTest
+  ✓ home page has google verification tag                                0.02s  
+  ✓ public pages have complete website share metadata                    0.01s  
+
+  Tests:    42 passed (467 assertions)
+  Duration: 2.01s
+

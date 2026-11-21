@@ -1,0 +1,260 @@
+== .logs/lh-desktop__.json  https://tenders.af/
+  Performance: 100
+  Accessibility: 100
+  Best Practices: 100
+  SEO: 100
+  First Contentful Paint: 0.3 s
+  Largest Contentful Paint: 0.5 s
+  Total Blocking Time: 0 ms
+  Cumulative Layout Shift: 0
+  Speed Index: 0.4 s
+  LCP element: <h1>
+  mainthread-work-breakdown (0.2 s): {"group":"styleLayout","groupLabel":"Style & Layout","duration":100.41099999999997} | {"group":"other","groupLabel":"Other","duration":80.65600000000025} | {"group":"paintCompositeRender","groupLabel":"Rendering","duration":5.3169999999999975} | {"group":"parseHTML","groupLabel":"Parse HTML & CSS","duration":4.810999999999999} | {"group":"scriptEvaluation","groupLabel":"Script Evaluation","duration":3.3719999999999977}
+  long-tasks (1 long task found): {"url":"https://tenders.af/","duration":52,"startTime":273.547}
+  dom-size (635 elements): {"statistic":"Total DOM Elements","value":{"type":"numeric","granularity":1,"value":635}} | {"node":{"type":"node","lhId":"1-127-path","path":"1,HTML,1,BODY,2,MAIN,5,SECTION,0,DIV,1,DIV,0,A,1,DIV,4,UL,0,LI,0,svg,0,path","selector":"ul.facts-row > li >  | {"node":{"type":"node","lhId":"1-128-svg","path":"1,HTML,1,BODY,2,MAIN,4,SECTION,0,DIV,1,DIV,0,DIV,0,svg","selector":"div.dark > div.mapwrap > div.mapscroll > s
+  bootup-time (0.0 s): {"url":"https://tenders.af/","total":125.60399999999997,"scripting":2.084999999999999,"scriptParseCompile":0.614} | {"url":"Unattributable","total":67.78100000000012,"scripting":0.9100000000000001,"scriptParseCompile":0}
+  -- not passing:
+  [0.5] uses-long-cache-ttl: Serve static assets with an efficient cache policy (2 resources found)
+      {"url":"https://tenders.af/companies/fida-technologies/logo","debugData":{"type":"debugdata","max-age":86400,"public":true},"cacheLifetimeMs":86400000,"cacheHitProbability":0.6,"totalBytes":487011,"wastedBytes":194804.40000000002}
+      {"url":"https://tenders.af/companies/rahimee-hewad-ltd/logo","debugData":{"type":"debugdata","max-age":86400,"public":true},"cacheLifetimeMs":86400000,"cacheHitProbability":0.6,"totalBytes":350474,"wastedBytes":140189.6}
+  [0.5] unminified-css: Minify CSS (Est savings of 2 KiB)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedBytes":2095,"wastedPercent":16.678019038758663}
+  [0.5] modern-image-formats: Serve images in next-gen formats (Est savings of 742 KiB)
+      {"node":{"type":"node","lhId":"1-135-IMG","path":"1,HTML,1,BODY,2,MAIN,5,SECTION,0,DIV,1,DIV,1,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":2962,"bottom":3016,"left":377,"right":431,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/compan
+      {"node":{"type":"node","lhId":"1-134-IMG","path":"1,HTML,1,BODY,2,MAIN,5,SECTION,0,DIV,1,DIV,0,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":2962,"bottom":3016,"left":54,"right":108,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/compani
+  [0.5] uses-responsive-images: Properly size images (Est savings of 814 KiB)
+      {"node":{"type":"node","lhId":"1-135-IMG","path":"1,HTML,1,BODY,2,MAIN,5,SECTION,0,DIV,1,DIV,1,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":2962,"bottom":3016,"left":377,"right":431,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/compan
+      {"node":{"type":"node","lhId":"1-134-IMG","path":"1,HTML,1,BODY,2,MAIN,5,SECTION,0,DIV,1,DIV,0,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":2962,"bottom":3016,"left":54,"right":108,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/compani
+  [0] uses-http2: Use HTTP/2 (8 requests not served via HTTP/2)
+      {"protocol":"http/1.1","url":"https://tenders.af/"}
+      {"protocol":"http/1.1","url":"https://tenders.af/fonts/jakarta-latin.woff2?v=1795286559"}
+      {"protocol":"http/1.1","url":"https://tenders.af/css/site.css?v=1795286548"}
+      {"protocol":"http/1.1","url":"https://tenders.af/vendor/select2/select2.min.css?v=1795286548"}
+      {"protocol":"http/1.1","url":"https://tenders.af/icons.svg?v=1795286548"}
+      {"protocol":"http/1.1","url":"https://tenders.af/companies/rahimee-hewad-ltd/logo"}
+  [0.5] cache-insight: Use efficient cache lifetimes (Est savings of 327 KiB)
+      {"url":"https://tenders.af/companies/fida-technologies/logo","cacheLifetimeMs":86400000,"totalBytes":487011,"wastedBytes":194804.40000000002}
+      {"url":"https://tenders.af/companies/rahimee-hewad-ltd/logo","cacheLifetimeMs":86400000,"totalBytes":350474,"wastedBytes":140189.6}
+  [0.5] image-delivery-insight: Improve image delivery (Est savings of 815 KiB)
+      {"url":"https://tenders.af/companies/fida-technologies/logo","totalBytes":485794,"wastedBytes":485327,"subItems":{"type":"subitems","items":[{"reason":"Using a modern image format (WebP, AVIF) or increasing the image compression could improve this image's download size.","wastedBytes":303863},{"reas
+      {"url":"https://tenders.af/companies/rahimee-hewad-ltd/logo","totalBytes":349257,"wastedBytes":349014,"subItems":{"type":"subitems","items":[{"reason":"This image file is larger than it needs to be (2048x2048) for its displayed dimensions (54x54). Use responsive images to reduce the image download s
+  [0] network-dependency-tree-insight: Network dependency tree
+      {"type":"list-section","value":{"type":"network-tree","chains":{"70F7BDF5036DD2F8F036498497EE1286":{"url":"https://tenders.af/","navStartToEndTime":145,"transferSize":39175,"isLongest":true,"children":{"3472.3":{"url":"https://tenders.af/css/site.css?v=1795286548","navStartToEndTime":149,"transferSi
+      {"type":"list-section","title":"Preconnected origins","description":"[preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints help the browser establish a connection earlier in the page load, saving time when the first request for that origin is made. The fol
+      {"type":"list-section","title":"Preconnect candidates","description":"Add [preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints to your most important origins, but try to use no more than 4.","value":{"type":"text","value":"No additional origins are good c
+  [0.5] render-blocking-insight: Render blocking requests
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563}
+
+== .logs/lh-desktop_companies_.json  https://tenders.af/companies
+  Performance: 100
+  Accessibility: 98
+  Best Practices: 100
+  SEO: 100
+  First Contentful Paint: 0.3 s
+  Largest Contentful Paint: 0.4 s
+  Total Blocking Time: 0 ms
+  Cumulative Layout Shift: 0
+  Speed Index: 0.3 s
+  LCP element: <p class=\
+  mainthread-work-breakdown (0.1 s): {"group":"other","groupLabel":"Other","duration":70.67099999999995} | {"group":"styleLayout","groupLabel":"Style & Layout","duration":16.678} | {"group":"paintCompositeRender","groupLabel":"Rendering","duration":3.3229999999999977} | {"group":"scriptEvaluation","groupLabel":"Script Evaluation","duration":3.1679999999999984} | {"group":"parseHTML","groupLabel":"Parse HTML & CSS","duration":2.8219999999999996}
+  long-tasks: 
+  dom-size (233 elements): {"statistic":"Total DOM Elements","value":{"type":"numeric","granularity":1,"value":233}} | {"node":{"type":"node","lhId":"1-39-path","path":"1,HTML,1,BODY,3,FOOTER,1,DIV,0,DIV,4,DIV,1,UL,0,LI,0,A,0,SPAN,0,svg,0,path","selector":"a > span.ci > svg > pa | {"node":{"type":"node","lhId":"1-40-SELECT","path":"1,HTML,1,BODY,2,MAIN,0,DIV,0,FORM,2,SELECT","selector":"main#content > div.wrap > form.filters > select","bo
+  bootup-time (0.0 s): {"url":"Unattributable","total":66.25900000000004,"scripting":0.916,"scriptParseCompile":0}
+  -- not passing:
+  [0] heading-order: Heading elements are not in a sequentially-descending order
+      {"node":{"type":"node","lhId":"1-0-H3","path":"1,HTML,1,BODY,2,MAIN,0,DIV,2,DIV,0,A,1,DIV,1,H3","selector":"div.grid-companies > a.company > div.in > h3","boundingRect":{"top":579,"bottom":601,"left":51,"right":314,"width":263,"height":22},"snippet":"<h3>","nodeLabel":"Fida Technologies","explanatio
+  [0.5] uses-long-cache-ttl: Serve static assets with an efficient cache policy (2 resources found)
+      {"url":"https://tenders.af/companies/fida-technologies/logo","debugData":{"type":"debugdata","max-age":86400,"public":true},"cacheLifetimeMs":86400000,"cacheHitProbability":0.6,"totalBytes":487011,"wastedBytes":194804.40000000002}
+      {"url":"https://tenders.af/companies/rahimee-hewad-ltd/logo","debugData":{"type":"debugdata","max-age":86400,"public":true},"cacheLifetimeMs":86400000,"cacheHitProbability":0.6,"totalBytes":350474,"wastedBytes":140189.6}
+  [0.5] unminified-css: Minify CSS (Est savings of 2 KiB)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedBytes":2095,"wastedPercent":16.678019038758663}
+  [0.5] modern-image-formats: Serve images in next-gen formats (Est savings of 742 KiB)
+      {"node":{"type":"node","lhId":"1-46-IMG","path":"1,HTML,1,BODY,2,MAIN,0,DIV,2,DIV,0,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":510,"bottom":564,"left":54,"right":108,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/companies/fida-techn
+      {"node":{"type":"node","lhId":"1-47-IMG","path":"1,HTML,1,BODY,2,MAIN,0,DIV,2,DIV,1,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":510,"bottom":564,"left":377,"right":431,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/companies/rahimee-h
+  [0] uses-text-compression: Enable text compression (Est savings of 15 KiB)
+      {"url":"https://tenders.af/companies","totalBytes":20587,"wastedBytes":15830}
+  [0.5] uses-responsive-images: Properly size images (Est savings of 814 KiB)
+      {"node":{"type":"node","lhId":"1-46-IMG","path":"1,HTML,1,BODY,2,MAIN,0,DIV,2,DIV,0,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":510,"bottom":564,"left":54,"right":108,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/companies/fida-techn
+      {"node":{"type":"node","lhId":"1-47-IMG","path":"1,HTML,1,BODY,2,MAIN,0,DIV,2,DIV,1,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":510,"bottom":564,"left":377,"right":431,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/companies/rahimee-h
+  [0] uses-http2: Use HTTP/2 (8 requests not served via HTTP/2)
+      {"protocol":"http/1.1","url":"https://tenders.af/companies"}
+      {"protocol":"http/1.1","url":"https://tenders.af/fonts/jakarta-latin.woff2?v=1795286559"}
+      {"protocol":"http/1.1","url":"https://tenders.af/css/site.css?v=1795286548"}
+      {"protocol":"http/1.1","url":"https://tenders.af/vendor/select2/select2.min.css?v=1795286548"}
+      {"protocol":"http/1.1","url":"https://tenders.af/icons.svg?v=1795286548"}
+      {"protocol":"http/1.1","url":"https://tenders.af/companies/fida-technologies/logo"}
+  [0.5] cache-insight: Use efficient cache lifetimes (Est savings of 327 KiB)
+      {"url":"https://tenders.af/companies/fida-technologies/logo","cacheLifetimeMs":86400000,"totalBytes":487011,"wastedBytes":194804.40000000002}
+      {"url":"https://tenders.af/companies/rahimee-hewad-ltd/logo","cacheLifetimeMs":86400000,"totalBytes":350474,"wastedBytes":140189.6}
+  [0.5] document-latency-insight: Document request latency (Est savings of 13 KiB)
+      {"noRedirects":{"label":"Avoids redirects","value":true},"serverResponseIsFast":{"label":"Server responds quickly (observed 72 ms)","value":true},"usesCompression":{"label":"No compression applied","value":false}}
+  [0.5] image-delivery-insight: Improve image delivery (Est savings of 815 KiB)
+      {"url":"https://tenders.af/companies/fida-technologies/logo","totalBytes":485794,"wastedBytes":485327,"subItems":{"type":"subitems","items":[{"reason":"Using a modern image format (WebP, AVIF) or increasing the image compression could improve this image's download size.","wastedBytes":303863},{"reas
+      {"url":"https://tenders.af/companies/rahimee-hewad-ltd/logo","totalBytes":349257,"wastedBytes":349014,"subItems":{"type":"subitems","items":[{"reason":"This image file is larger than it needs to be (2048x2048) for its displayed dimensions (54x54). Use responsive images to reduce the image download s
+  [0] network-dependency-tree-insight: Network dependency tree
+      {"type":"list-section","value":{"type":"network-tree","chains":{"B8C9E3A9A6FD0A51405EBE095EB6E68F":{"url":"https://tenders.af/companies","navStartToEndTime":142,"transferSize":21780,"isLongest":true,"children":{"4216.3":{"url":"https://tenders.af/css/site.css?v=1795286548","navStartToEndTime":148,"t
+      {"type":"list-section","title":"Preconnected origins","description":"[preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints help the browser establish a connection earlier in the page load, saving time when the first request for that origin is made. The fol
+      {"type":"list-section","title":"Preconnect candidates","description":"Add [preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints to your most important origins, but try to use no more than 4.","value":{"type":"text","value":"No additional origins are good c
+  [0.5] render-blocking-insight: Render blocking requests
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563}
+
+== .logs/lh-desktop_tenders_.json  https://tenders.af/tenders
+  Performance: 100
+  Accessibility: 100
+  Best Practices: 100
+  SEO: 100
+  First Contentful Paint: 0.3 s
+  Largest Contentful Paint: 0.4 s
+  Total Blocking Time: 0 ms
+  Cumulative Layout Shift: 0
+  Speed Index: 0.3 s
+  LCP element: <p class=\
+  mainthread-work-breakdown (0.0 s): {"group":"other","groupLabel":"Other","duration":23.26400000000002} | {"group":"styleLayout","groupLabel":"Style & Layout","duration":12.243999999999998} | {"group":"scriptEvaluation","groupLabel":"Script Evaluation","duration":4.2049999999999965} | {"group":"parseHTML","groupLabel":"Parse HTML & CSS","duration":2.2569999999999997} | {"group":"paintCompositeRender","groupLabel":"Rendering","duration":2.0719999999999983}
+  long-tasks: 
+  dom-size (181 elements): {"statistic":"Total DOM Elements","value":{"type":"numeric","granularity":1,"value":181}} | {"node":{"type":"node","lhId":"1-36-path","path":"1,HTML,1,BODY,3,FOOTER,1,DIV,0,DIV,4,DIV,1,UL,0,LI,0,A,0,SPAN,0,svg,0,path","selector":"a > span.ci > svg > pa | {"node":{"type":"node","lhId":"1-37-SELECT","path":"1,HTML,1,BODY,2,MAIN,0,DIV,0,FORM,2,SELECT","selector":"main#content > div.wrap > form.filters > select","bo
+  bootup-time: 
+  -- not passing:
+  [0.5] unminified-css: Minify CSS (Est savings of 2 KiB)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedBytes":2095,"wastedPercent":16.678019038758663}
+  [0.5] unused-css-rules: Reduce unused CSS (Est savings of 10 KiB)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","wastedBytes":10406,"wastedPercent":85.14943598092802,"totalBytes":12221}
+  [0] uses-text-compression: Enable text compression (Est savings of 13 KiB)
+      {"url":"https://tenders.af/tenders","totalBytes":17411,"wastedBytes":12992}
+  [0.5] document-latency-insight: Document request latency (Est savings of 11 KiB)
+      {"noRedirects":{"label":"Avoids redirects","value":true},"serverResponseIsFast":{"label":"Server responds quickly (observed 60 ms)","value":true},"usesCompression":{"label":"No compression applied","value":false}}
+  [0] network-dependency-tree-insight: Network dependency tree
+      {"type":"list-section","value":{"type":"network-tree","chains":{"3A9F577C36FA9CC98925EA3036822672":{"url":"https://tenders.af/tenders","navStartToEndTime":94,"transferSize":18603,"isLongest":true,"children":{"3845.3":{"url":"https://tenders.af/css/site.css?v=1795286548","navStartToEndTime":101,"tran
+      {"type":"list-section","title":"Preconnected origins","description":"[preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints help the browser establish a connection earlier in the page load, saving time when the first request for that origin is made. The fol
+      {"type":"list-section","title":"Preconnect candidates","description":"Add [preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints to your most important origins, but try to use no more than 4.","value":{"type":"text","value":"No additional origins are good c
+  [0.5] render-blocking-insight: Render blocking requests
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563}
+
+== .logs/lh-mobile__.json  https://tenders.af/
+  Performance: 82
+  Accessibility: 100
+  Best Practices: 100
+  SEO: 100
+  First Contentful Paint: 1.1 s
+  Largest Contentful Paint: 1.9 s
+  Total Blocking Time: 710 ms
+  Cumulative Layout Shift: 0
+  Speed Index: 1.8 s
+  LCP element: <p class=\
+  mainthread-work-breakdown (2.5 s): {"group":"styleLayout","groupLabel":"Style & Layout","duration":1099.5279999999998} | {"group":"other","groupLabel":"Other","duration":889.9079999999966} | {"group":"paintCompositeRender","groupLabel":"Rendering","duration":319.83199999999977} | {"group":"parseHTML","groupLabel":"Parse HTML & CSS","duration":130.31200000000004} | {"group":"scriptEvaluation","groupLabel":"Script Evaluation","duration":83.38800000000003}
+  long-tasks (4 long tasks found): {"url":"https://tenders.af/","duration":569,"startTime":1322.5505} | {"url":"https://tenders.af/","duration":282.0000000000002,"startTime":1891.5505} | {"url":"https://tenders.af/","duration":152,"startTime":904.5505} | {"url":"Unattributable","duration":129,"startTime":1056.5505}
+  dom-size (635 elements): {"statistic":"Total DOM Elements","value":{"type":"numeric","granularity":1,"value":635}} | {"node":{"type":"node","lhId":"1-127-path","path":"1,HTML,1,BODY,2,MAIN,5,SECTION,0,DIV,1,DIV,0,A,1,DIV,4,UL,0,LI,0,svg,0,path","selector":"ul.facts-row > li >  | {"node":{"type":"node","lhId":"1-128-svg","path":"1,HTML,1,BODY,2,MAIN,4,SECTION,0,DIV,1,DIV,0,DIV,0,svg","selector":"div.dark > div.mapwrap > div.mapscroll > s
+  bootup-time (0.1 s): {"url":"https://tenders.af/","total":2055.6199999999994,"scripting":42.632000000000005,"scriptParseCompile":1.8880000000000001} | {"url":"Unattributable","total":438.74800000000016,"scripting":38.699999999999996,"scriptParseCompile":0}
+  -- not passing:
+  [0.99] first-contentful-paint: First Contentful Paint (1.1 s)
+  [0.98] largest-contentful-paint: Largest Contentful Paint (1.9 s)
+  [0.42] total-blocking-time: Total Blocking Time (710 ms)
+  [0.05] max-potential-fid: Max Potential First Input Delay (570 ms)
+  [0.99] interactive: Time to Interactive (2.1 s)
+  [0] mainthread-work-breakdown: Minimize main-thread work (2.5 s)
+      {"group":"styleLayout","groupLabel":"Style & Layout","duration":1099.5279999999998}
+      {"group":"other","groupLabel":"Other","duration":889.9079999999966}
+      {"group":"paintCompositeRender","groupLabel":"Rendering","duration":319.83199999999977}
+      {"group":"parseHTML","groupLabel":"Parse HTML & CSS","duration":130.31200000000004}
+      {"group":"scriptEvaluation","groupLabel":"Script Evaluation","duration":83.38800000000003}
+      {"group":"scriptParseCompile","groupLabel":"Script Parsing & Compilation","duration":1.8880000000000001}
+  [0.5] render-blocking-resources: Eliminate render-blocking resources (Est savings of 0 ms)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedMs":155}
+  [0] unminified-css: Minify CSS (Est savings of 2 KiB)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedBytes":2095,"wastedPercent":16.678019038758663}
+  [0] network-dependency-tree-insight: Network dependency tree
+      {"type":"list-section","value":{"type":"network-tree","chains":{"AD08DCB1555D3A063A69404CB0D2149B":{"url":"https://tenders.af/","navStartToEndTime":213,"transferSize":39175,"isLongest":true,"children":{"3287.3":{"url":"https://tenders.af/css/site.css?v=1795286548","navStartToEndTime":212,"transferSi
+      {"type":"list-section","title":"Preconnected origins","description":"[preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints help the browser establish a connection earlier in the page load, saving time when the first request for that origin is made. The fol
+      {"type":"list-section","title":"Preconnect candidates","description":"Add [preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints to your most important origins, but try to use no more than 4.","value":{"type":"text","value":"No additional origins are good c
+  [0.5] render-blocking-insight: Render blocking requests
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedMs":155}
+
+== .logs/lh-mobile_companies_.json  https://tenders.af/companies
+  Performance: 100
+  Accessibility: 98
+  Best Practices: 100
+  SEO: 100
+  First Contentful Paint: 1.1 s
+  Largest Contentful Paint: 1.7 s
+  Total Blocking Time: 0 ms
+  Cumulative Layout Shift: 0
+  Speed Index: 1.1 s
+  LCP element: <p class=\
+  mainthread-work-breakdown (0.2 s): {"group":"other","groupLabel":"Other","duration":138.96400000000045} | {"group":"styleLayout","groupLabel":"Style & Layout","duration":61.77199999999997} | {"group":"paintCompositeRender","groupLabel":"Rendering","duration":12.891999999999973} | {"group":"scriptEvaluation","groupLabel":"Script Evaluation","duration":12.719999999999997} | {"group":"parseHTML","groupLabel":"Parse HTML & CSS","duration":10.779999999999998}
+  long-tasks: 
+  dom-size (233 elements): {"statistic":"Total DOM Elements","value":{"type":"numeric","granularity":1,"value":233}} | {"node":{"type":"node","lhId":"1-39-path","path":"1,HTML,1,BODY,3,FOOTER,1,DIV,0,DIV,4,DIV,1,UL,0,LI,0,A,0,SPAN,0,svg,0,path","selector":"a > span.ci > svg > pa | {"node":{"type":"node","lhId":"1-40-SELECT","path":"1,HTML,1,BODY,2,MAIN,0,DIV,0,FORM,2,SELECT","selector":"main#content > div.wrap > form.filters > select","bo
+  bootup-time (0.0 s): {"url":"Unattributable","total":123.84800000000027,"scripting":3.7159999999999997,"scriptParseCompile":0} | {"url":"https://tenders.af/companies","total":107.41199999999994,"scripting":7.319999999999998,"scriptParseCompile":1.464}
+  -- not passing:
+  [0.99] largest-contentful-paint: Largest Contentful Paint (1.7 s)
+  [0] heading-order: Heading elements are not in a sequentially-descending order
+      {"node":{"type":"node","lhId":"1-0-H3","path":"1,HTML,1,BODY,2,MAIN,0,DIV,2,DIV,0,A,1,DIV,1,H3","selector":"div.grid-companies > a.company > div.in > h3","boundingRect":{"top":724,"bottom":746,"left":35,"right":377,"width":342,"height":22},"snippet":"<h3>","nodeLabel":"Fida Technologies","explanatio
+  [0.5] uses-long-cache-ttl: Serve static assets with an efficient cache policy (2 resources found)
+      {"url":"https://tenders.af/companies/fida-technologies/logo","debugData":{"type":"debugdata","max-age":86400,"public":true},"cacheLifetimeMs":86400000,"cacheHitProbability":0.6,"totalBytes":487011,"wastedBytes":194804.40000000002}
+      {"url":"https://tenders.af/companies/rahimee-hewad-ltd/logo","debugData":{"type":"debugdata","max-age":86400,"public":true},"cacheLifetimeMs":86400000,"cacheHitProbability":0.6,"totalBytes":350474,"wastedBytes":140189.6}
+  [0] render-blocking-resources: Eliminate render-blocking resources (Est savings of 120 ms)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedMs":154}
+  [0.5] unminified-css: Minify CSS (Est savings of 2 KiB)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedBytes":2095,"wastedPercent":16.678019038758663}
+  [0.5] modern-image-formats: Serve images in next-gen formats (Est savings of 742 KiB)
+      {"node":{"type":"node","lhId":"1-46-IMG","path":"1,HTML,1,BODY,2,MAIN,0,DIV,2,DIV,0,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":655,"bottom":709,"left":38,"right":92,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/companies/fida-techno
+      {"node":{"type":"node","lhId":"1-47-IMG","path":"1,HTML,1,BODY,2,MAIN,0,DIV,2,DIV,1,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":1005,"bottom":1059,"left":38,"right":92,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/companies/rahimee-h
+  [0] uses-text-compression: Enable text compression (Est savings of 15 KiB)
+      {"url":"https://tenders.af/companies","totalBytes":20587,"wastedBytes":15830}
+  [0.5] uses-responsive-images: Properly size images (Est savings of 811 KiB)
+      {"node":{"type":"node","lhId":"1-46-IMG","path":"1,HTML,1,BODY,2,MAIN,0,DIV,2,DIV,0,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":655,"bottom":709,"left":38,"right":92,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/companies/fida-techno
+      {"node":{"type":"node","lhId":"1-47-IMG","path":"1,HTML,1,BODY,2,MAIN,0,DIV,2,DIV,1,A,1,DIV,0,DIV,0,IMG","selector":"a.company > div.in > div.logo > img","boundingRect":{"top":1005,"bottom":1059,"left":38,"right":92,"width":54,"height":54},"snippet":"<img src=\"https://tenders.af/companies/rahimee-h
+  [0] uses-http2: Use HTTP/2 (8 requests not served via HTTP/2)
+      {"protocol":"http/1.1","url":"https://tenders.af/companies"}
+      {"protocol":"http/1.1","url":"https://tenders.af/fonts/jakarta-latin.woff2?v=1795286559"}
+      {"protocol":"http/1.1","url":"https://tenders.af/css/site.css?v=1795286548"}
+      {"protocol":"http/1.1","url":"https://tenders.af/vendor/select2/select2.min.css?v=1795286548"}
+      {"protocol":"http/1.1","url":"https://tenders.af/icons.svg?v=1795286548"}
+      {"protocol":"http/1.1","url":"https://tenders.af/companies/fida-technologies/logo"}
+  [0.5] cache-insight: Use efficient cache lifetimes (Est savings of 327 KiB)
+      {"url":"https://tenders.af/companies/fida-technologies/logo","cacheLifetimeMs":86400000,"totalBytes":487011,"wastedBytes":194804.40000000002}
+      {"url":"https://tenders.af/companies/rahimee-hewad-ltd/logo","cacheLifetimeMs":86400000,"totalBytes":350474,"wastedBytes":140189.6}
+  [0.5] document-latency-insight: Document request latency (Est savings of 13 KiB)
+      {"noRedirects":{"label":"Avoids redirects","value":true},"serverResponseIsFast":{"label":"Server responds quickly (observed 48 ms)","value":true},"usesCompression":{"label":"No compression applied","value":false}}
+  [0.5] image-delivery-insight: Improve image delivery (Est savings of 815 KiB)
+      {"url":"https://tenders.af/companies/fida-technologies/logo","totalBytes":485794,"wastedBytes":485327,"subItems":{"type":"subitems","items":[{"reason":"Using a modern image format (WebP, AVIF) or increasing the image compression could improve this image's download size.","wastedBytes":303863},{"reas
+      {"url":"https://tenders.af/companies/rahimee-hewad-ltd/logo","totalBytes":349257,"wastedBytes":349014,"subItems":{"type":"subitems","items":[{"reason":"This image file is larger than it needs to be (2048x2048) for its displayed dimensions (54x54). Use responsive images to reduce the image download s
+  [0] network-dependency-tree-insight: Network dependency tree
+      {"type":"list-section","value":{"type":"network-tree","chains":{"95481235A69A59AF7BC069CA6691B8BA":{"url":"https://tenders.af/companies","navStartToEndTime":86,"transferSize":21780,"isLongest":true,"children":{"4036.3":{"url":"https://tenders.af/css/site.css?v=1795286548","navStartToEndTime":95,"tra
+      {"type":"list-section","title":"Preconnected origins","description":"[preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints help the browser establish a connection earlier in the page load, saving time when the first request for that origin is made. The fol
+      {"type":"list-section","title":"Preconnect candidates","description":"Add [preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints to your most important origins, but try to use no more than 4.","value":{"type":"text","value":"No additional origins are good c
+  [0] render-blocking-insight: Render blocking requests (Est savings of 140 ms)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedMs":154}
+
+== .logs/lh-mobile_tenders_.json  https://tenders.af/tenders
+  Performance: 100
+  Accessibility: 100
+  Best Practices: 100
+  SEO: 100
+  First Contentful Paint: 1.1 s
+  Largest Contentful Paint: 1.7 s
+  Total Blocking Time: 0 ms
+  Cumulative Layout Shift: 0
+  Speed Index: 1.1 s
+  LCP element: <p class=\
+  mainthread-work-breakdown (0.3 s): {"group":"other","groupLabel":"Other","duration":101.04000000000005} | {"group":"paintCompositeRender","groupLabel":"Rendering","duration":81.73599999999999} | {"group":"styleLayout","groupLabel":"Style & Layout","duration":48.263999999999996} | {"group":"scriptEvaluation","groupLabel":"Script Evaluation","duration":12.155999999999995} | {"group":"parseHTML","groupLabel":"Parse HTML & CSS","duration":8.664000000000001}
+  long-tasks (1 long task found): {"url":"Unattributable","duration":75,"startTime":931.656}
+  dom-size (181 elements): {"statistic":"Total DOM Elements","value":{"type":"numeric","granularity":1,"value":181}} | {"node":{"type":"node","lhId":"1-36-path","path":"1,HTML,1,BODY,3,FOOTER,1,DIV,0,DIV,4,DIV,1,UL,0,LI,0,A,0,SPAN,0,svg,0,path","selector":"a > span.ci > svg > pa | {"node":{"type":"node","lhId":"1-37-SELECT","path":"1,HTML,1,BODY,2,MAIN,0,DIV,0,FORM,2,SELECT","selector":"main#content > div.wrap > form.filters > select","bo
+  bootup-time (0.0 s): {"url":"Unattributable","total":150.16000000000003,"scripting":3.508,"scriptParseCompile":0} | {"url":"https://tenders.af/tenders","total":96.75999999999999,"scripting":6.975999999999998,"scriptParseCompile":1.7000000000000002}
+  -- not passing:
+  [0.99] largest-contentful-paint: Largest Contentful Paint (1.7 s)
+  [0] render-blocking-resources: Eliminate render-blocking resources (Est savings of 120 ms)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedMs":151}
+  [0.5] unminified-css: Minify CSS (Est savings of 2 KiB)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedBytes":2095,"wastedPercent":16.678019038758663}
+  [0.5] unused-css-rules: Reduce unused CSS (Est savings of 10 KiB)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","wastedBytes":10276,"wastedPercent":84.08452810127423,"totalBytes":12221}
+  [0] uses-text-compression: Enable text compression (Est savings of 13 KiB)
+      {"url":"https://tenders.af/tenders","totalBytes":17411,"wastedBytes":12992}
+  [0.5] document-latency-insight: Document request latency (Est savings of 11 KiB)
+      {"noRedirects":{"label":"Avoids redirects","value":true},"serverResponseIsFast":{"label":"Server responds quickly (observed 52 ms)","value":true},"usesCompression":{"label":"No compression applied","value":false}}
+  [0] network-dependency-tree-insight: Network dependency tree
+      {"type":"list-section","value":{"type":"network-tree","chains":{"F4EAEB3375AA5F44F38C0940A207AE1F":{"url":"https://tenders.af/tenders","navStartToEndTime":84,"transferSize":18603,"isLongest":true,"children":{"3662.3":{"url":"https://tenders.af/css/site.css?v=1795286548","navStartToEndTime":93,"trans
+      {"type":"list-section","title":"Preconnected origins","description":"[preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints help the browser establish a connection earlier in the page load, saving time when the first request for that origin is made. The fol
+      {"type":"list-section","title":"Preconnect candidates","description":"Add [preconnect](https://developer.chrome.com/docs/lighthouse/performance/uses-rel-preconnect/) hints to your most important origins, but try to use no more than 4.","value":{"type":"text","value":"No additional origins are good c
+  [0] render-blocking-insight: Render blocking requests (Est savings of 120 ms)
+      {"url":"https://tenders.af/css/site.css?v=1795286548","totalBytes":12563,"wastedMs":151}
+
