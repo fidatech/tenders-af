@@ -14,7 +14,9 @@
             @endforeach
         </select>
     </form>
-    <a class="btn btn-primary" href="{{ route('admin.expenses.create') }}"><x-icon name="plus" class="me-1" /> {{ __('Add an expense') }}</a>
+    @if (auth('admin')->user()->isSuper())
+    <a class="btn btn-primary" href="{{ route('admin.office.create', ['kind' => 'expense']) }}"><x-icon name="plus" class="me-1" /> {{ __('Add an expense') }}</a>
+    @endif
 </x-page-header>
 
 <div class="row g-3 mb-3">

@@ -42,8 +42,10 @@
                                     @if ($request->receipt_path)
                                         <a class="btn btn-sm btn-light-secondary" target="_blank" rel="noopener" href="{{ route('admin.subscriptions.receipt', ['id' => $request->id]) }}"><x-icon name="paperclip" class="me-1" />{{ __('Screenshot') }}</a>
                                     @endif
+                                    @if (auth('admin')->user()->isSuper())
                                     <a class="btn btn-sm btn-soft-success" href="{{ route('admin.subscriptions.edit', ['id' => $request->id, 'confirm' => 1]) }}"><x-icon name="check" class="me-1" />{{ __('Confirm') }}</a>
                                     <a class="btn btn-sm btn-soft-danger" href="{{ route('admin.subscriptions.reject', ['id' => $request->id]) }}"><x-icon name="ban" class="me-1" />{{ __('Reject') }}</a>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

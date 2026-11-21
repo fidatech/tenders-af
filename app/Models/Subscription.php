@@ -6,6 +6,7 @@ use App\Casts\Day;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * A period a business pays for. Written by a system administrator, or sent by the business itself
@@ -34,6 +35,33 @@ class Subscription extends Model
     public function account(): BelongsTo
     {
         return $this->belongsTo(PlatformAccount::class, 'platform_account_id');
+    }
+
+    public static function isPlanUpgrade(Company $company, Plan $plan): bool
+    {
+        $current = $company->plan;
+
+        return $company->status === Company::ACTIVE && $company->isUsable() && $company->endsOn() !== null
+            && $current && $plan->is_active && $plan->id !== $current->id
+            && strtoupper($plan->currency) === strtoupper($current->currency)
+            // by what a month costs, so a yearly plan is not "higher" than a bigger plan paid monthly
+            && round($plan->monthlyRate(), 4) > round($current->monthlyRate(), 4);
+    }
+
+    public static function billingPeriod(Company $company, Plan $plan): array
+    {
+        $today = Carbon::parse(now($company->timezone ?: config('app.timezone'))->toDateString());
+        $paidUntil = $company->status === Company::ACTIVE ? $company->subscription_ends_at : null;
+        // an upgrade starts today; a renewal or another plan starts when the paid time ends
+        $from = $paidUntil && $paidUntil->gte($today) && ! static::isPlanUpgrade($company, $plan) ? $paidUntil->copy()->addDay() : $today;
+
+        $until = match ($plan->interval) {
+            'monthly' => $from->copy()->addMonthNoOverflow(),
+            'lifetime' => null,
+            default => $from->copy()->addYearNoOverflow(),
+        };
+
+        return [$from, $until];
     }
 
     public function isPaid(): bool

@@ -44,7 +44,7 @@ class VerificationController extends Controller
     public function approve(int $id): RedirectResponse
     {
         $company = Company::where('verify_status', 'pending')->findOrFail($id);
-        $company->update(['verify_status' => 'verified', 'verified_at' => now(), 'verify_note' => null]);
+        abort_unless(Company::whereKey($id)->where('verify_status', 'pending')->update(['verify_status' => 'verified', 'verified_at' => now(), 'verify_note' => null]), 409);
         AdminLog::record('verified company', $company->name);
         $this->tell($company, 'Your company is verified', ['We checked the licence of '.$company->name.'. Your public profile now carries the Verified badge.'], route('verification.show'));
 
@@ -61,7 +61,7 @@ class VerificationController extends Controller
         // a reason from the list, an own reason, or a reason from the list with a note added
         $note = trim((string) ($data['note'] ?? ''));
         $text = $data['reason'] === 'other' ? $note : trim(self::REASONS[$data['reason']].($note !== '' ? ' '.$note : ''));
-        $company->update(['verify_status' => 'rejected', 'verify_note' => $text, 'verified_at' => null]);
+        abort_unless(Company::whereKey($id)->where('verify_status', 'pending')->update(['verify_status' => 'rejected', 'verify_note' => $text, 'verified_at' => null]), 409);
         AdminLog::record('refused verification', $company->name, $text);
         $this->tell($company, 'Your verification was not accepted', [$text, 'You can send the document again from the Verification page.'], route('verification.show'));
 

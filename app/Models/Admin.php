@@ -13,10 +13,10 @@ class Admin extends Authenticatable
 
     protected function casts(): array
     {
-        return ['password' => 'hashed', 'is_active' => 'boolean'];
+        return ['password' => 'hashed', 'is_active' => 'boolean', 'permissions' => 'array'];
     }
 
-    public const ROLES = ['super' => 'Super administrator', 'manager' => 'Manager', 'viewer' => 'Viewer', 'focal' => 'Focal point'];
+    public const ROLES = ['super' => 'Super administrator', 'manager' => 'Manager', 'viewer' => 'Viewer', 'focal' => 'Focal point', 'cashier' => 'Cashier', 'verifier' => 'Company verifier', 'staff' => 'Custom office staff'];
 
     public function isSuper(): bool
     {
@@ -25,7 +25,16 @@ class Admin extends Authenticatable
 
     public function homeRoute(): string
     {
-        return $this->role === 'focal' ? 'admin.messages.index' : 'admin.dashboard';
+        if (in_array($this->role ?? 'super', ['super', 'manager', 'viewer'], true)) {
+            return 'admin.dashboard';
+        }
+        foreach (['admin.office.index', 'admin.verification.index', 'admin.messages.index', 'admin.tenders.index'] as $route) {
+            if (\App\Support\AdminAccess::allows($this, $route)) {
+                return $route;
+            }
+        }
+
+        return 'admin.profile.edit';
     }
 
     public function roleLabel(): string

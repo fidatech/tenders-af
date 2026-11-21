@@ -15,8 +15,10 @@
 @section('content')
 <x-page-header :title="$account->name" icon="building-columns" :crumbs="[[__('Financial accounts'), route('admin.accounts.index')], [$account->name]]">
     <a class="btn btn-outline-soft" href="{{ $self(request()->only('period', 'from', 'to', 'q') + ['export' => 'csv']) }}"><x-icon name="file-excel" class="me-1" /> {{ __('Excel') }}</a>
+    @if (auth('admin')->user()->isSuper())
     <a class="btn btn-outline-soft" href="{{ route('admin.accounts.edit', ['id' => $account->id]) }}"><x-icon name="pen" class="me-1" /> {{ __('Edit') }}</a>
     <a class="btn btn-primary" href="{{ route('admin.subscriptions.create') }}"><x-icon name="plus" class="me-1" /> {{ __('Record a payment') }}</a>
+    @endif
 </x-page-header>
 
 {{-- the account itself --}}
@@ -76,6 +78,11 @@
                 <div class="d-flex align-items-center gap-2 mb-2"><span class="sc-icon icon-soft warning flex-shrink-0" style="width:36px;height:36px"><x-icon name="scale-balanced" /></span><span class="small fw-semibold text-muted">{{ __('Balance') }}</span></div>
                 <div class="fs-5 fw-bold" dir="ltr">{{ $balance ? collect($balance)->map(fn ($amount, $currency) => money($amount, $currency))->implode(' · ') : '0' }}</div>
                 <div class="small text-muted mt-1">{{ trans_choice('{0} no payments|{1} 1 payment|[2,*] :count payments', $count, ['count' => $count]) }} · {{ __('spent') }} <span dir="ltr">{{ sums($spent) }}</span></div>
+                @if ($officeIncome)<div class="small">{{ __('Other income') }} · {{ sums($officeIncome) }}</div>@endif
+                @if ($held)
+                    <div class="small">{{ __('Held by employees') }} · {{ sums($held) }}</div>
+                    <div class="small">{{ __('Office balance') }} · {{ sums($officeBalance) }}</div>
+                @endif
             </div>
         </div>
     </div>

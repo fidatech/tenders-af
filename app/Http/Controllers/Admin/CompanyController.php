@@ -50,9 +50,16 @@ class CompanyController extends Controller
             'owner_password' => ['required', Password::min(8)],
         ]);
 
+        if (! $request->user('admin')->isSuper()) {
+            unset($data['plan_id'], $data['subscription_ends_at'], $data['trial_ends_at'], $data['status']);
+        }
         $company = Companies::create($data);
         // the currency follows the kind of company unless the administrator typed another one
-        $company->update(array_filter(['currency' => $data['currency'], 'notes' => $data['notes'] ?? null, 'trial_ends_at' => $data['status'] === Company::TRIAL ? ($data['trial_ends_at'] ?? null) : null]));
+        $company->update(array_filter([
+            'currency' => $request->user('admin')->isSuper() ? $data['currency'] : null,
+            'notes' => $data['notes'] ?? null,
+            'trial_ends_at' => $request->user('admin')->isSuper() && ($data['status'] ?? null) === Company::TRIAL ? ($data['trial_ends_at'] ?? null) : null,
+        ]));
 
         AdminLog::record('opened company', $company->name, 'Owner: '.$data['owner_email']);
 
@@ -83,6 +90,12 @@ class CompanyController extends Controller
         $request->merge(['currency' => strtoupper(trim((string) $request->input('currency')))]);
         $data = $request->validate($this->rules() + ['email' => ['nullable', 'email', 'max:255']]);
 
+        if (! $request->user('admin')->isSuper()) {
+            unset($data['plan_id'], $data['subscription_ends_at'], $data['trial_ends_at'], $data['currency']);
+            if ($data['status'] !== Company::SUSPENDED) {
+                $data['status'] = $company->status;
+            }
+        }
         if ($data['status'] !== Company::TRIAL) {
             $data['trial_ends_at'] = $company->trial_ends_at;
         }
@@ -113,6 +126,9 @@ class CompanyController extends Controller
     public function destroy(Request $request, int $id): RedirectResponse
     {
         $company = Company::findOrFail($id);
+        if (\App\Models\OfficeEntry::where('company_id', $company->id)->exists()) {
+            throw new \App\Exceptions\UserError(__('This company has office records. Suspend it to keep the audit history.'));
+        }
         // typing the name protects against a wrong click: everything of the company goes with it
         $request->validate(['confirm' => ['required', Rule::in([$company->name])]], ['confirm.in' => __('Type the name of the company exactly to delete it.')]);
         AdminLog::record('deleted company', $company->name, 'Email: '.$company->email);

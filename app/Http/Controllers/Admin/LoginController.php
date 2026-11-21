@@ -49,7 +49,7 @@ class LoginController extends Controller
 
         $admin = Auth::guard('admin')->user();
 
-        return $admin->role === 'focal'
+        return $admin->homeRoute() !== 'admin.dashboard'
             ? redirect()->route($admin->homeRoute())
             : redirect()->intended(route($admin->homeRoute()));
     }

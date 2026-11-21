@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\CrudController;
 use App\Models\PlatformAccount;
 use App\Models\PlatformExpense;
+use App\Models\OfficeEntry;
+use App\Exceptions\UserError;
 use App\Models\Subscription;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -71,7 +73,12 @@ class AccountController extends CrudController
 
     protected function beforeSave(array $data, ?Model $record, Request $request): array
     {
+        OfficeController::lockRegister();
         $data['currency'] = strtoupper($data['currency']);
+        if ($record && ($record->currency !== $data['currency'] || $record->type !== $data['type'])
+            && OfficeEntry::where('platform_account_id', $record->id)->exists()) {
+            throw new UserError(__('An account with office activity must retain its currency and payment method.'));
+        }
 
         return $data;
     }
@@ -140,6 +147,13 @@ class AccountController extends CrudController
             }
         }
 
+        $officeIncome = $sum(OfficeEntry::approvedIncome()->where('platform_account_id', $account->id));
+        $held = OfficeEntry::where('platform_account_id', $account->id)->select('currency')->custody()->groupBy('currency')->pluck('held', 'currency')->all();
+        $spent = $sum(PlatformExpense::where('platform_account_id', $account->id));
+        $subscriptionIncome = $sum($paid());
+        $combined = $this->balance($subscriptionIncome, array_map(fn ($amount) => -$amount, $officeIncome));
+        $balance = $this->balance($combined, $spent);
+
         return view('admin.account', [
             'account' => $account,
             'periods' => self::PERIODS,
@@ -149,11 +163,14 @@ class AccountController extends CrudController
             'term' => $term,
             'month' => $sum($paid()->where('paid_on', '>=', now()->startOfMonth()->toDateString())),
             'year' => $sum($paid()->where('paid_on', '>=', now()->startOfYear()->toDateString())),
-            'all' => $sum($paid()),
+            'all' => $subscriptionIncome,
             'count' => $paid()->count(),
             // what went out of this account (platform expenses), and what is left of each currency
-            'spent' => $spent = PlatformExpense::where('platform_account_id', $account->id)->selectRaw('currency, sum(amount) as total')->groupBy('currency')->orderBy('currency')->pluck('total', 'currency')->all(),
-            'balance' => $this->balance($sum($paid()), $spent),
+            'spent' => $spent,
+            'balance' => $balance,
+            'officeIncome' => $officeIncome,
+            'held' => $held,
+            'officeBalance' => $this->balance($balance, $held),
             'expenses' => PlatformExpense::where('platform_account_id', $account->id)->orderByDesc('date')->orderByDesc('id')->limit(6)->get(),
             'last' => $paid()->with('company')->orderByDesc('paid_on')->orderByDesc('id')->first(),
             'chart' => $chart,
@@ -217,6 +234,6 @@ class AccountController extends CrudController
 
     protected function deleteProblem(Model $record): ?string
     {
-        return $record->subscriptions()->exists() ? __('Payments were received in this account. Switch it off instead.') : null;
+        return ($record->subscriptions()->exists() || OfficeEntry::where('platform_account_id', $record->id)->exists()) ? __('Payments were received in this account. Switch it off instead.') : null;
     }
 }

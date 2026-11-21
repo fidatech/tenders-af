@@ -1,6 +1,7 @@
 @extends('layouts.admin', ['title' => $company ? $company->name : __('New company')])
 
 @php
+    $ownerAccess = auth('admin')->user()->isSuper();
     $value = fn (string $key, $default = null) => old($key, $company?->{$key} ?? $default);
 @endphp
 
@@ -10,7 +11,9 @@
         @if ($owner = $company->owner())
             <a class="btn btn-outline-soft" href="{{ route('admin.messages.show', $owner) }}"><x-icon name="envelope" class="me-1" /> {{ __('Message company') }}</a>
         @endif
+        @if ($ownerAccess)
         <a class="btn btn-primary" href="{{ route('admin.subscriptions.create', ['company' => $company->id]) }}"><x-icon name="receipt" class="me-1" /> {{ __('New subscription') }}</a>
+        @endif
     @endif
 </x-page-header>
 
@@ -56,7 +59,7 @@
                     </div>
                     <div class="col-5 col-md-3">
                         <label class="form-label" for="t-currency">{{ __('Pays in') }} <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control text-uppercase @error('currency') is-invalid @enderror" id="t-currency" name="currency" value="{{ $value('currency', 'AFN') }}" maxlength="3" required dir="ltr">
+                        <input type="text" class="form-control text-uppercase @error('currency') is-invalid @enderror" id="t-currency" name="currency" value="{{ $value('currency', 'AFN') }}" maxlength="3" required dir="ltr" @readonly(! $ownerAccess)>
                         @error('currency')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-7 col-md-9">
@@ -89,6 +92,7 @@
                         </div>
                     @endunless
 
+                    @if ($ownerAccess)
                     <div class="col-12"><div class="border-top pt-3 mt-2"><h6 class="mb-0 text-uppercase small fw-semibold text-muted">{{ __('Plan and access') }}</h6></div></div>
                     <div class="col-12 col-md-6">
                         <label class="form-label" for="t-plan">{{ __('Plan') }}</label>
@@ -121,6 +125,17 @@
                         @error('subscription_ends_at')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         <div class="form-text">{{ __('Empty on an active company: no end (your own company, for example).') }}</div>
                     </div>
+                    @elseif ($company)
+                        <div class="col-md-6">
+                            <label class="form-label" for="t-staff-status">{{ __('Status') }}</label>
+                            <select class="form-select" name="status" id="t-staff-status">
+                                <option value="{{ $company->status }}">{{ __(ucfirst($company->status)) }}</option>
+                                @if ($company->status !== 'suspended')<option value="suspended">{{ __('Suspended') }}</option>@endif
+                            </select>
+                        </div>
+                    @else
+                        <input type="hidden" name="status" value="trial">
+                    @endif
                     <div class="col-12">
                         <label class="form-label" for="t-notes">{{ __('Notes (only administrators see them)') }}</label>
                         <textarea class="form-control" id="t-notes" name="notes" rows="2" maxlength="2000">{{ $value('notes') }}</textarea>

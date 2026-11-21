@@ -134,7 +134,8 @@ abstract class CrudController extends Controller
             'columns' => $this->columns(),
             'term' => $term,
             'filters' => $this->filters($request),
-            'canManage' => true,
+            'canManage' => ! str_starts_with($this->route, 'admin.')
+                || \App\Support\AdminAccess::allows($request->user('admin'), $this->route.'.store', false),
             'totals' => $this->totals($request),
             'headerLinks' => $this->headerLinks($request),
             'links' => fn (Model $record) => $this->rowLinks($record),

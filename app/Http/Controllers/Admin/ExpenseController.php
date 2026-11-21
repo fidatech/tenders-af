@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\CrudController;
 use App\Models\PlatformAccount;
 use App\Models\PlatformExpense;
+use App\Models\OfficeEntry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -94,6 +95,11 @@ class ExpenseController extends CrudController
             'Paid from' => fn (PlatformExpense $e) => $e->account?->name,
             'Amount' => fn (PlatformExpense $e) => money($e->amount, $e->currency),
         ];
+    }
+
+    protected function canEdit(Model $record): bool
+    {
+        return ! OfficeEntry::where('expense_id', $record->id)->exists();
     }
 
     protected function beforeSave(array $data, ?Model $record, Request $request): array

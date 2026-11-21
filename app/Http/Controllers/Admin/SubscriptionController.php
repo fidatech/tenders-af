@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\CrudController;
 use App\Models\Plan;
+use App\Models\OfficeEntry;
+use App\Exceptions\UserError;
+use Illuminate\Support\Facades\DB;
 use App\Models\PlatformAccount;
 use App\Models\Subscription;
 use App\Models\AdminLog;
@@ -117,8 +120,19 @@ class SubscriptionController extends CrudController
         ];
     }
 
+    protected function canEdit(Model $record): bool
+    {
+        return ! OfficeEntry::where('subscription_id', $record->id)->whereIn('status', ['pending', 'approved'])->exists();
+    }
+
     protected function beforeSave(array $data, ?Model $record, Request $request): array
     {
+        OfficeController::lockRegister();
+        abort_if($record && ! $this->canEdit($record), 409);
+        if (! empty($data['paid_on']) && OfficeEntry::where('company_id', $data['company_id'])
+            ->where('kind', 'subscription')->where('status', 'pending')->exists()) {
+            throw new UserError(__('Review the pending collection in Office approvals first.'));
+        }
         $data['currency'] = strtoupper($data['currency']);
 
         return $data;
@@ -155,10 +169,10 @@ class SubscriptionController extends CrudController
         if ($record->receipt_no) {
             $links[] = ['label' => $record->receiptNumber(), 'icon' => 'print', 'url' => route('admin.subscriptions.print', ['id' => $record->id]), 'blank' => true];
         }
-        if (! $record->isPaid() && ! $record->isRejected()) {
+        if (auth('admin')->user()->isSuper() && $this->canEdit($record) && ! $record->isPaid() && ! $record->isRejected()) {
             $links[] = ['label' => __('Confirm'), 'icon' => 'check', 'class' => 'btn-soft-success', 'url' => route('admin.subscriptions.edit', ['id' => $record->id, 'confirm' => 1])];
         }
-        if ($record->isWaiting()) {
+        if (auth('admin')->user()->isSuper() && $this->canEdit($record) && $record->isWaiting()) {
             $links[] = ['label' => __('Reject'), 'icon' => 'ban', 'class' => 'btn-soft-danger', 'url' => route('admin.subscriptions.reject', ['id' => $record->id])];
         }
 
@@ -169,7 +183,7 @@ class SubscriptionController extends CrudController
     public function reject(int $id): View
     {
         $subscription = Subscription::with('company')->findOrFail($id);
-        abort_unless($subscription->isWaiting(), 404);
+        abort_unless($subscription->isWaiting() && $this->canEdit($subscription), 404);
 
         return view('admin.reject', ['subscription' => $subscription, 'reasons' => config('tenders.reject_reasons')]);
     }
@@ -185,7 +199,12 @@ class SubscriptionController extends CrudController
             'reject_note' => ['nullable', 'string', 'max:255'],
         ], ['reject_reason.required' => __('Choose the reason.')]);
 
-        $subscription->update($data + ['rejected_at' => now()]);
+        DB::transaction(function () use ($subscription, $data) {
+            OfficeController::lockRegister();
+            $subscription->refresh();
+            abort_unless($subscription->isWaiting() && $this->canEdit($subscription), 409);
+            $subscription->update($data + ['rejected_at' => now()]);
+        });
         AdminLog::record('rejected payment', $subscription->company?->name, money($subscription->amount, $subscription->currency).' · '.$subscription->rejectLabel());
 
         $company = $subscription->company;

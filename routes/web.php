@@ -217,6 +217,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('profile', [Admin\ProfileController::class, 'update'])->name('profile.update');
         crud_routes('admins', Admin\AdminController::class, 'admins');
         crud_routes('expenses', Admin\ExpenseController::class, 'expenses');
+        Route::prefix('office')->name('office.')->group(function () {
+            Route::get('/', [Admin\OfficeController::class, 'index'])->name('index');
+            Route::get('create', [Admin\OfficeController::class, 'create'])->name('create');
+            Route::post('/', [Admin\OfficeController::class, 'store'])->name('store');
+            Route::get('approvals', [Admin\OfficeController::class, 'approvals'])->name('approvals');
+            Route::post('{id}/review', [Admin\OfficeController::class, 'review'])->whereNumber('id')->name('review');
+            Route::get('{id}/proof', [Admin\OfficeController::class, 'proof'])->whereNumber('id')->name('proof');
+        });
         Route::get('subscriptions/{id}/print', [Admin\SubscriptionController::class, 'print'])->whereNumber('id')->name('subscriptions.print');
         Route::get('reports', [Admin\ReportController::class, 'index'])->name('reports.index');
         Route::get('logs', [Admin\LogController::class, 'index'])->name('logs.index');

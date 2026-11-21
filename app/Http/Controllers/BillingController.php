@@ -142,13 +142,7 @@ class BillingController extends Controller
      */
     private function isUpgrade(Company $company, Plan $plan): bool
     {
-        $current = $company->plan;
-
-        return $company->status === Company::ACTIVE && $company->isUsable() && $company->endsOn() !== null
-            && $current && $plan->is_active && $plan->id !== $current->id
-            && strtoupper($plan->currency) === strtoupper($current->currency)
-            // by what a month costs, so a yearly plan is not "higher" than a bigger plan paid monthly
-            && round($plan->monthlyRate(), 4) > round($current->monthlyRate(), 4);
+        return Subscription::isPlanUpgrade($company, $plan);
     }
 
     /** May the company move to the free plan now? Only from a trial or after its time ended: a paid period is never cut short. */
@@ -296,17 +290,6 @@ class BillingController extends Controller
      */
     private function period(Company $company, Plan $plan): array
     {
-        $today = Carbon::parse(today_iso());
-        $paidUntil = $company->status === Company::ACTIVE ? $company->subscription_ends_at : null;
-        // an upgrade starts today; a renewal or another plan starts when the paid time ends
-        $from = $paidUntil && $paidUntil->gte($today) && ! $this->isUpgrade($company, $plan) ? $paidUntil->copy()->addDay() : $today;
-
-        $until = match ($plan->interval) {
-            'monthly' => $from->copy()->addMonthNoOverflow(),
-            'lifetime' => null,
-            default => $from->copy()->addYearNoOverflow(),
-        };
-
-        return [$from, $until];
+        return Subscription::billingPeriod($company, $plan);
     }
 }

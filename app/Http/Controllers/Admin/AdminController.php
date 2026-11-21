@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\CrudController;
 use App\Models\Admin;
+use App\Models\OfficeEntry;
+use App\Support\AdminAccess;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -37,8 +39,16 @@ class AdminController extends CrudController
                     'super' => __('Super administrator: everything'),
                     'manager' => __('Manager: businesses and money, but not administrators, settings, the activity log or deleting a business'),
                     'focal' => __('Focal point: messages and own account'),
+                    'cashier' => __('Cashier: collections, expenses, handovers and messaging'),
+                    'verifier' => __('Company verifier: licence review and messaging'),
+                    'staff' => __('Custom office staff: permissions selected below'),
                     'viewer' => __('Viewer: looks at what a manager sees and changes nothing'),
                 ]],
+            ...collect(AdminAccess::PERMISSIONS)->map(fn ($label, $key) => [
+                'name' => 'permission_'.$key, 'label' => $label, 'type' => 'checkbox', 'virtual' => true,
+                'value' => in_array($key, $record?->permissions ?? [], true),
+                'help' => 'Applies to the Custom office staff role.',
+            ])->values()->all(),
             ['name' => 'is_active', 'label' => 'May sign in', 'type' => 'checkbox', 'default' => true],
         ];
     }
@@ -60,6 +70,9 @@ class AdminController extends CrudController
             $data['is_active'] = true; // nobody locks himself out
             $data['role'] = $record->role;
         }
+        $data['permissions'] = $data['role'] === 'staff'
+            ? array_values(array_filter(array_keys(AdminAccess::PERMISSIONS), fn ($key) => $request->boolean('permission_'.$key)))
+            : null;
         // there must always be a super administrator who can sign in
         if ($record && $record->isSuper() && ($data['role'] !== 'super' || ! $data['is_active'])
             && ! Admin::where('role', 'super')->where('is_active', true)->where('id', '!=', $record->id)->exists()) {
@@ -71,6 +84,12 @@ class AdminController extends CrudController
 
     protected function deleteProblem(Model $record): ?string
     {
-        return $record->id === auth('admin')->id() ? __('You cannot delete yourself.') : null;
+        if ($record->id === auth('admin')->id()) {
+            return __('You cannot delete yourself.');
+        }
+
+        return OfficeEntry::where('employee_id', $record->id)->orWhere('reviewed_by', $record->id)->exists()
+            ? __('This employee has office records. Disable the account to keep the audit history.')
+            : null;
     }
 }

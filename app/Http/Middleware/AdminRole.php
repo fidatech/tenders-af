@@ -2,51 +2,22 @@
 
 namespace App\Http\Middleware;
 
-use App\Exceptions\UserError;
+use App\Support\AdminAccess;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
-/**
- * What each role of an administrator may do:
- *   super    everything
- *   manager  everything except administrators, settings, the activity log and deleting a company
- *   viewer   may look at everything a manager sees, and change nothing
- *   focal   can read and send messages
- * Everyone may sign out and change his own account.
- */
 class AdminRole
 {
-    private const SUPER_ONLY = ['admin.admins.*', 'admin.settings.*', 'admin.logs.*', 'admin.companies.destroy'];
-
-    private const OWN = ['admin.logout', 'admin.profile.edit', 'admin.profile.update'];
-
     public function handle(Request $request, Closure $next): Response
     {
-        $admin = auth('admin')->user();
+        $admin = $request->user('admin');
         $name = (string) $request->route()?->getName();
 
-        abort_if($admin?->is_active === false && $name !== 'admin.logout', 403);
-
-        if (! $admin || $admin->isSuper() || in_array($name, self::OWN, true)) {
-            return $next($request);
+        if ($admin && $name === 'admin.dashboard' && $admin->homeRoute() !== $name && $admin->is_active !== false) {
+            return redirect()->route($admin->homeRoute());
         }
-        if ($admin->role === 'focal') {
-            if ($name === 'admin.dashboard') {
-                return redirect()->route($admin->homeRoute());
-            }
-
-            abort_unless($request->routeIs('admin.messages.*'), 403);
-
-            return $next($request);
-        }
-        if (Str::is(self::SUPER_ONLY, $name)) {
-            abort(403, __('Only a super administrator can open this.'));
-        }
-        if ($admin->role === 'viewer' && ! $request->isMethodSafe()) {
-            throw new UserError(__('Your role can look at everything but cannot change it.'));
-        }
+        abort_unless($admin && AdminAccess::allows($admin, $name, $request->isMethodSafe()), 403);
 
         return $next($request);
     }

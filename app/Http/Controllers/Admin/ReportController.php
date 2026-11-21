@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PlatformExpense;
+use App\Models\OfficeEntry;
 use App\Models\Subscription;
 use App\Models\Company;
 use Illuminate\Http\Request;
@@ -24,6 +25,10 @@ class ReportController extends Controller
         $months = [];
         foreach (Subscription::whereNotNull('paid_on')->whereBetween('paid_on', $range)->get(['paid_on', 'currency', 'amount']) as $row) {
             $month = (int) $row->paid_on->format('n');
+            $months[$row->currency][$month]['in'] = ($months[$row->currency][$month]['in'] ?? 0) + (float) $row->amount;
+        }
+        foreach (OfficeEntry::approvedIncome()->whereBetween('date', $range)->get(['date', 'currency', 'amount']) as $row) {
+            $month = (int) $row->date->format('n');
             $months[$row->currency][$month]['in'] = ($months[$row->currency][$month]['in'] ?? 0) + (float) $row->amount;
         }
         foreach (PlatformExpense::whereBetween('date', $range)->get(['date', 'currency', 'amount']) as $row) {

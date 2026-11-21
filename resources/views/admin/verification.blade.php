@@ -29,7 +29,11 @@
                             <td>
                                 <div class="d-flex align-items-center gap-3">
                                     <span class="vr-avatar">{{ \App\Models\User::initialsOf($company->name) }}</span>
-                                    <span class="min-w-0"><a class="fw-semibold text-decoration-none d-block text-truncate" href="{{ route('admin.companies.edit', ['id' => $company->id]) }}">{{ $company->name }}</a><span class="d-block small text-muted text-truncate">{{ $company->kindLabel() }} · {{ $company->email }}</span></span>
+                                    <span class="min-w-0">@if (\App\Support\AdminAccess::allows(auth('admin')->user(), 'admin.companies.edit'))
+                                        <a class="fw-semibold text-decoration-none d-block text-truncate" href="{{ route('admin.companies.edit', ['id' => $company->id]) }}">{{ $company->name }}</a>
+                                    @else
+                                        <strong class="d-block text-truncate">{{ $company->name }}</strong>
+                                    @endif<span class="d-block small text-muted text-truncate">{{ $company->kindLabel() }} · {{ $company->email }}</span></span>
                                 </div>
                             </td>
                             <td dir="ltr"><span class="fw-semibold">{{ $company->license_no ?: '—' }}</span>@if ($company->tin)<span class="d-block small text-muted">TIN {{ $company->tin }}</span>@endif</td>
@@ -44,7 +48,7 @@
                                 @endif
                             </td>
                             <td class="text-end text-nowrap">
-                                @if ($status === 'pending')
+                                @if ($status === 'pending' && \App\Support\AdminAccess::allows(auth('admin')->user(), 'admin.verification.approve', false))
                                     <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#review-{{ $company->id }}"><x-icon name="magnifying-glass" class="me-1" />{{ __('Review') }}</button>
                                 @elseif ($company->verify_doc_path)
                                     <a class="btn btn-sm btn-light-secondary" href="{{ route('admin.verification.document', ['id' => $company->id]) }}" target="_blank" rel="noopener"><x-icon name="file-lines" class="me-1" />{{ __('Licence') }}</a>

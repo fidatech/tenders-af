@@ -16,7 +16,11 @@ class PlatformExpense extends Model
         'salaries' => 'Salaries',
         'marketing' => 'Marketing',
         'fees' => 'Payment fees',
-        'office' => 'Office',
+        'office' => 'Office supplies',
+        'rent' => 'Office rent',
+        'food' => 'Food and refreshments',
+        'utilities' => 'Utilities',
+        'transport' => 'Transport',
         'other' => 'Other',
     ];
 
