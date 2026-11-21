@@ -26,24 +26,30 @@ class AdminNotice extends Model
         return self::KINDS[$this->kind] ?? 'bell';
     }
 
-    /**
-     * Tell every active administrator. A notification must never break what the visitor
-     * was doing, so a failure is only reported.
-     */
-    public static function toAll(string $kind, string $title, ?string $body = null, ?string $url = null): void
+    public static function messageToAll(string $title, string $body, string $replyEmail): bool
+    {
+        $address = str_replace('%40', '@', rawurlencode($replyEmail));
+
+        return self::toAll('message', $title, $body, 'mailto:'.$address);
+    }
+
+    /** Returns true when notifications were delivered to active administrators. */
+    public static function toAll(string $kind, string $title, ?string $body = null, ?string $url = null): bool
     {
         try {
             $now = now();
             $rows = Admin::where('is_active', true)->pluck('id')->map(fn ($id) => [
                 'admin_id' => $id, 'kind' => $kind, 'title' => mb_substr($title, 0, 250),
-                'body' => $body === null ? null : mb_substr($body, 0, 250), 'url' => $url,
+                'body' => $body === null ? null : mb_substr($body, 0, 250),
+                'full_body' => $body !== null && mb_strlen($body) > 250 ? $body : null,
+                'url' => $url,
                 'created_at' => $now, 'updated_at' => $now,
             ])->all();
-            if ($rows) {
-                self::insert($rows);
-            }
+            return $rows && self::insert($rows);
         } catch (Throwable $e) {
             report($e);
+
+            return false;
         }
     }
 }

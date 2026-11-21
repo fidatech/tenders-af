@@ -27,4 +27,5 @@ return [
 
     ['heading' => 'Account'],
     ['label' => 'Subscription', 'icon' => 'credit-card', 'route' => 'billing.show'],
+    ['label' => 'Contact admin', 'icon' => 'envelope', 'route' => 'company-message.create'],
 ];

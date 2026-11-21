@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\CompanyMessageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PostedTenderController;
 use App\Http\Controllers\ProductController;
@@ -130,6 +131,9 @@ Route::middleware('auth:web')->group(function () {
     Route::post('subscription', [BillingController::class, 'store'])->middleware('owner')->name('billing.store');
     Route::get('subscription/receipt/{id}', [BillingController::class, 'receipt'])->whereNumber('id')->name('billing.receipt');
     Route::get('subscription/qr/{id}', [BillingController::class, 'qr'])->whereNumber('id')->name('billing.qr');
+
+    Route::get('contact-admin', [CompanyMessageController::class, 'create'])->name('company-message.create');
+    Route::post('contact-admin', [CompanyMessageController::class, 'store'])->middleware('throttle:5,10')->name('company-message.store');
 
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');

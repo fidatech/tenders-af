@@ -210,7 +210,8 @@ class CompanyTest extends TestCase
         $this->actingAs($admin, 'admin');
         $this->get('/admin/notifications')->assertOk()->assertSee('New company: Kabul Solar');
         $notice = AdminNotice::where('admin_id', $admin->id)->firstOrFail();
-        $this->get('/admin/notifications/'.$notice->id)->assertRedirect();
+        $this->get('/admin/notifications/'.$notice->id)->assertOk()
+            ->assertSee('New company: Kabul Solar')->assertSee('Open related page');
         $this->assertNotNull($notice->fresh()->read_at);
     }
 
@@ -235,5 +236,41 @@ class CompanyTest extends TestCase
         $this->from($url)->post(route('admin.notices.read'))->assertRedirect($url);
         $this->assertNotNull($notice->fresh()->read_at);
         $this->get($url)->assertOk()->assertDontSee($button, false);
+    }
+
+    public function test_a_company_can_send_a_full_message_to_the_administrators(): void
+    {
+        $admin = $this->systemAdmin();
+        $otherAdmin = Admin::create(['name' => 'Second admin', 'email' => 'second@tenders.test', 'password' => 'password123']);
+        Admin::create(['name' => 'Inactive admin', 'email' => 'inactive@tenders.test', 'password' => 'password123', 'is_active' => false]);
+        auth('admin')->logout();
+
+        $form = route('company-message.create');
+        $send = route('company-message.store');
+        $this->post($send)->assertRedirect(route('login'));
+
+        $company = $this->business();
+        $sender = $this->signIn($company);
+        $body = str_repeat('پیام شرکت ', 60)."\n".'<script>End of message</script>';
+
+        $this->get(route('dashboard'))->assertOk()->assertSee($form);
+        $this->get($form)->assertOk()->assertSee('Send message');
+        $this->from($form)->post($send, ['subject' => 'Pricing question'])->assertSessionHasErrors('message');
+        $this->post($send, ['subject' => 'Pricing question', 'message' => $body, 'email' => 'other@example.test'])
+            ->assertRedirect($form)->assertSessionHas('success');
+
+        $notice = AdminNotice::where('admin_id', $admin->id)->firstOrFail();
+        $otherNotice = AdminNotice::where('admin_id', $otherAdmin->id)->firstOrFail();
+        $this->assertSame(2, AdminNotice::count());
+        $this->assertSame('mailto:'.$sender->email, $notice->url);
+
+        auth('web')->logout();
+        $this->actingAs($admin, 'admin');
+        $this->get(route('admin.notices.open', $otherNotice->id))->assertNotFound();
+        $this->get(route('admin.notices.open', $notice->id))->assertOk()
+            ->assertSee('Pricing question')->assertSee($company->name)->assertSee($sender->name)
+            ->assertSee($body)->assertDontSee('<script>End of message</script>', false)->assertSee('Reply by email');
+        $this->assertNotNull($notice->fresh()->read_at);
+        $this->assertNull($otherNotice->fresh()->read_at);
     }
 }

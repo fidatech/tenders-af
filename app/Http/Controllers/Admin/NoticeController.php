@@ -20,14 +20,14 @@ class NoticeController extends Controller
         ]);
     }
 
-    /** Open a notification: it is read, and its page opens. */
-    public function open(int $id): RedirectResponse
+    /** Show the notification and mark it as read. */
+    public function open(int $id): View
     {
         $notice = AdminNotice::where('admin_id', auth('admin')->id())->findOrFail($id);
         $notice->read_at ??= now();
         $notice->save();
 
-        return $notice->url ? redirect()->to($notice->url) : redirect()->route('admin.notices.index');
+        return view('admin.notice', ['notice' => $notice]);
     }
 
     public function read(): RedirectResponse
