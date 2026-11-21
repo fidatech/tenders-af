@@ -7,7 +7,7 @@
     $waitingProducts = $productsOn ? \App\Models\Product::where('status', 'pending')->count() + \App\Models\ProductPromotion::where('status', 'pending')->count() : 0;
     $waitingPay = \App\Models\Subscription::waiting()->count();
     // the bell: what waits for an administrator, then the newest notifications
-    $adminUnread = \App\Models\AdminNotice::where('admin_id', $admin->id)->whereNull('read_at')->count();
+    $adminUnread ??= \App\Models\AdminNotice::where('admin_id', $admin->id)->whereNull('read_at')->count();
     $adminLatest = \App\Models\AdminNotice::where('admin_id', $admin->id)->orderByDesc('id')->limit(8)->get();
     $waitingList = array_filter([
         [__('Licences to check'), 'shield-halved', route('admin.verification.index'), $waitingVerify],
@@ -22,6 +22,7 @@
     // [label, icon, route, pattern that marks it current, only for super administrators, number waiting]
     $menu = [
         ['Dashboard', 'gauge-high', 'admin.dashboard', 'admin.dashboard', false, 0],
+        ['Notifications', 'bell', 'admin.notices.index', 'admin.notices.*', false, $adminUnread],
         ['Tenders', 'gavel', 'admin.tenders.index', 'admin.tenders.*', false, $waitingTenders],
         ['Products', 'boxes-stacked', 'admin.products.index', 'admin.products.*', false, $waitingProducts],
         ['Sectors', 'layer-group', 'admin.industries.index', 'admin.industries.*', false, 0],

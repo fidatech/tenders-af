@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Mail\TenderAlertMail;
 use App\Models\Admin;
+use App\Models\AdminNotice;
 use App\Models\Industry;
 use App\Models\Plan;
 use App\Models\PlatformAccount;
@@ -203,13 +204,36 @@ class CompanyTest extends TestCase
 
         $this->post('/register', ['company' => 'Kabul Solar', 'kind' => 'company', 'roles' => ['supplier'], 'name' => 'Ahmad', 'email' => 'ahmad@solar.test',
             'password' => 'password123', 'password_confirmation' => 'password123', 'terms' => '1'])->assertRedirect();
-        $this->assertSame(1, \App\Models\AdminNotice::where('admin_id', $admin->id)->where('kind', 'company')->count());
+        $this->assertSame(1, AdminNotice::where('admin_id', $admin->id)->where('kind', 'company')->count());
 
         auth('web')->logout();
         $this->actingAs($admin, 'admin');
         $this->get('/admin/notifications')->assertOk()->assertSee('New company: Kabul Solar');
-        $notice = \App\Models\AdminNotice::where('admin_id', $admin->id)->firstOrFail();
+        $notice = AdminNotice::where('admin_id', $admin->id)->firstOrFail();
         $this->get('/admin/notifications/'.$notice->id)->assertRedirect();
         $this->assertNotNull($notice->fresh()->read_at);
+    }
+
+    public function test_admin_sidebar_links_to_notifications_and_mark_all_covers_every_page(): void
+    {
+        $admin = $this->systemAdmin();
+        $notice = AdminNotice::create(['admin_id' => $admin->id, 'kind' => 'info', 'title' => 'Older unread notice']);
+
+        foreach (range(1, 30) as $number) {
+            AdminNotice::create([
+                'admin_id' => $admin->id, 'kind' => 'info', 'title' => 'Read notice '.$number, 'read_at' => now(),
+            ]);
+        }
+
+        $url = route('admin.notices.index');
+        $link = '<a class="menu-link" href="'.$url.'">';
+        $button = 'form="adminNoticesRead" class="btn btn-outline-soft"';
+
+        $this->get(route('admin.dashboard'))->assertOk()->assertSee($link, false);
+        $this->get($url)->assertOk()->assertSee($button, false)->assertDontSee('Older unread notice');
+        $this->get($url.'?page=2')->assertOk()->assertSee('Older unread notice');
+        $this->from($url)->post(route('admin.notices.read'))->assertRedirect($url);
+        $this->assertNotNull($notice->fresh()->read_at);
+        $this->get($url)->assertOk()->assertDontSee($button, false);
     }
 }

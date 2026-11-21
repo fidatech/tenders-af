@@ -12,8 +12,11 @@ class NoticeController extends Controller
 {
     public function index(): View
     {
+        $notices = AdminNotice::where('admin_id', auth('admin')->id());
+
         return view('admin.notices', [
-            'rows' => AdminNotice::where('admin_id', auth('admin')->id())->orderByDesc('id')->paginate(30),
+            'rows' => (clone $notices)->orderByDesc('id')->paginate(30),
+            'adminUnread' => $notices->whereNull('read_at')->count(),
         ]);
     }
 

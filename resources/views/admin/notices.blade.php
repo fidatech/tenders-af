@@ -2,7 +2,7 @@
 
 @section('content')
 <x-page-header :title="__('Notifications')" icon="bell">
-    @if ($rows->contains(fn ($n) => ! $n->read_at))
+    @if ($adminUnread)
         <button type="submit" form="adminNoticesRead" class="btn btn-outline-soft"><x-icon name="check-double" class="me-1" /> {{ __('Mark all as read') }}</button>
     @endif
 </x-page-header>
