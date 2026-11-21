@@ -52,6 +52,10 @@ class OfficeRegisterTest extends TestCase
 
         $this->actingAs($owner, 'admin');
         $this->get(route('admin.office.approvals'))->assertOk()->assertSee('Download proof');
+        $this->get(route('admin.office.approvals', ['q' => $company->name, 'kind' => 'subscription', 'from' => now()->toDateString()]))
+            ->assertOk()->assertSee('Download proof')->assertSee('Clear filters');
+        $this->get(route('admin.office.approvals', ['q' => 'Unmatched reference']))
+            ->assertOk()->assertSee('No entries match these filters.')->assertDontSee('Download proof');
         $this->get(route('admin.office.proof', $collection))->assertOk();
         $this->approve($collection);
         $this->assertDatabaseCount('subscriptions', 1);

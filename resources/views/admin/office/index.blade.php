@@ -33,41 +33,52 @@
 </div>
 
 <div class="card">
-    <div class="card-body border-bottom">
-        <form method="GET" action="{{ route($review ? 'admin.office.approvals' : 'admin.office.index') }}" class="row g-2 align-items-end">
-            @if ($employee->isSuper())
-                <div class="col-sm">
-                    <label class="form-label" for="office-employee">{{ __('Employee') }}</label>
-                    <select class="form-select" name="employee" id="office-employee">
-                        <option value="">{{ __('All employees') }}</option>
-                        @foreach ($employees as $id => $name)<option value="{{ $id }}" @selected((string) $employeeId === (string) $id)>{{ $name }}</option>@endforeach
+    <div class="card-body pb-0">
+        @php
+            $filterUrl = route($review ? 'admin.office.approvals' : 'admin.office.index');
+            $hasDates = request()->filled('from') || request()->filled('to');
+            $hasFilters = $term !== '' || $hasDates || request()->filled('kind') || $employeeId || $status !== ($review ? 'pending' : null);
+            $choices = [
+                ['kind', __('All types'), array_map('__', \App\Models\OfficeEntry::KINDS), request('kind')],
+                ['status', __('All statuses'), array_map('__', \App\Models\OfficeEntry::STATUSES), $status],
+            ];
+            if ($employee->isSuper()) {
+                $choices[] = ['employee', __('All employees'), $employees, $employeeId];
+            }
+        @endphp
+        <x-filter-bar :action="$filterUrl" :term="$term" :placeholder="__('Search company, reference or description…')"
+            :limit="150" :reset="$hasFilters ? $filterUrl : null">
+            @foreach ($choices as [$name, $label, $options, $selected])
+                <div class="col-6 col-xl-auto">
+                    <select class="form-select" name="{{ $name }}" aria-label="{{ $label }}" onchange="this.form.requestSubmit()" data-plain>
+                        <option value="">{{ $label }}</option>
+                        @foreach ($options as $value => $text)
+                            <option value="{{ $value }}" @selected((string) $selected === (string) $value)>{{ $text }}</option>
+                        @endforeach
                     </select>
                 </div>
-            @endif
-            <div class="col-sm">
-                <label class="form-label" for="office-kind">{{ __('Entry type') }}</label>
-                <select class="form-select" name="kind" id="office-kind">
-                    <option value="">{{ __('All types') }}</option>
-                    @foreach (\App\Models\OfficeEntry::KINDS as $key => $label)<option value="{{ $key }}" @selected(request('kind') === $key)>{{ __($label) }}</option>@endforeach
-                </select>
+            @endforeach
+            <div class="col-auto">
+                <button type="button" class="btn {{ $hasDates ? 'btn-primary' : 'btn-light-secondary' }}" data-bs-toggle="collapse"
+                    data-bs-target="#office-filter-dates" aria-controls="office-filter-dates" aria-expanded="{{ $hasDates ? 'true' : 'false' }}">
+                    <x-icon name="calendar" class="me-1" />{{ __('Date range') }}
+                </button>
             </div>
-            <div class="col-sm">
-                <label class="form-label" for="office-status">{{ __('Status') }}</label>
-                <select class="form-select" name="status" id="office-status">
-                    <option value="">{{ __('All statuses') }}</option>
-                    @foreach (\App\Models\OfficeEntry::STATUSES as $key => $label)<option value="{{ $key }}" @selected($status === $key)>{{ __($label) }}</option>@endforeach
-                </select>
-            </div>
-            <div class="col-sm">
-                <label class="form-label" for="office-from">{{ __('From') }}</label>
-                <input class="form-control" type="date" id="office-from" name="from" value="{{ request('from') }}">
-            </div>
-            <div class="col-sm">
-                <label class="form-label" for="office-to">{{ __('To') }}</label>
-                <input class="form-control" type="date" id="office-to" name="to" value="{{ request('to') }}">
-            </div>
-            <div class="col-sm-auto"><button class="btn btn-primary">{{ __('Filter') }}</button></div>
-        </form>
+            <x-slot:extra>
+                <div class="col-12 collapse {{ $hasDates ? 'show' : '' }}" id="office-filter-dates">
+                    <div class="row g-2">
+                        <div class="col-6 col-md-auto">
+                            <label class="form-label small mb-1" for="office-from">{{ __('From') }}</label>
+                            <input class="form-control" type="date" id="office-from" name="from" value="{{ request('from') }}">
+                        </div>
+                        <div class="col-6 col-md-auto">
+                            <label class="form-label small mb-1" for="office-to">{{ __('To') }}</label>
+                            <input class="form-control" type="date" id="office-to" name="to" value="{{ request('to') }}">
+                        </div>
+                    </div>
+                </div>
+            </x-slot:extra>
+        </x-filter-bar>
     </div>
     <div class="table-responsive">
         <table class="table align-middle mb-0">

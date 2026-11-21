@@ -4,11 +4,10 @@
 <x-page-header :title="__('Messages')" icon="envelope" />
 
 <div class="card">
-    <div class="card-body border-bottom">
-        <form method="GET" action="{{ route('admin.messages.index') }}" class="d-flex gap-2">
-            <input name="q" value="{{ $search }}" class="form-control" aria-label="{{ __('Search contacts') }}" placeholder="{{ __('Search company, bidder or email') }}" maxlength="150">
-            <button class="btn btn-primary">{{ __('Search') }}</button>
-        </form>
+    <div class="card-body pb-0">
+        <x-filter-bar :action="route('admin.messages.index')" :term="$search"
+            :placeholder="__('Search company, bidder or email…')" :limit="150"
+            :reset="$search !== '' ? route('admin.messages.index') : null" />
     </div>
     <div class="list-group list-group-flush">
         @forelse ($people as $person)

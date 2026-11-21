@@ -15,10 +15,7 @@
 
 <div class="card">
     <div class="card-body">
-        <form method="GET" class="row g-2 mb-3">
-            <div class="col-12 col-md">
-                <input type="search" class="form-control" name="q" value="{{ $term }}" placeholder="{{ __('Search…') }}" aria-label="{{ __('Search') }}">
-            </div>
+        <x-filter-bar :term="$term">
             @foreach ($filters ?? [] as $filter)
                 <div class="col-6 col-md-auto">
                     @if (($filter['type'] ?? 'select') === 'date')
@@ -33,10 +30,7 @@
                     @endif
                 </div>
             @endforeach
-            <div class="col-auto">
-                <button class="btn btn-light-secondary" type="submit"><x-icon name="magnifying-glass" /></button>
-            </div>
-        </form>
+        </x-filter-bar>
 
         @if ($totals)
             <div class="d-flex flex-wrap gap-2 mb-3">

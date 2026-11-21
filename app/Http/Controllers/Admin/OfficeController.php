@@ -42,18 +42,24 @@ class OfficeController extends Controller
         $employee = $request->user('admin');
         $query = OfficeEntry::query()->when(! $employee->isSuper(), fn (Builder $query) => $query->where('employee_id', $employee->id));
         $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:150'],
             'kind' => ['nullable', Rule::in(array_keys(OfficeEntry::KINDS))],
             'status' => ['nullable', Rule::in(array_keys(OfficeEntry::STATUSES))],
             'employee' => ['nullable', 'integer'],
             'from' => ['nullable', 'date_format:Y-m-d'],
             'to' => ['nullable', 'date_format:Y-m-d', Rule::when($request->filled('from'), 'after_or_equal:from')],
         ]);
+        $term = trim($filters['q'] ?? '');
         $status = $filters['status'] ?? ($review && ! $request->has('status') ? 'pending' : null);
         $employeeId = $employee->isSuper() ? ($filters['employee'] ?? null) : null;
         $scoped = (clone $query)->when($employeeId, fn (Builder $query) => $query->where('employee_id', $employeeId));
         $balances = (clone $scoped)->select('employee_id', 'platform_account_id', 'currency')->custody()
             ->groupBy('employee_id', 'platform_account_id', 'currency')->with('employee', 'account')->get();
         $entries = (clone $scoped)->with('employee', 'reviewer', 'account', 'company', 'plan', 'subscription')
+            ->when($term !== '', fn (Builder $query) => $query->where(fn (Builder $matches) => $matches
+                ->where('reference', 'like', '%'.$term.'%')
+                ->orWhere('description', 'like', '%'.$term.'%')
+                ->orWhereHas('company', fn (Builder $company) => $company->where('name', 'like', '%'.$term.'%'))))
             ->when($filters['kind'] ?? null, fn (Builder $query, $kind) => $query->where('kind', $kind))
             ->when($filters['from'] ?? null, fn (Builder $query, $from) => $query->where('date', '>=', $from))
             ->when($filters['to'] ?? null, fn (Builder $query, $to) => $query->where('date', '<=', $to))
@@ -61,7 +67,7 @@ class OfficeController extends Controller
             ->latest('id')->paginate(25)->withQueryString();
         $employees = $employee->isSuper() ? Admin::orderBy('name')->pluck('name', 'id') : collect();
 
-        return view('admin.office.index', compact('employee', 'employees', 'employeeId', 'balances', 'entries', 'status', 'review'));
+        return view('admin.office.index', compact('employee', 'employees', 'employeeId', 'balances', 'entries', 'status', 'review', 'term'));
     }
 
     public function create(Request $request): View
