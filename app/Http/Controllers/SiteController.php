@@ -49,6 +49,12 @@ class SiteController extends Controller
         'site.terms' => ['/terms', 'Terms'],
     ];
 
+    /** The fixed pages of the site, without those of modules that are switched off. */
+    public static function pages(): array
+    {
+        return array_filter(self::PAGES, fn (string $name) => $name !== 'site.companies' || module_on('directory'), ARRAY_FILTER_USE_KEY);
+    }
+
     public function home(): View
     {
         $counts = $this->provinceCounts();
@@ -69,7 +75,7 @@ class SiteController extends Controller
             'map' => $this->map($counts),
             'top' => Province::whereIn('id', array_keys($counts))->get()->sortByDesc(fn (Province $p) => $counts[$p->id])->take(4)->values()
                 ->map(fn (Province $p) => ['name' => $p->name, 'slug' => $p->slug, 'count' => $counts[$p->id]]),
-            'sponsored' => Platform::bool('products_enabled') ? Product::live()->sponsored()->with('company', 'images', 'province')->inRandomOrder()->limit(4)->get() : collect(),
+            'sponsored' => module_on('products') ? Product::live()->sponsored()->with('company', 'images', 'province')->inRandomOrder()->limit(4)->get() : collect(),
             'featured' => Company::listed()->where('verify_status', 'verified')->with('province', 'industries')->orderByDesc('verified_at')->limit(4)->get(),
             'faqSchema' => array_slice($this->faqs(), 0, 4),
         ]);
@@ -228,10 +234,12 @@ class SiteController extends Controller
             'description' => mb_substr($company->about ? preg_replace('/\s+/', ' ', $company->about) : $company->name.' is a '.mb_strtolower($company->kindLabel()).($place ? ' in '.$place : '').' registered on '.config('app.name').'.', 0, 300),
             'company' => $company,
             // what this organisation posted itself: open ones first, then the newest results
-            'products' => Platform::bool('products_enabled') ? Product::live()->where('company_id', $company->id)->with('company', 'images', 'province')->sponsoredFirst()->limit(6)->get() : collect(),
+            'products' => module_on('products') ? Product::live()->where('company_id', $company->id)->with('company', 'images', 'province')->sponsoredFirst()->limit(6)->get() : collect(),
             'posted' => Tender::visible()->where('company_id', $company->id)->with('industry', 'province')
                 ->orderByRaw("case when status = 'published' then 0 else 1 end")->orderByDesc('published_on')->orderByDesc('id')->limit(12)->get(),
             'crumbs' => [['Companies', route('site.companies')], [$company->name, null]],
+            // an empty profile is not offered to search engines until the company writes about itself
+            'noindex' => blank($company->about),
         ]);
     }
 
@@ -240,7 +248,7 @@ class SiteController extends Controller
 
     public function products(Request $request): View
     {
-        abort_unless(Platform::bool('products_enabled'), 404);
+        abort_unless(module_on('products'), 404);
         $term = trim((string) $request->query('q', ''));
         $rows = Product::live()
             ->when($term !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner->where('name', 'like', "%$term%")->orWhere('summary', 'like', "%$term%")))
@@ -262,7 +270,7 @@ class SiteController extends Controller
 
     public function product(string $slug): View
     {
-        abort_unless(Platform::bool('products_enabled'), 404);
+        abort_unless(module_on('products'), 404);
         $product = Product::live()->with('company.province', 'industry', 'province', 'images')->where('slug', $slug)->firstOrFail();
         $product->increment('views');
         $place = $product->province?->name ?: ($product->company->province?->name ?: 'Afghanistan');
@@ -284,7 +292,7 @@ class SiteController extends Controller
     /** A visitor presses "WhatsApp": the click is counted for the company, then WhatsApp opens. */
     public function productContact(string $slug): RedirectResponse
     {
-        abort_unless(Platform::bool('products_enabled'), 404);
+        abort_unless(module_on('products'), 404);
         $product = Product::live()->with('company')->where('slug', $slug)->firstOrFail();
         $number = preg_replace('/\D+/', '', (string) ($product->company->whatsapp ?: $product->company->phone));
         abort_if($number === '', 404);
@@ -317,7 +325,7 @@ class SiteController extends Controller
 
     private function maySee(Product $product): void
     {
-        $open = $product->isLive() && Platform::bool('products_enabled');
+        $open = $product->isLive() && module_on('products');
         abort_unless($open || auth('admin')->check() || auth('web')->user()?->company_id === $product->company_id, 404);
     }
 
@@ -327,7 +335,7 @@ class SiteController extends Controller
     public function statistics(): View
     {
         $min = (int) platform('stats_min');
-        $products = Platform::bool('products_enabled');
+        $products = module_on('products');
         // [label, number, explanation]
         $figures = [
             ['Tenders published', Tender::visible()->count(), 'Every tender published on the site so far, open or closed.'],
@@ -449,7 +457,7 @@ class SiteController extends Controller
     {
         $today = date('Y-m-d');
         $urls = [];
-        foreach (self::PAGES as $name => [$path]) {
+        foreach (self::pages() as $name => [$path]) {
             $urls[] = [url($path), $today, $path === '/' ? '1.0' : (in_array($name, ['site.privacy', 'site.terms'], true) ? '0.3' : '0.8')];
         }
         try {
@@ -462,14 +470,18 @@ class SiteController extends Controller
             foreach (Tender::whereIn('status', [Tender::PUBLISHED, Tender::AWARDED])->orderByDesc('id')->limit(20000)->get(['slug', 'updated_at']) as $tender) {
                 $urls[] = [route('site.tenders.show', ['slug' => $tender->slug]), $tender->updated_at?->toDateString() ?? $today, '0.6'];
             }
-            if (Platform::bool('products_enabled')) {
+            if (module_on('products')) {
                 $urls[] = [route('site.products'), $today, '0.8'];
                 foreach (Product::live()->orderByDesc('id')->limit(20000)->get(['slug', 'updated_at']) as $product) {
                     $urls[] = [route('site.products.show', ['slug' => $product->slug]), $product->updated_at?->toDateString() ?? $today, '0.6'];
                 }
             }
-            foreach (Company::listed()->orderByDesc('id')->limit(20000)->get(['slug', 'updated_at']) as $company) {
-                $urls[] = [route('site.companies.show', ['slug' => $company->slug]), $company->updated_at?->toDateString() ?? $today, '0.5'];
+            // company pages, while the directory is on; a profile with nothing written about the company is
+            // too thin to offer to search engines (it is also marked noindex on its page)
+            if (module_on('directory')) {
+                foreach (Company::listed()->whereNotNull('about')->where('about', '!=', '')->orderByDesc('id')->limit(20000)->get(['slug', 'updated_at']) as $company) {
+                    $urls[] = [route('site.companies.show', ['slug' => $company->slug]), $company->updated_at?->toDateString() ?? $today, '0.5'];
+                }
             }
         } catch (Throwable) {
             // before the database is set up the fixed pages are still listed
@@ -535,7 +547,7 @@ class SiteController extends Controller
             $text .= "### $question\n\n$answer\n\n";
         }
         $text .= "## Pages\n\n";
-        foreach (self::PAGES as [$path, $title]) {
+        foreach (self::pages() as [$path, $title]) {
             $text .= "- [$title](".url($path).")\n";
         }
 

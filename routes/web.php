@@ -33,16 +33,20 @@ Route::get('sectors', [SiteController::class, 'sectors'])->name('site.sectors');
 Route::get('provinces', [SiteController::class, 'provinces'])->name('site.provinces');
 
 // the free company directory
-Route::get('companies', [SiteController::class, 'companies'])->name('site.companies');
-Route::get('companies/{slug}', [SiteController::class, 'company'])->name('site.companies.show');
+Route::middleware('module:directory')->group(function () {
+    Route::get('companies', [SiteController::class, 'companies'])->name('site.companies');
+    Route::get('companies/{slug}', [SiteController::class, 'company'])->name('site.companies.show');
+});
 Route::get('companies/{slug}/logo', [SiteController::class, 'logo'])->name('site.companies.logo');
 
 // products for wholesale (the module is switched on in the settings of the administrators)
-Route::get('products', [SiteController::class, 'products'])->name('site.products');
-Route::get('products/image/{id}', [SiteController::class, 'productImage'])->whereNumber('id')->name('site.products.image');
-Route::get('products/video/{id}', [SiteController::class, 'productVideo'])->whereNumber('id')->name('site.products.video');
-Route::get('products/{slug}', [SiteController::class, 'product'])->name('site.products.show');
-Route::get('products/{slug}/whatsapp', [SiteController::class, 'productContact'])->middleware('throttle:30,1')->name('site.products.contact');
+Route::middleware('module:products')->group(function () {
+    Route::get('products', [SiteController::class, 'products'])->name('site.products');
+    Route::get('products/image/{id}', [SiteController::class, 'productImage'])->whereNumber('id')->name('site.products.image');
+    Route::get('products/video/{id}', [SiteController::class, 'productVideo'])->whereNumber('id')->name('site.products.video');
+    Route::get('products/{slug}', [SiteController::class, 'product'])->name('site.products.show');
+    Route::get('products/{slug}/whatsapp', [SiteController::class, 'productContact'])->middleware('throttle:30,1')->name('site.products.contact');
+});
 Route::get('statistics', [SiteController::class, 'statistics'])->name('site.statistics');
 
 Route::get('pricing', [SiteController::class, 'pricing'])->name('site.pricing');
@@ -110,7 +114,7 @@ Route::middleware('auth:web')->group(function () {
         });
 
         // the products a company offers for wholesale
-        Route::prefix('my/products')->name('products.')->group(function () {
+        Route::prefix('my/products')->name('products.')->middleware('module:products')->group(function () {
             Route::get('/', [ProductController::class, 'index'])->name('index');
             Route::get('create', [ProductController::class, 'create'])->name('create');
             Route::post('/', [ProductController::class, 'store'])->name('store');
@@ -235,6 +239,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('subscriptions/{id}/print', [Admin\SubscriptionController::class, 'print'])->whereNumber('id')->name('subscriptions.print');
         Route::get('reports', [Admin\ReportController::class, 'index'])->name('reports.index');
         Route::get('logs', [Admin\LogController::class, 'index'])->name('logs.index');
+        Route::get('modules', [Admin\ModuleController::class, 'index'])->name('modules.index');
+        Route::put('modules/{module}', [Admin\ModuleController::class, 'update'])->where('module', '[a-z_]+')->name('modules.update');
         Route::get('branding', [Admin\BrandingController::class, 'edit'])->name('branding.edit');
         Route::put('branding', [Admin\BrandingController::class, 'update'])->name('branding.update');
         Route::delete('branding/{asset}', [Admin\BrandingController::class, 'destroy'])->where('asset', '[a-z_]+')->name('branding.destroy');

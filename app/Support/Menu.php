@@ -117,6 +117,9 @@ class Menu
         if (! empty($item['setting']) && ! Platform::bool($item['setting'])) {
             return false;
         }
+        if (! empty($item['module']) && ! Modules::inDashboardNav($item['module'])) {
+            return false;
+        }
         $company = $user->company;
         if (! empty($item['supplier']) && ! $company?->is_supplier) {
             return false;

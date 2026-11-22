@@ -73,11 +73,10 @@
                 @endif
                 @if ($title === __('Products for wholesale'))
                     <div class="col-12">
-                        <div class="form-check form-switch">
-                            <input type="hidden" name="products_enabled" value="0">
-                            <input class="form-check-input" type="checkbox" role="switch" id="s-products" name="products_enabled" value="1" @checked(old('products_enabled', $values['products_enabled'] ? '1' : '0') == '1')>
-                            <label class="form-check-label" for="s-products">{{ __('The products module is switched on') }}</label>
-                            <div class="form-text">{{ __('Switched off: there is no Products page on the site and companies do not see "My products". Nothing is deleted.') }}</div>
+                        <div class="alert alert-light border d-flex align-items-center gap-2 mb-0 py-2">
+                            <x-icon name="puzzle-piece" />
+                            <span class="flex-grow-1">{{ module_on('products') ? __('The products module is switched on.') : __('The products module is switched off.') }} {{ __('It is switched on and off under Module Management.') }}</span>
+                            @if (\App\Support\AdminAccess::allows(auth('admin')->user(), 'admin.modules.index'))<a class="btn btn-sm btn-outline-primary" href="{{ route('admin.modules.index') }}">{{ __('Module Management') }}</a>@endif
                         </div>
                     </div>
                 @endif

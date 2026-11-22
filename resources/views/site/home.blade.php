@@ -202,7 +202,7 @@
 </section>
 @endif
 
-@if ($featured->isNotEmpty())
+@if ($featured->isNotEmpty() && module_on('directory'))
 <section class="band" id="companies">
     <div class="wrap section">
         <div class="section-head">

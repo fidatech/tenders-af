@@ -6,10 +6,11 @@
     $trialLeft = $company?->status === \App\Models\Company::TRIAL && $company->isUsable() ? $company->daysLeft() : null;
     $unread = \App\Models\Notice::where('user_id', $user->id)->whereNull('read_at')->count();
     $latest = \App\Models\Notice::where('user_id', $user->id)->orderByDesc('id')->limit(6)->get();
-    $productsOn = \App\Support\Platform::bool('products_enabled');
+    $productsOn = \App\Support\Modules::inPublicNav('products');
+    $directoryOn = module_on('directory');
     $siteNav = array_filter([
         [__('Tenders'), route('site.tenders')],
-        [__('Companies'), route('site.companies')],
+        \App\Support\Modules::inPublicNav('directory') ? [__('Companies'), route('site.companies')] : null,
         $productsOn ? [__('Products'), route('site.products')] : null,
         [__('Sectors'), route('site.sectors')],
         [__('Provinces'), route('site.provinces')],
@@ -90,7 +91,7 @@
                     <li><a class="dropdown-item" href="{{ route('dashboard') }}"><x-icon name="gauge" /> {{ __('Dashboard') }}</a></li>
                     <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><x-icon name="user" /> {{ __('My Profile') }}</a></li>
                     <li><a class="dropdown-item" href="{{ route('profile.password') }}"><x-icon name="key" /> {{ __('Change Password') }}</a></li>
-                    @if ($company?->is_listed)
+                    @if ($company?->is_listed && $directoryOn)
                         <li><a class="dropdown-item" href="{{ route('site.companies.show', ['slug' => $company->slug]) }}" target="_blank" rel="noopener"><x-icon name="eye" /> {{ __('Our public page') }}</a></li>
                     @endif
                     <li><hr class="dropdown-divider"></li>

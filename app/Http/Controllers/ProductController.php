@@ -196,7 +196,7 @@ class ProductController extends Controller
     /** The module is off until an administrator switches it on. */
     private function company(): Company
     {
-        abort_unless(Platform::bool('products_enabled'), 404);
+        abort_unless(module_on('products'), 404);
 
         return company();
     }

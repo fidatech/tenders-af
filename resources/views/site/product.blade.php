@@ -103,7 +103,7 @@
                 <h2>{{ $company->name }}</h2>
                 @if ($company->isVerified())<p style="margin:6px 0 10px"><span class="verified">✓ Verified company</span></p>@endif
                 <p class="muted" style="font-size:14px">{{ $company->kindLabel() }}@if ($company->province) · {{ $company->province->name }}@endif</p>
-                @if ($company->is_listed)<a class="line" href="{{ route('site.companies.show', ['slug' => $company->slug]) }}"><b>See the company profile</b></a>@endif
+                @if ($company->is_listed && module_on('directory'))<a class="line" href="{{ route('site.companies.show', ['slug' => $company->slug]) }}"><b>See the company profile</b></a>@endif
             </div>
         </aside>
     </div>

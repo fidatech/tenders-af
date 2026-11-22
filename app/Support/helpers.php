@@ -34,6 +34,14 @@ if (! function_exists('platform')) {
     }
 }
 
+if (! function_exists('module_on')) {
+    /** Is a module of the platform switched on (with the modules it depends on)? See config/modules.php. */
+    function module_on(string $key): bool
+    {
+        return \App\Support\Modules::enabled($key);
+    }
+}
+
 if (! function_exists('company')) {
     /** The business of the signed-in user, or null (admin panel, console, guest). */
     function company(): ?Company

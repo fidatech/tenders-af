@@ -8,7 +8,7 @@
 
 @section('content')
 <x-page-header :title="__('Company profile')" icon="building" :subtitle="__('What buyers see about your company in the directory, and the sectors your tender alerts follow.')">
-    <a class="btn btn-outline-soft" href="{{ route('site.companies.show', ['slug' => $company->slug]) }}" target="_blank" rel="noopener"><x-icon name="eye" class="me-1" /> {{ __('See the public page') }}</a>
+    @if (module_on('directory'))<a class="btn btn-outline-soft" href="{{ route('site.companies.show', ['slug' => $company->slug]) }}" target="_blank" rel="noopener"><x-icon name="eye" class="me-1" /> {{ __('See the public page') }}</a>@endif
 </x-page-header>
 
 <form method="POST" action="{{ route('settings.update') }}" enctype="multipart/form-data">

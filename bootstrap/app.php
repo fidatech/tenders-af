@@ -26,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // tender.af and the www addresses lead to tenders.af
         $middleware->prepend(\App\Http\Middleware\CanonicalHost::class);
         $middleware->prepend(\App\Http\Middleware\CompressResponse::class);
-        $middleware->alias(['company.active' => EnsureCompanyActive::class, 'owner' => EnsureOwner::class, 'admin.role' => AdminRole::class]);
+        $middleware->alias(['company.active' => EnsureCompanyActive::class, 'owner' => EnsureOwner::class, 'admin.role' => AdminRole::class, 'module' => \App\Http\Middleware\EnsureModule::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // A problem the user can fix: go back to the form and show the message.

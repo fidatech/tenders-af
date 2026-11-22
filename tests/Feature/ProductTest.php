@@ -33,7 +33,9 @@ class ProductTest extends TestCase
         $this->get('/products')->assertNotFound();
         $this->get('/')->assertOk()->assertDontSee('href="'.route('site.products').'"', false);
         $this->signIn($this->business());
-        $this->get('/my/products')->assertNotFound();
+        // a switched-off module sends the company back to its dashboard with a short note
+        $this->get('/my/products')->assertRedirect(route('dashboard'))->assertSessionHas('warning');
+        $this->post('/my/products', [])->assertNotFound();
         $this->get('/dashboard')->assertOk()->assertDontSee('My products');
 
         Platform::set(['products_enabled' => '1']);

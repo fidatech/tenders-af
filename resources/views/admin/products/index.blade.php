@@ -2,7 +2,7 @@
 
 @php
     $pill = ['draft' => 'bg-secondary-subtle text-secondary-emphasis', 'pending' => 'bg-warning-subtle text-warning-emphasis', 'published' => 'bg-success-subtle text-success-emphasis', 'rejected' => 'bg-danger-subtle text-danger-emphasis', 'hidden' => 'bg-secondary-subtle text-secondary-emphasis'];
-    $on = \App\Support\Platform::bool('products_enabled');
+    $on = module_on('products');
 @endphp
 
 @section('content')

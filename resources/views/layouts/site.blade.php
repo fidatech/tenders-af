@@ -5,8 +5,9 @@
     $canonical = url()->current();
     $image = asset('img/og.png');
     $imageAlt = $name.' banner reading “Every tender in Afghanistan.”';
-    $menu = ['site.tenders' => ['site.tenders', 'site.sector', 'site.province', 'site.tenders.show'], 'site.companies' => ['site.companies', 'site.companies.show'], 'site.sectors' => ['site.sectors'], 'site.provinces' => ['site.provinces'], 'site.pricing' => ['site.pricing']];
-    $productsOn = \App\Support\Platform::bool('products_enabled');
+    $directoryOn = \App\Support\Modules::inPublicNav('directory');
+    $menu = array_filter(['site.tenders' => ['site.tenders', 'site.sector', 'site.province', 'site.tenders.show'], 'site.companies' => $directoryOn ? ['site.companies', 'site.companies.show'] : null, 'site.sectors' => ['site.sectors'], 'site.provinces' => ['site.provinces'], 'site.pricing' => ['site.pricing']]);
+    $productsOn = \App\Support\Modules::inPublicNav('products');
     $signedIn = auth('web')->check();
     // the bell of a signed-in company: its notifications and tender alerts
     $bellUnread = $signedIn ? \App\Models\Notice::where('user_id', auth('web')->id())->whereNull('read_at')->count() : 0;
@@ -148,7 +149,7 @@
             <nav class="foot-col" aria-label="Companies">
                 <h2>Companies</h2>
                 <ul>
-                    <li><a href="{{ route('site.companies') }}">Company directory</a></li>
+                    @if ($directoryOn)<li><a href="{{ route('site.companies') }}">Company directory</a></li>@endif
                     @if ($productsOn)<li><a href="{{ route('site.products') }}">Wholesale products</a></li>@endif
                     <li><a href="{{ route('site.statistics') }}">Statistics</a></li>
                     <li><a href="{{ route('site.pricing') }}">Pricing</a></li>

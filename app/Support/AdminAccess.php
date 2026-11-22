@@ -15,7 +15,7 @@ class AdminAccess
     ];
 
     private const OWN = ['admin.logout', 'admin.profile.*'];
-    private const OWNER_ONLY = ['admin.admins.*', 'admin.settings.*', 'admin.branding.*', 'admin.logs.*', 'admin.companies.destroy', 'admin.office.review', 'admin.office.approvals'];
+    private const OWNER_ONLY = ['admin.admins.*', 'admin.settings.*', 'admin.branding.*', 'admin.modules.update', 'admin.logs.*', 'admin.companies.destroy', 'admin.office.review', 'admin.office.approvals'];
     private const FINANCE = ['admin.accounts.*', 'admin.expenses.*', 'admin.plans.*', 'admin.subscriptions.*', 'admin.products.payments.*'];
 
     public static function allows(Admin $admin, string $name, bool $readOnly = true): bool

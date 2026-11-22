@@ -30,7 +30,7 @@
     <nav class="crumbs" aria-label="You are here"><a href="{{ route('site.home') }}">Home</a>@foreach ($crumbs as [$crumbName, $crumbUrl]) / @if ($crumbUrl)<a href="{{ $crumbUrl }}">{{ $crumbName }}</a>@else<span>{{ $crumbName }}</span>@endif @endforeach</nav>
     <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span class="tag" style="background:rgba(255,255,255,.16);color:#fff">{{ $tender->typeLabel() }} · {{ $tender->number() }}</span><span class="pill {{ $pill }}">{{ $tender->stateLabel() }}</span></div>
     <h1>{{ $tender->title }}</h1>
-    <p class="lead">@if ($tender->company?->is_listed)<a href="{{ route('site.companies.show', ['slug' => $tender->company->slug]) }}" style="color:inherit">{{ $tender->buyer_name }}</a>@else{{ $tender->buyer_name }}@endif · {{ $tender->placeText() }}@if ($tender->company_id) · <span style="opacity:.85">Posted by the buyer</span>@endif</p>
+    <p class="lead">@if ($tender->company?->is_listed && module_on('directory'))<a href="{{ route('site.companies.show', ['slug' => $tender->company->slug]) }}" style="color:inherit">{{ $tender->buyer_name }}</a>@else{{ $tender->buyer_name }}@endif · {{ $tender->placeText() }}@if ($tender->company_id) · <span style="opacity:.85">Posted by the buyer</span>@endif</p>
 </section>
 @endsection
 
