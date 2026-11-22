@@ -193,6 +193,7 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') bell.open = false; });
 })();
 </script>
+<script src="{{ asset_v('js/filters.js') }}" defer></script>
 @stack('scripts')
 </body>
 </html>
