@@ -140,14 +140,41 @@ p { margin: 0; }
 .legend { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #D5E4DB; }
 .legend i { width: 26px; height: 12px; border-radius: 3px; border: 1px solid rgba(255,255,255,.5); }
 .mapwrap { position: relative; margin-top: 18px; }
-.mapscroll { overflow-x: auto; }
-.afmap { display: block; width: 100%; min-width: 700px; }
+/* the whole country always fits: no sideways scrolling, on any screen */
+.mapscroll { overflow: visible; }
+.afmap { display: block; width: 100%; height: auto; }
 .afmap a path { fill: #5FE0A0; stroke: #fff; stroke-opacity: .75; stroke-width: 1.2; stroke-linejoin: round; transition: fill-opacity .15s; }
 .afmap a:hover path, .afmap a:focus path { fill-opacity: .85 !important; stroke-width: 3; }
 .afmap text { fill: #fff; font-family: var(--head); font-weight: 700; pointer-events: none; text-anchor: middle; }
 .afmap .n { font: 600 12px var(--mono); fill: #C9F7DD; }
+.afmap a { outline: none; -webkit-tap-highlight-color: transparent; }
+.afmap a:focus-visible path { stroke: var(--mint); stroke-width: 4; }
+.afmap a.on path { fill-opacity: .95 !important; stroke: #fff; stroke-opacity: 1; stroke-width: 4; }
+/* touch screens and phones: a hint, then the card of the province picked */
+.afmap-pick { margin-top: 14px; }
+.afmap-hint { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; color: #D5E4DB; }
+.afmap-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: #fff; color: var(--ink); border-radius: 16px; padding: 14px 16px; box-shadow: 0 18px 40px rgba(0,0,0,.3); }
+.afmap-card[hidden], .afmap-hint[hidden] { display: none; }
+.afmap-info { min-width: 0; }
+.afmap-info b { display: block; font: 800 17px/1.2 var(--head); }
+.afmap-info span { display: block; margin-top: 3px; font-size: 13px; color: var(--muted); }
+.afmap-card .btn { flex: 0 0 auto; white-space: nowrap; }
+@media (hover: hover) and (min-width: 641px) { .afmap-pick { display: none; } }
+/* tablets: the names of the small provinces are too small to read; phones: no names at all, the card says it */
+@media (max-width: 999px) { .afmap text.s { display: none; } }
+@media (max-width: 640px) {
+    .afmap text { display: none; }
+    .afmap a path { stroke-width: 1.6; }
+    .map-head p { font-size: 15px; }
+    .legend { font-size: 12px; }
+    .legend i { width: 20px; }
+}
 .mappanel { margin-top: 20px; background: #fff; color: var(--ink); border-radius: 20px; padding: 18px; box-shadow: 0 24px 60px rgba(0,0,0,.35); }
-@media (min-width: 1000px) { .mappanel { position: absolute; right: 0; bottom: 0; width: 340px; margin-top: 0; } }
+/* wide screens: the list of provinces beside the map, not over its south-east */
+@media (min-width: 1000px) {
+    .mapwrap:has(> .mappanel) { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; align-items: center; }
+    .mappanel { margin-top: 0; }
+}
 .mappanel h3 { font-size: 19px; font-weight: 800; }
 .mappanel a.line { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 11px 0; border-top: 1px solid #EEF2EF; margin-top: 10px; text-decoration: none; color: var(--ink); font-weight: 600; font-size: 14px; }
 .mappanel a.line span { font-size: 12px; color: var(--muted); }

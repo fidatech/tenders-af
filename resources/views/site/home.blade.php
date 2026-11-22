@@ -170,7 +170,7 @@
 <section class="wrap" id="map" style="padding-bottom:64px">
     <div class="dark panel">
         <div class="map-head">
-            <div><div class="eyebrow">34 provinces</div><h2 style="margin-top:6px;font-size:clamp(28px,3.4vw,36px);font-weight:800">Tenders across the country</h2><p>Click a province to see its open tenders.</p></div>
+            <div><div class="eyebrow">34 provinces</div><h2 style="margin-top:6px;font-size:clamp(28px,3.4vw,36px);font-weight:800">Tenders across the country</h2><p>Choose a province to see its open tenders.</p></div>
             <div class="legend"><span>Fewer</span><i style="background:rgba(95,224,160,.14)"></i><i style="background:rgba(95,224,160,.36)"></i><i style="background:rgba(95,224,160,.62)"></i><span>More tenders</span></div>
         </div>
         <div class="mapwrap">
