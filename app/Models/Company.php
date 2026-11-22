@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Casts\Day;
+use App\Support\Modules;
+use App\Support\Platform;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -243,7 +245,7 @@ class Company extends Model
             return false;
         }
 
-        return \App\Support\Platform::bool('posting_free') || ($this->isUsable() && (bool) $this->plan?->can_post);
+        return Platform::bool('posting_free') || ($this->isUsable() && (bool) $this->plan?->can_post);
     }
 
     /** What a website address may be once https:// and www. are taken off: example.af, shop.example.com/en */
@@ -295,10 +297,10 @@ class Company extends Model
             'Services' => $this->serviceList() !== [],
             'Verification' => $this->isVerified(),
         ];
-        if (\App\Support\Modules::enabled('portfolios')) {
+        if (Modules::enabled('portfolios')) {
             $checks['Projects'] = $this->projects()->where('status', 'published')->exists();
         }
-        if (\App\Support\Modules::enabled('products')) {
+        if (Modules::enabled('products')) {
             $checks['Products'] = $this->hasMany(Product::class)->exists();
         }
         $done = count(array_filter($checks));

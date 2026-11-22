@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
 use App\Models\ModuleChange;
+use App\Support\AdminAccess;
 use App\Support\Modules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class ModuleController extends Controller
         return view('admin.modules', [
             'modules' => $modules,
             'history' => $history,
-            'canEdit' => \App\Support\AdminAccess::allows(auth('admin')->user(), 'admin.modules.update', false),
+            'canEdit' => AdminAccess::allows(auth('admin')->user(), 'admin.modules.update', false),
         ]);
     }
 

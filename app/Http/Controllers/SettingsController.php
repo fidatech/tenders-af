@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Company;
 use App\Models\Industry;
 use App\Models\Province;
+use App\Support\Modules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -88,7 +89,7 @@ class SettingsController extends Controller
             unset($data['contact_visibility'], $data['contact_fields']);
         }
 
-        if (\App\Support\Modules::enabled('mini_websites') && $request->has('page_shown')) {
+        if (Modules::enabled('mini_websites') && $request->has('page_shown')) {
             $data['services'] = collect($data['services'] ?? [])
                 ->map(fn ($row) => ['name' => trim((string) ($row['name'] ?? '')), 'text' => trim((string) ($row['text'] ?? ''))])
                 ->filter(fn ($row) => $row['name'] !== '')->values()->all();

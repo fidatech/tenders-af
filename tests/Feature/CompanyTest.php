@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Mail\TenderAlertMail;
 use App\Models\Admin;
 use App\Models\AdminNotice;
+use App\Models\Company;
 use App\Models\Industry;
+use App\Models\Notice;
 use App\Models\Plan;
 use App\Models\PlatformAccount;
 use App\Models\Tender;
@@ -29,7 +31,7 @@ class CompanyTest extends TestCase
             'password' => 'password123', 'password_confirmation' => 'password123', 'terms' => '1',
         ])->assertRedirect('/company');
 
-        $afghan = \App\Models\Company::where('name', 'Kabul Supplies')->firstOrFail();
+        $afghan = Company::where('name', 'Kabul Supplies')->firstOrFail();
         $this->assertSame('AFN', $afghan->currency);
         $this->assertSame('active', $afghan->status);
         $this->assertTrue($afghan->onFreePlan());
@@ -119,13 +121,13 @@ class CompanyTest extends TestCase
         $this->assertSame(1, TenderAlert::where('channel', 'email')->count());
         $this->assertNotNull($tender->fresh()->alerted_at);
         // the bell of the matching company is told once; the other two hear nothing yet
-        $this->assertSame(1, \App\Models\Notice::where('company_id', $match->id)->where('title', 'New tender matches your alerts')->count());
-        $this->assertSame(0, \App\Models\Notice::whereIn('company_id', [$elsewhere->id, $freeOne->id])->count());
+        $this->assertSame(1, Notice::where('company_id', $match->id)->where('title', 'New tender matches your alerts')->count());
+        $this->assertSame(0, Notice::whereIn('company_id', [$elsewhere->id, $freeOne->id])->count());
 
         // the company on the free plan gets the weekly digest instead
         $this->artisan('tenders:digest')->assertSuccessful();
         Mail::assertSent(TenderAlertMail::class, fn (TenderAlertMail $mail) => $mail->hasTo('owner@small.test') && $mail->digest);
-        $this->assertSame(1, \App\Models\Notice::where('company_id', $freeOne->id)->where('title', '1 new tender matches your sectors this week')->count());
+        $this->assertSame(1, Notice::where('company_id', $freeOne->id)->where('title', '1 new tender matches your sectors this week')->count());
     }
 
     public function test_a_company_sends_its_licence_and_an_administrator_verifies_it(): void

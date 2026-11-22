@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\ContactMessage;
 use App\Models\Admin;
+use App\Models\AdminNotice;
 use App\Models\Company;
 use App\Models\CompanyProject;
 use App\Models\CompanyProjectFile;
@@ -502,7 +503,7 @@ class SiteController extends Controller
                 }
             }
 
-            \App\Models\AdminNotice::messageToAll('Message from '.$data['name'], $data['message'], $data['email']);
+            AdminNotice::messageToAll('Message from '.$data['name'], $data['message'], $data['email']);
         }
 
         return redirect()->route('site.contact')->with('sent', true);

@@ -2,13 +2,17 @@
 
 use App\Exceptions\UserError;
 use App\Http\Middleware\AdminRole;
-use App\Http\Middleware\EnsureOwner;
+use App\Http\Middleware\CanonicalHost;
+use App\Http\Middleware\CompressResponse;
 use App\Http\Middleware\EnsureCompanyActive;
+use App\Http\Middleware\EnsureModule;
+use App\Http\Middleware\EnsureOwner;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\StripNumberCommas;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -24,9 +28,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [StripNumberCommas::class, EnsureUserIsActive::class]);
         // tender.af and the www addresses lead to tenders.af
-        $middleware->prepend(\App\Http\Middleware\CanonicalHost::class);
-        $middleware->prepend(\App\Http\Middleware\CompressResponse::class);
-        $middleware->alias(['company.active' => EnsureCompanyActive::class, 'owner' => EnsureOwner::class, 'admin.role' => AdminRole::class, 'module' => \App\Http\Middleware\EnsureModule::class]);
+        $middleware->prepend(CanonicalHost::class);
+        $middleware->prepend(CompressResponse::class);
+        $middleware->alias(['company.active' => EnsureCompanyActive::class, 'owner' => EnsureOwner::class, 'admin.role' => AdminRole::class, 'module' => EnsureModule::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // A problem the user can fix: go back to the form and show the message.
@@ -38,7 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return back()->withInput()->with('danger', $e->getMessage());
         });
         // the files sent together are larger than the server takes in one go
-        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, Request $request) {
+        $exceptions->render(function (PostTooLargeException $e, Request $request) {
             $message = __('The files are too large to send together. Send fewer files at a time, or make them smaller.');
             if ($request->expectsJson()) {
                 return response()->json(['message' => $message], 413);
