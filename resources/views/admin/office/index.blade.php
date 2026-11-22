@@ -46,11 +46,17 @@
                 $choices[] = ['employee', __('All employees'), $employees, $employeeId];
             }
         @endphp
-        <x-filter-bar :action="$filterUrl" :term="$term" :placeholder="__('Search company, reference or description…')"
+        @php
+            $from = request('from');
+            $to = request('to');
+            $dateLabel = $hasDates ? trim(($from ? fmt_date($from) : '…').' – '.($to ? fmt_date($to) : '…')) : __('Date range');
+        @endphp
+        {{-- every filter on one row: search, the lists, the dates (in a small menu) and the buttons --}}
+        <x-filter-bar id="office-filters" class="filter-row" :action="$filterUrl" :term="$term" :placeholder="__('Search company, reference or description…')"
             :limit="150" :reset="$hasFilters ? $filterUrl : null">
             @foreach ($choices as [$name, $label, $options, $selected])
-                <div class="col-6 col-xl-auto">
-                    <select class="form-select" name="{{ $name }}" aria-label="{{ $label }}" onchange="this.form.requestSubmit()" data-plain>
+                <div class="col-6 col-md">
+                    <select class="form-select" name="{{ $name }}" aria-label="{{ $label }}" title="{{ $label }}" onchange="this.form.requestSubmit()" data-plain>
                         <option value="">{{ $label }}</option>
                         @foreach ($options as $value => $text)
                             <option value="{{ $value }}" @selected((string) $selected === (string) $value)>{{ $text }}</option>
@@ -58,26 +64,25 @@
                     </select>
                 </div>
             @endforeach
-            <div class="col-auto">
-                <button type="button" class="btn {{ $hasDates ? 'btn-primary' : 'btn-light-secondary' }}" data-bs-toggle="collapse"
-                    data-bs-target="#office-filter-dates" aria-controls="office-filter-dates" aria-expanded="{{ $hasDates ? 'true' : 'false' }}">
-                    <x-icon name="calendar" class="me-1" />{{ __('Date range') }}
+            <div class="col-auto dropdown">
+                <button type="button" class="btn {{ $hasDates ? 'btn-soft-primary' : 'btn-light-secondary' }} dropdown-toggle text-nowrap" data-bs-toggle="dropdown" aria-expanded="false" title="{{ __('Date range') }}">
+                    <x-icon name="calendar" class="me-1" />{{ $dateLabel }}
                 </button>
-            </div>
-            <x-slot:extra>
-                <div class="col-12 collapse {{ $hasDates ? 'show' : '' }}" id="office-filter-dates">
+                {{-- the fields name the form, because on phones the menu is moved out of it as a bottom sheet --}}
+                <div class="dropdown-menu dropdown-menu-end filter-dates" data-bs-auto-close="outside">
                     <div class="row g-2">
-                        <div class="col-6 col-md-auto">
+                        <div class="col-6">
                             <label class="form-label small mb-1" for="office-from">{{ __('From') }}</label>
-                            <input class="form-control" type="date" id="office-from" name="from" value="{{ request('from') }}">
+                            <input class="form-control" type="date" id="office-from" name="from" value="{{ $from }}" form="office-filters">
                         </div>
-                        <div class="col-6 col-md-auto">
+                        <div class="col-6">
                             <label class="form-label small mb-1" for="office-to">{{ __('To') }}</label>
-                            <input class="form-control" type="date" id="office-to" name="to" value="{{ request('to') }}">
+                            <input class="form-control" type="date" id="office-to" name="to" value="{{ $to }}" form="office-filters">
                         </div>
                     </div>
+                    <button class="btn btn-primary w-100 mt-3" type="submit" form="office-filters">{{ __('Apply dates') }}</button>
                 </div>
-            </x-slot:extra>
+            </div>
         </x-filter-bar>
     </div>
     <div class="table-responsive">

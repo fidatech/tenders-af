@@ -1730,3 +1730,13 @@ textarea.form-control { min-height: 96px; line-height: 1.6; resize: vertical; }
 .vr-exit { position: absolute; top: 14px; right: 14px; z-index: 2; display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; border: 0; border-radius: 10px; background: rgba(15, 20, 30, .78); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
 .vr-exit:hover { background: rgba(15, 20, 30, .92); }
 .vr-exit kbd { margin-inline-start: 6px; padding: 1px 6px; border-radius: 5px; background: rgba(255,255,255,.18); font-size: 11px; }
+
+/* a filter bar that keeps every filter on one row on wide screens (1200px and up): the search takes the room that is left */
+@media (min-width: 1200px) {
+    .filter-row { flex-wrap: nowrap; }
+    .filter-row > * { flex: 0 1 auto; width: auto; min-width: 0; }
+    .filter-row > :first-child { flex: 1 1 220px; min-width: 150px; }
+    .filter-row > .col-auto { flex-shrink: 0; }
+    .filter-row .form-select { min-width: 118px; max-width: 200px; }
+}
+.filter-dates { width: 320px; max-width: 94vw; padding: 14px; }
