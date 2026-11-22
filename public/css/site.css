@@ -140,8 +140,30 @@ p { margin: 0; }
 .legend { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #D5E4DB; }
 .legend i { width: 26px; height: 12px; border-radius: 3px; border: 1px solid rgba(255,255,255,.5); }
 .mapwrap { position: relative; margin-top: 18px; }
-.mapscroll { overflow-x: auto; }
-.afmap { display: block; width: 100%; min-width: 700px; }
+/* the province map always fits the width of its box: no fixed width, no sideways scrolling */
+.mapscroll { width: 100%; max-width: 100%; min-width: 0; }
+.afmap-stage { position: relative; width: 100%; max-width: 100%; }
+.afmap { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 1020 / 781; touch-action: manipulation; }
+.afmap a { outline: none; }
+.afmap a:focus-visible path { stroke: var(--mint); stroke-width: 4; }
+.afmap-tip { position: absolute; z-index: 3; transform: translate(-50%, calc(-100% - 12px)); background: #fff; color: var(--ink); border-radius: 12px; padding: 8px 12px; box-shadow: 0 12px 30px rgba(0,0,0,.35); text-align: center; pointer-events: none; width: max-content; max-width: min(220px, 92%); }
+.afmap-tip.below { transform: translate(-50%, 16px); }
+.afmap-tip b { display: block; font: 700 14px/1.2 var(--head); }
+.afmap-tip span { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+.afmap-tip .afmap-go { pointer-events: auto; display: block; margin-top: 8px; padding: 8px 12px; border-radius: 999px; background: var(--g-green); color: #fff; font-weight: 600; font-size: 13px; text-decoration: none; }
+.afmap-tip .afmap-go[hidden] { display: none; }
+@media (max-width: 640px) {
+    /* names are drawn in map units; on a phone only the large provinces keep a (larger) name */
+    .afmap .lbl.small, .afmap .n { display: none; }
+    .afmap .lbl.big { font-size: 30px; }
+    .afmap a path { stroke-width: 2; }
+    #map .mapwrap, .panel .mapwrap { margin-left: -8px; margin-right: -8px; }
+}
+@media (min-width: 641px) and (max-width: 900px) {
+    .afmap .lbl.small { font-size: 15px; }
+    .afmap .lbl.big { font-size: 19px; }
+    .afmap .n { font-size: 16px; }
+}
 .afmap a path { fill: #5FE0A0; stroke: #fff; stroke-opacity: .75; stroke-width: 1.2; stroke-linejoin: round; transition: fill-opacity .15s; }
 .afmap a:hover path, .afmap a:focus path { fill-opacity: .85 !important; stroke-width: 3; }
 .afmap text { fill: #fff; font-family: var(--head); font-weight: 700; pointer-events: none; text-anchor: middle; }
