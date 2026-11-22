@@ -4,7 +4,7 @@
     and $narrow for the small card of sign in and the password pages.
 --}}
 @php
-    $name = config('app.name');
+    $name = \App\Support\Branding::name();
     $signup = \App\Support\Platform::bool('registration');
     $onRegister = request()->routeIs('register', 'register.*');
 @endphp
@@ -17,7 +17,7 @@
 <title>{{ $title }} | {{ $name }}</title>
 <meta name="robots" content="noindex, follow">
 <meta name="theme-color" content="#F6F8F5">
-<link rel="icon" href="{{ asset_v('img/favicon.svg') }}" type="image/svg+xml">
+@include('partials.brand-head')
 @include('partials.head-font')
 <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="{{ asset_v('css/site.css') }}">
@@ -26,7 +26,7 @@
 <body>
 <div class="acc">
     <header class="wrap acc-top">
-        <a class="brand" href="{{ route('site.home') }}" aria-label="{{ $name }}, home"><i aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 17 9 11l4 3 7-8"/><path d="M15 6h5v5"/></svg></i><span>Tenders<b>.af</b></span></a>
+        <a class="brand" href="{{ route('site.home') }}" aria-label="{{ $name }}, home"><x-brand-mark tone="light" /></a>
         <div class="switch">
             @if ($onRegister)
                 <span>Already registered?</span><a href="{{ route('login') }}">Sign in</a>

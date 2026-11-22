@@ -6,12 +6,10 @@
 {{-- "Add to Home Screen" on a phone opens the system full screen, like an installed app --}}
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="{{ config('app.name') }}">
+<meta name="apple-mobile-web-app-title" content="{{ \App\Support\Branding::name() }}">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-<title>{{ $title ?? '' }}{{ isset($title) ? ' | ' : '' }}{{ config('app.name') }}</title>
-<link rel="icon" href="{{ asset_v('img/favicon.svg') }}" type="image/svg+xml">
-<link rel="apple-touch-icon" href="{{ asset_v('img/favicon.svg') }}">
+<title>{{ $title ?? '' }}{{ isset($title) ? ' | ' : '' }}{{ \App\Support\Branding::name() }}</title>
+@include('partials.brand-head')
 <script>(function(){var s={};try{s=JSON.parse(localStorage.getItem('erp.ui')||'{}')}catch(e){}var h=document.documentElement;h.setAttribute('data-bs-theme',s.theme==='dark'?'dark':'light');h.setAttribute('data-layout',s.layout==='collapsed'?'collapsed':'vertical')})();</script>
 <link rel="stylesheet" href="{{ asset_v(text_dir() === 'rtl' ? 'css/app.rtl.css' : 'css/app.css') }}">
 <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}">

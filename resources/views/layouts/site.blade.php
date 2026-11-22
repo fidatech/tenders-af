@@ -1,5 +1,6 @@
 @php
-    $name = config('app.name');
+    $name = \App\Support\Branding::name();
+    $brandLogo = \App\Support\Branding::url('logo') ?? \App\Support\Branding::url('icon');
     $pageTitle = $title.' | '.$name;
     $canonical = url()->current();
     $image = asset('img/og.png');
@@ -13,7 +14,7 @@
 
     // structured data: who runs the site and what it is. No ratings or reviews: there are none to quote.
     $graph = [
-        ['@type' => 'Organization', '@id' => url('/').'#organization', 'name' => $name, 'url' => url('/'), 'logo' => $image, 'areaServed' => ['@type' => 'Country', 'name' => 'Afghanistan'],
+        ['@type' => 'Organization', '@id' => url('/').'#organization', 'name' => $name, 'url' => url('/'), 'logo' => $brandLogo ?? $image, 'areaServed' => ['@type' => 'Country', 'name' => 'Afghanistan'],
             'parentOrganization' => ['@type' => 'Organization', 'name' => 'Fida Technologies', 'url' => 'https://fida.af']],
         ['@type' => 'WebSite', '@id' => url('/').'#website', 'url' => url('/'), 'name' => $name, 'description' => config('site.description'), 'inLanguage' => 'en', 'publisher' => ['@id' => url('/').'#organization'],
             'potentialAction' => ['@type' => 'SearchAction', 'target' => ['@type' => 'EntryPoint', 'urlTemplate' => route('site.tenders').'?q={search_term_string}'], 'query-input' => 'required name=search_term_string']],
@@ -69,7 +70,7 @@
 <meta name="twitter:description" content="{{ $description }}">
 <meta name="twitter:image" content="{{ $image }}">
 <meta name="twitter:image:alt" content="{{ $imageAlt }}">
-<link rel="icon" href="{{ asset_v('img/favicon.svg') }}" type="image/svg+xml">
+@include('partials.brand-head')
 <link rel="alternate" type="text/plain" href="{{ url('/llms.txt') }}" title="{{ $name }} for AI assistants">
 @include('partials.head-font')
 <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}" media="print" onload="this.media='all'">
@@ -82,7 +83,7 @@
 <div class="dark">
     <div class="flagline"></div>
     <header class="wrap top">
-        <a class="brand" href="{{ route('site.home') }}" aria-label="{{ $name }}, home"><i aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 17 9 11l4 3 7-8"/><path d="M15 6h5v5"/></svg></i><span>Tenders<b>.af</b></span></a>
+        <a class="brand" href="{{ route('site.home') }}" aria-label="{{ $name }}, home"><x-brand-mark tone="dark" /></a>
         <nav class="nav" aria-label="Main">
             @foreach ($menu as $route => $patterns)
                 <a href="{{ route($route) }}" @if (request()->routeIs(...$patterns)) aria-current="page" @endif>{{ \App\Http\Controllers\SiteController::PAGES[$route][1] }}</a>
@@ -124,8 +125,8 @@
     <div class="wrap">
         <div class="foot-grid">
             <div class="foot-brand">
-                <a class="brand" href="{{ route('site.home') }}"><i aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 17 9 11l4 3 7-8"/><path d="M15 6h5v5"/></svg></i><span>Tenders<b>.af</b></span></a>
-                <p>{{ config('site.tagline') }} With a free directory of verified companies.</p>
+                <a class="brand" href="{{ route('site.home') }}"><x-brand-mark tone="dark" :size="20" /></a>
+                <p>{{ \App\Support\Branding::tagline() }} With a free directory of verified companies.</p>
                 <div class="foot-cta">
                     @if ($signedIn)
                         <a class="btn btn-green btn-sm" href="{{ route('dashboard') }}">My account</a>

@@ -24,8 +24,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#F6F8F5">
     <meta name="robots" content="noindex, nofollow">
-    <title>{{ $title ?? '' }}{{ isset($title) ? ' | ' : '' }}{{ config('app.name') }}</title>
-    <link rel="icon" href="{{ asset_v('img/favicon.svg') }}" type="image/svg+xml">
+    <title>{{ $title ?? '' }}{{ isset($title) ? ' | ' : '' }}{{ \App\Support\Branding::name() }}</title>
+    @include('partials.brand-head')
     @include('partials.head-font')
     <link rel="stylesheet" href="{{ asset_v(text_dir() === 'rtl' ? 'css/app.rtl.css' : 'css/app.css') }}">
     <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}">
@@ -37,9 +37,8 @@
 
 <header class="pt-top" id="ptTop">
     <div class="pt-wrap pt-top-in">
-        <a class="pt-brand" href="{{ route('site.home') }}" aria-label="{{ config('app.name') }}, {{ __('home') }}">
-            <i aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 17 9 11l4 3 7-8"/><path d="M15 6h5v5"/></svg></i>
-            <span>Tenders<b>.af</b></span>
+        <a class="pt-brand" href="{{ route('site.home') }}" aria-label="{{ \App\Support\Branding::name() }}, {{ __('home') }}">
+            <x-brand-mark tone="light" :size="20" />
         </a>
         <nav class="pt-nav" id="ptNav" aria-label="{{ __('Website') }}">
             @foreach ($siteNav as [$label, $url])

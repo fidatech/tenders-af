@@ -6,7 +6,7 @@
 <body class="auth-body">
 <div class="auth-shell">
     <aside class="auth-hero">
-        <a href="{{ url('/') }}" class="brand-link"><x-brand-logo :size="36" inverse /><span class="brand-text">{{ config('app.name') }}</span></a>
+        <a href="{{ url('/') }}" class="brand-link"><x-brand-logo :size="36" inverse /><span class="brand-text">{{ \App\Support\Branding::name() }}</span></a>
         <div>
             <span class="ah-kicker"><x-icon name="bell" /> {{ __('app.auth.hero_kicker') }}</span>
             <h1>{{ __('app.auth.hero_title') }}</h1>
@@ -18,9 +18,9 @@
         <div class="auth-tools">
             <button class="topbar-icon" type="button" data-theme-toggle title="{{ __('app.nav.toggle_theme') }}"><x-icon name="moon" /></button>
         </div>
-        <div class="auth-mobile-hero"><span class="amh-logo"><x-brand-logo :size="44" /></span><strong>{{ config('app.name') }}</strong><small>{{ __('app.auth.hero_kicker') }}</small></div>
+        <div class="auth-mobile-hero"><span class="amh-logo"><x-brand-logo :size="44" /></span><strong>{{ \App\Support\Branding::name() }}</strong><small>{{ __('app.auth.hero_kicker') }}</small></div>
         @yield('content')
-        <footer class="mt-4 small text-muted">© {{ date('Y') }} {{ config('app.name') }} · <a href="https://fida.af" target="_blank" rel="noopener">Fida Technologies</a></footer>
+        <footer class="mt-4 small text-muted">© {{ date('Y') }} {{ \App\Support\Branding::name() }} · <a href="https://fida.af" target="_blank" rel="noopener">Fida Technologies</a></footer>
     </main>
 </div>
 @include('partials.flash')

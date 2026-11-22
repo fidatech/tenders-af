@@ -50,6 +50,7 @@
             ['Employees and roles', 'user-shield', 'admin.admins.index', 'admin.admins.*', 0],
             ['Activity log', 'clock-rotate-left', 'admin.logs.index', 'admin.logs.*', 0],
             ['Settings', 'gear', 'admin.settings.edit', 'admin.settings.*', 0],
+            ['Branding & Logo', 'image', 'admin.branding.edit', 'admin.branding.*', 0],
             ['My account', 'user', 'admin.profile.edit', 'admin.profile.*', 0],
         ],
     ];
@@ -63,7 +64,7 @@
 <div class="app-wrapper">
     <aside class="app-sidebar" id="appSidebar" aria-label="{{ __('app.nav.menu') }}">
         <div class="sidebar-brand">
-            <a href="{{ route($admin->homeRoute()) }}" class="brand-link"><x-brand-logo /><span class="brand-text">{{ config('app.name') }}</span></a>
+            <a href="{{ route($admin->homeRoute()) }}" class="brand-link"><x-brand-logo /><span class="brand-text">{{ \App\Support\Branding::name() }}</span></a>
         </div>
         <div class="sidebar-scroll" id="sidebarScroll">
             <div class="drawer-profile">

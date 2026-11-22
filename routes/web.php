@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\CompanyMessageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DirectMessageController;
@@ -54,6 +55,12 @@ Route::get('terms', [SiteController::class, 'terms'])->name('site.terms');
 Route::get('sitemap.xml', [SiteController::class, 'sitemap'])->name('site.sitemap');
 Route::get('robots.txt', [SiteController::class, 'robots'])->name('site.robots');
 Route::get('llms.txt', [SiteController::class, 'llms'])->name('site.llms');
+
+// the brand (Admin > Branding & Logo), the web app manifest and the offline page of the phone app
+Route::get('brand/{asset}', [BrandingController::class, 'asset'])->where('asset', '[a-z0-9_-]+')->name('brand.asset');
+Route::get('site.webmanifest', [BrandingController::class, 'manifest'])->name('site.manifest');
+Route::get('offline', [BrandingController::class, 'offline'])->name('site.offline');
+Route::get('sw.js', [BrandingController::class, 'serviceWorker'])->name('site.sw');
 
 /* ------------------------------------------------------------------ sign in, sign up */
 
@@ -228,6 +235,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('subscriptions/{id}/print', [Admin\SubscriptionController::class, 'print'])->whereNumber('id')->name('subscriptions.print');
         Route::get('reports', [Admin\ReportController::class, 'index'])->name('reports.index');
         Route::get('logs', [Admin\LogController::class, 'index'])->name('logs.index');
+        Route::get('branding', [Admin\BrandingController::class, 'edit'])->name('branding.edit');
+        Route::put('branding', [Admin\BrandingController::class, 'update'])->name('branding.update');
+        Route::delete('branding/{asset}', [Admin\BrandingController::class, 'destroy'])->where('asset', '[a-z_]+')->name('branding.destroy');
         Route::get('settings', [Admin\SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [Admin\SettingsController::class, 'update'])->name('settings.update');
     });

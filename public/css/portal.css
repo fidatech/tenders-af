@@ -160,3 +160,11 @@ html.portal .form-actions-sticky, html.portal .sticky-actions { border-radius: 1
     html.portal .card-body { padding: 16px; }
     html.portal .card-header { padding: 14px 16px; }
 }
+
+/* the brand: an uploaded logo (Admin > Branding & Logo) or the text brand */
+.pt-brand .brand-img { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.pt-brand .brand-img picture { display: flex; }
+.pt-brand .brand-img img { display: block; height: var(--brand-h, 40px); width: auto; max-width: min(220px, 46vw); object-fit: contain; }
+.pt-brand .brand-icon-img { background: none !important; overflow: hidden; }
+.pt-brand .brand-icon-img img { width: 100%; height: 100%; object-fit: contain; }
+@media (max-width: 640px) { .pt-brand .brand-img img { height: var(--brand-h-m, 30px); } }

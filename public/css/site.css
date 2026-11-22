@@ -650,3 +650,12 @@ a.side-card.tl:hover { color: #fff; border-color: rgba(255,255,255,.4); }
     .foot-brand, .foot-contact { grid-column: 1 / -1; }
     .foot-bottom { flex-direction: column; align-items: flex-start; }
 }
+
+/* ---------- the brand: an uploaded logo (Admin > Branding & Logo) or the text brand ---------- */
+.brand-img { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+.brand-img picture { display: flex; }
+.brand-img img { display: block; height: var(--brand-h, 40px); width: auto; max-width: min(240px, 52vw); object-fit: contain; }
+.brand-img .brand-name { white-space: nowrap; }
+.brand .brand-icon-img { background: none !important; box-shadow: none !important; overflow: hidden; }
+.brand .brand-icon-img img { width: 100%; height: 100%; object-fit: contain; }
+@media (max-width: 640px) { .brand-img img { height: var(--brand-h-m, 30px); max-width: 46vw; } }

@@ -39,6 +39,18 @@ class Platform
         'company_address' => '',
         'whatsapp_url' => '',
         'whatsapp_token' => '',
+        // branding (Admin > Branding & Logo): empty means the text brand and the built-in mark
+        'brand_name' => '',
+        'brand_tagline' => '',
+        'brand_logo' => '',
+        'brand_logo_dark' => '',
+        'brand_logo_mobile' => '',
+        'brand_icon' => '',
+        'brand_favicon' => '',
+        'brand_logo_alt' => '',
+        'brand_logo_height' => '40',
+        'brand_logo_height_mobile' => '30',
+        'brand_display' => 'logo',
     ];
 
     public static function all(): array
