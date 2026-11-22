@@ -33,6 +33,19 @@ class SiteTest extends TestCase
         $this->get('/llms.txt')->assertOk()->assertSee('Company registration: free');
     }
 
+    public function test_the_structured_data_is_valid_json_with_a_schema_org_context(): void
+    {
+        $tender = $this->tender();
+        foreach (['/', '/tenders', '/tender/'.$tender->slug, '/questions'] as $path) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $this->assertSame(1, preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $html, $m), $path);
+            $data = json_decode($m[1], true);
+            $this->assertIsArray($data, $path.': the structured data is not valid JSON');
+            $this->assertSame('https://schema.org', $data['@context'] ?? null, $path);
+            $this->assertStringNotContainsString('<?php', $m[1], $path);
+        }
+    }
+
     public function test_a_visitor_reads_the_summary_of_a_tender_but_not_its_full_details(): void
     {
         $tender = $this->tender();
