@@ -196,8 +196,8 @@ directories need the Company Directory) stop with it and come back with it.
   or be limited to companies on a paid plan.
 - Only a super administrator changes modules; every change is kept in the history on that page and in the
   activity log.
-- RFQs, supplier contacts, collections, product catalogue documents and international features are listed as
-  **Planned**: they are not built yet, so there is nothing to switch on.
+- RFQs, supplier contacts, product catalogue documents and international features are listed as **Planned**:
+  they are not built yet, so there is nothing to switch on.
 
 In code: `module_on('directory')` in views, `->middleware('module:directory')` on routes,
 `'module' => 'products'` on an entry of `config/menu.php`.
@@ -240,3 +240,17 @@ from a copy.
   Visitors open the public version from the company page.
 - The directory can be filtered by kind of business; manufacturer and importer/exporter/wholesaler filters appear
   when their modules are on. Profiles with nothing written about the company are `noindex` and left out of the sitemap.
+
+## Saved suppliers and business enquiries
+
+- **Supplier Favourites & Collections** (module, off at first, paid plans by default): from a company page a
+  signed-in company saves the company into its Favourites or another collection. Collections are shared with the
+  team unless their maker made them private; each saved company has a status (researching, shortlisted, contacted,
+  qualified, preferred, rejected), private notes and tags. Two to four can be compared side by side (facts only; no
+  scores), and a collection can be exported as CSV, in which contact details follow each company's sharing choice.
+  Saved companies never see any of it.
+- **Business Enquiries** (module, off at first): a signed-in company sends an enquiry from another company's page
+  (with an optional PDF or picture); both companies' people answer in a private thread under **Enquiries**, on any
+  plan. Either side can close the thread, block the other company or report it. Administrators with the "messages"
+  permission see a thread only after it is reported (**Admin > Reported enquiries**), and opening it is logged.
+  A company starts at most 20 enquiries a day.

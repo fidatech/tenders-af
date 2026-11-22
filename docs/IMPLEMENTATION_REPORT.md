@@ -5,8 +5,9 @@ Branch `platform-modules-branding-mobile`, against `main` at `cbe44f0`. Nothing 
 
 ## How it was verified
 
-- **Automated tests:** 80 tests, 723 assertions, all passing (`php artisan test`). 35 of them are new
-  (`BrandingTest`, `ModuleTest`, `MobileNavTest`, `CompanyDirectoryTest`, and a structured-data test in `SiteTest`).
+- **Automated tests:** 91 tests, 817 assertions, all passing (`php artisan test`). 46 of them are new
+  (`BrandingTest`, `ModuleTest`, `MobileNavTest`, `CompanyDirectoryTest`, `CollectionTest`, `EnquiryTest`, and a
+  structured-data test in `SiteTest`).
   The 45 existing tests still pass; two assertions were updated on purpose (see "Changed behaviour").
 - **Real browser:** Chrome (headless, Playwright) against the app on SQLite. Every public, company-panel and admin
   page was opened at 320, 360, 375, 390, 414, 430, 768, 1024, 1280 and 1440 px and checked for horizontal overflow
@@ -21,7 +22,7 @@ Branch `platform-modules-branding-mobile`, against `main` at `cbe44f0`. Nothing 
 |---|---|
 | Country (province) map on phones | Fits 100 % of its box at every width: the fixed 700 px width and the sideways scroller are gone; the SVG scales with its `viewBox`; small-province names are hidden and large ones enlarged on phones; a tap shows the province and its count, a second tap opens it. Used on the home page, /provinces and /statistics. |
 | Branding & Logo | Admin page (super administrators only): name, tagline, main/dark/mobile logo, icon, favicon, heights, display mode, alt text, preview, replace, remove. Text brand fallback everywhere until a logo exists. Used in the site header and footer, sign-in pages, company panel, admin sidebar, emails, favicon, app icons and the web app manifest. Uploads re-encoded with GD; SVG and disguised files refused. |
-| Module Management | 13 modules; 8 built and switchable, 5 listed as Planned. Switches in the settings table, read once per request. Dependencies, menu visibility (site and panel), notifications, paid-only access, route middleware, sitemap and link hiding, explanatory `noindex` 404 page, history with notes and admin log. Products keeps its existing `products_enabled` switch. |
+| Module Management | 14 modules; 10 built and switchable, 4 listed as Planned. Switches in the settings table, read once per request. Dependencies, menu visibility (site and panel), notifications, paid-only access, route middleware, sitemap and link hiding, explanatory `noindex` 404 page, history with notes and admin log. Products keeps its existing `products_enabled` switch. |
 | Mobile navigation | Bottom bar and menu sheet for the website and the company panel; tabs and entries follow modules and permissions (owner-only pages stay hidden from members); safe areas; keyboard handling; Escape, backdrop and swipe to close; focus kept in the sheet. Admin panel keeps its existing tab bar. |
 | Filters on phones | Tender, company and product lists: search box plus a "Filters" drawer with Apply / Clear all and removable chips. Desktop unchanged. |
 | PWA | Dynamic manifest with the brand's name and icons, standalone mode, service worker that keeps only an offline page (never live data). |
@@ -30,6 +31,9 @@ Branch `platform-modules-branding-mobile`, against `main` at `cbe44f0`. Nothing 
 | Company mini-website | Cover, slogan, services, five templates (order of sections), six approved accent colours, featured projects, similar companies, honest "what was checked" panel. Every template works on phones. No HTML from companies is rendered. |
 | Project portfolios | Company CRUD with drafts, publishing, featured, up to 8 pictures and 5 private evidence files; public project pages; admin review queue with search, filters, sorting and pagination; distinct review statuses; rules that stop a project being marked reviewed without evidence; review reset when facts change; notifications to admins and companies. Companies cannot reach each other's projects. |
 | Profile completeness | Extended with business type, services, projects and products (when their modules are on); shown on the dashboard and the document page, with no claim that a complete profile proves anything. |
+| Supplier Favourites & Collections | Save from a company page into Favourites or a new/existing collection; private or team collections; statuses, private notes, tags, filters; move between collections; compare 2–4 companies on facts only; CSV export that follows contact sharing and neutralises spreadsheet formulas. Paid plans by default (changeable per module). Notes are never visible to the saved companies or other companies. |
+| Business Enquiries | Enquiry form on company pages (with optional file); private threads; read/unread per company; replies on any plan; close/reopen; block a company; report a thread; administrators see only reported threads and the reading is logged; 20 new enquiries per company per day plus request throttles; notifications. "Enquiries only" companies get this form instead of the contact page when the module is on. |
+| Public flash messages | The public site never showed the result of a form; it now shows a success/error banner. |
 | SEO | Fixed a live bug: Blade compiled `"@context"` in the JSON-LD as a directive, so **every public page on `main` (and so, most likely, in production) prints PHP source instead of valid structured data**. Empty company profiles are `noindex` and out of the sitemap; disabled modules leave the sitemap and llms.txt. |
 
 ## Implemented but not fully verified
@@ -49,14 +53,14 @@ Branch `platform-modules-branding-mobile`, against `main` at `cbe44f0`. Nothing 
 ## Not implemented (with the reason)
 
 The brief describes several years of product work. This branch delivers the foundation every other part depends
-on (modules, branding, mobile navigation) and the company-directory core. Not built yet, and listed as **Planned**
+on (modules, branding, mobile navigation), the company-directory core, saved suppliers and business enquiries. Not built yet, and listed as **Planned**
 in Module Management so nobody can switch on an empty feature:
 
-- Buyer RFQs and quotations; supplier contacts & contact logs as a paid product; favourites, collections, notes,
-  saved searches and comparison; product catalogue documents; international marketplace features (currencies,
-  translations beyond the existing setup).
-- Company-to-company messaging (the existing messaging is company ↔ administrators). Private-contact companies
-  currently offer "Send an enquiry" through the existing contact form.
+- Buyer RFQs and quotations; contact-view logs and a separate "contacts" product (restricted contacts already work
+  through contact sharing); saved searches; product favourites; product catalogue documents; international
+  marketplace features (currencies, translations beyond the existing setup).
+- Enquiries are a separate inbox, not merged into the existing Messages page: that page is a company ↔
+  administrators support channel keyed to one user, and folding company threads into it would change how it works.
 - Multiple companies per user with company-level roles (the app has one company per user with owner/member).
 - Official registry import, company claims and invitations, storage quotas, malware scanning, the admin SEO
   dashboard, `hreflang`, IndexNow, the 5,000 AFN plan (plans are already configurable under Admin > Plans; no plan was
@@ -73,6 +77,7 @@ in Module Management so nobody can switch on an empty feature:
    changes it.
 4. On phones the header shows only the brand and one button; the links live in the bottom bar and its sheet.
 5. Company pages with nothing written about the company are no longer offered to search engines.
+6. The public site shows a banner with the result of a form (it showed nothing before).
 
 ## Found during the review, not changed
 
@@ -84,11 +89,12 @@ in Module Management so nobody can switch on an empty feature:
 ## Deploying
 
 The normal pipeline applies everything: `php artisan migrate` runs the two new, additive migrations (new nullable
-columns on `companies`; new tables `module_changes`, `company_projects`, `company_project_files`). No data is changed.
+columns on `companies`; new tables `module_changes`, `company_projects`, `company_project_files`,
+`supplier_collections`, `supplier_collection_items`, `enquiries`, `enquiry_messages`, `company_blocks`). No data is changed.
 Before merging: back up the database. After deploying:
 
 1. Sign in as a super administrator and open **Module Management**: check the switches (Directory, Mini-Websites,
    Projects and the profile document are on; Products keeps its current state; Manufacturer and Importer/Exporter
-   filters are off).
+   filters, Collections and Enquiries are off until you switch them on).
 2. Open **Branding & Logo** and upload the logo when ready; until then the text brand stays.
-3. Rollback: `php artisan migrate:rollback --step=2` removes the new tables and columns (and anything saved in them).
+3. Rollback: `php artisan migrate:rollback --step=4` removes the new tables and columns (and anything saved in them).
