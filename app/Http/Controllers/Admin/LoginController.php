@@ -48,6 +48,10 @@ class LoginController extends Controller
         \App\Models\AdminLog::record('signed in');
 
         $admin = Auth::guard('admin')->user();
+        // only a page of the admin panel saved earlier is a place to return to; a company page is not
+        if (! \App\Http\Controllers\Auth\LoginController::isAdminUrl($request->session()->get('url.intended'))) {
+            $request->session()->forget('url.intended');
+        }
 
         return $admin->homeRoute() !== 'admin.dashboard'
             ? redirect()->route($admin->homeRoute())

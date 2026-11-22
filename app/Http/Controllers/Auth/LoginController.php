@@ -45,8 +45,19 @@ class LoginController extends Controller
 
         RateLimiter::clear($key);
         $request->session()->regenerate();
+        // a page of the admin panel saved earlier in this browser is not where a company goes:
+        // it would send the company to the admin sign-in page
+        if (self::isAdminUrl($request->session()->get('url.intended'))) {
+            $request->session()->forget('url.intended');
+        }
 
         return redirect()->intended(route('dashboard'));
+    }
+
+    /** True for an address of the admin panel (/admin and everything under it). */
+    public static function isAdminUrl(?string $url): bool
+    {
+        return $url !== null && preg_match('#^/admin(/|$)#', (string) parse_url($url, PHP_URL_PATH)) === 1;
     }
 
     public function destroy(Request $request): RedirectResponse
