@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\DirectMessage;
+use App\Models\Enquiry;
 use App\Models\Notice;
 use App\Models\User;
 
@@ -109,6 +110,7 @@ class MobileNav
             ['label' => 'My dashboard', 'url' => route('dashboard'), 'glyph' => 'home', 'primary' => true],
             ['label' => 'Notifications', 'url' => route('notices.index'), 'glyph' => 'bell', 'badge' => self::unread($user)],
             ['label' => 'Messages', 'url' => route('messages.show'), 'glyph' => 'mail'],
+            Modules::inDashboardNav('enquiries') ? ['label' => 'Enquiries', 'url' => route('enquiries.index'), 'glyph' => 'mail', 'badge' => $company ? Enquiry::unreadFor($company->id)->count() : 0] : null,
             Modules::inDashboardNav('collections') ? ['label' => 'Saved suppliers', 'url' => route('collections.index'), 'glyph' => 'folder'] : null,
             $company?->is_supplier ? ['label' => 'Saved tenders', 'url' => route('tenders.saved'), 'glyph' => 'bookmark'] : null,
             $user->isOwner() ? ['label' => 'Company profile', 'url' => route('settings.edit'), 'glyph' => 'companies'] : null,
@@ -136,6 +138,7 @@ class MobileNav
             'boxes-stacked' => 'products',
             'building' => 'companies',
             'paper-plane' => 'send',
+            'comments' => 'mail',
             'shield-halved' => 'shield',
             'user-group' => 'team',
             'credit-card' => 'card',

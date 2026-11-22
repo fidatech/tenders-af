@@ -120,6 +120,12 @@
 </div>
 
 <main id="content">
+    {{-- the result of a form sent from a public page (saving a supplier, sending an enquiry ...) --}}
+    @foreach (['success', 'danger', 'warning', 'info'] as $kind)
+        @if (session($kind))
+            <div class="wrap"><div class="site-flash {{ $kind }}" role="{{ $kind === 'danger' ? 'alert' : 'status' }}">{{ session($kind) }}</div></div>
+        @endif
+    @endforeach
     @yield('content')
 </main>
 

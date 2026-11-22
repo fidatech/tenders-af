@@ -38,6 +38,7 @@
         'Companies and bidders' => [
             ['Companies', 'building', 'admin.companies.index', 'admin.companies.*', 0],
             ['Verification', 'shield-halved', 'admin.verification.index', 'admin.verification.*', $waitingVerify],
+            module_on('enquiries') || \App\Models\Enquiry::whereNotNull('reported_at')->exists() ? ['Reported enquiries', 'flag', 'admin.enquiries.index', 'admin.enquiries.*', \App\Models\Enquiry::whereNotNull('reported_at')->where('status', 'open')->count()] : null,
             module_on('portfolios') || \App\Models\CompanyProject::exists() ? ['Company projects', 'briefcase', 'admin.projects.index', 'admin.projects.*', \App\Models\CompanyProject::where('review_status', 'pending')->count()] : null,
         ],
         'Office and finance' => [

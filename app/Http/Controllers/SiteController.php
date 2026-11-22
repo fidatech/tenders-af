@@ -259,6 +259,9 @@ class SiteController extends Controller
             'projects' => $projects,
             'contact' => $company->contactFor(auth('web')->user()),
             'save' => $this->saveTargets($company),
+            // the enquiry form: null (module off), 'guest', 'own', 'paid' (the plan does not allow it) or 'yes'
+            'enquiry' => ! module_on('enquiries') ? null : (! auth('web')->check() ? 'guest' : (auth('web')->user()->company_id === $company->id ? 'own'
+                : (Modules::allows('enquiries', auth('web')->user()->company) ? 'yes' : 'paid'))),
             // what this organisation posted itself: open ones first, then the newest results
             'products' => module_on('products') ? Product::live()->where('company_id', $company->id)->with('company', 'images', 'province')->sponsoredFirst()->limit(6)->get() : collect(),
             'posted' => Tender::visible()->where('company_id', $company->id)->with('industry', 'province')

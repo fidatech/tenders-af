@@ -185,7 +185,30 @@
                     <a class="line" href="{{ auth('web')->check() ? route('billing.show') : route('login') }}"><b>{{ auth('web')->check() ? 'See the plans' : 'Sign in to see them' }}</b></a>
                 @else
                     <p class="muted" style="font-size:14px">{{ $company->name }} receives enquiries through {{ \App\Support\Branding::name() }} only.</p>
-                    <a class="line" href="{{ route('site.contact', ['about' => $company->slug]) }}"><b>Send an enquiry</b></a>
+                    @unless ($enquiry)<a class="line" href="{{ route('site.contact', ['about' => $company->slug]) }}"><b>Send an enquiry</b></a>@endunless
+                @endif
+                @if ($enquiry === 'guest')
+                    <a class="line" href="{{ route('login') }}"><b>Sign in to send an enquiry</b><span>Free for registered companies</span></a>
+                @elseif ($enquiry === 'paid')
+                    <a class="line" href="{{ route('billing.show') }}"><b>Send an enquiry</b><span>Part of the paid plans</span></a>
+                @elseif ($enquiry === 'yes')
+                    <details class="co-enquiry" @if ($errors->hasAny(['subject', 'body', 'attachment'])) open @endif>
+                        <summary class="btn btn-green btn-sm">Send an enquiry</summary>
+                        <form method="POST" action="{{ route('enquiries.store', ['slug' => $company->slug]) }}" enctype="multipart/form-data">
+                            @csrf
+                            <label for="enqSubject">Subject</label>
+                            <input id="enqSubject" type="text" name="subject" maxlength="150" required value="{{ old('subject') }}" placeholder="For example: Price for 200 tonnes of cement">
+                            @error('subject')<small class="err">{{ $message }}</small>@enderror
+                            <label for="enqBody">Message</label>
+                            <textarea id="enqBody" name="body" rows="5" minlength="10" maxlength="5000" required dir="auto">{{ old('body') }}</textarea>
+                            @error('body')<small class="err">{{ $message }}</small>@enderror
+                            <label for="enqFile">A file (optional): PDF, JPG or PNG, up to 5 MB</label>
+                            <input id="enqFile" type="file" name="attachment" accept="application/pdf,image/jpeg,image/png">
+                            @error('attachment')<small class="err">{{ $message }}</small>@enderror
+                            <button type="submit" class="btn btn-green btn-sm">Send</button>
+                            <small>Only {{ $company->name }} and your company read this thread.</small>
+                        </form>
+                    </details>
                 @endif
                 @if ($place)<div class="line" style="padding:12px 0;border-top:1px solid var(--line)"><span style="font-size:12px;color:var(--muted)">Address</span><b style="display:block;font-weight:600;font-size:15px">{{ $place }}</b></div>@endif
             </div>

@@ -96,6 +96,16 @@ return [
         'dashboard_nav' => true,
         'notifications' => false,
     ],
+    'enquiries' => [
+        'name' => 'Business Enquiries',
+        'description' => 'Companies send enquiries to other companies from their pages and talk in a private thread. Every company may answer the enquiries it receives, on any plan. Reported threads go to the administrators.',
+        'default' => false,
+        'depends' => ['directory'],
+        'built' => true,
+        'public_nav' => false,
+        'dashboard_nav' => true,
+        'notifications' => true,
+    ],
     'rfqs' => [
         'name' => 'Buyer RFQs',
         'description' => 'Buyers ask for quotations; suppliers answer with prices and lead times.',

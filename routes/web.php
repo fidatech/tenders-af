@@ -10,6 +10,7 @@ use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\CompanyMessageController;
 use App\Http\Controllers\CompanyPdfController;
+use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DirectMessageController;
 use App\Http\Controllers\PostedTenderController;
@@ -145,6 +146,17 @@ Route::middleware('auth:web')->group(function () {
             Route::put('{id}/items/{item}', [CollectionController::class, 'updateItem'])->whereNumber(['id', 'item'])->name('items.update');
             Route::delete('{id}/items/{item}', [CollectionController::class, 'removeItem'])->whereNumber(['id', 'item'])->name('items.destroy');
         });
+        // enquiries between companies (Business Enquiries): every member reads and answers them
+        Route::prefix('my/enquiries')->name('enquiries.')->middleware('module:enquiries')->group(function () {
+            Route::get('/', [EnquiryController::class, 'index'])->name('index');
+            Route::get('{id}', [EnquiryController::class, 'show'])->whereNumber('id')->name('show');
+            Route::post('{id}/reply', [EnquiryController::class, 'reply'])->whereNumber('id')->middleware('throttle:30,1')->name('reply');
+            Route::post('{id}/status', [EnquiryController::class, 'status'])->whereNumber('id')->name('status');
+            Route::post('{id}/block', [EnquiryController::class, 'block'])->whereNumber('id')->name('block');
+            Route::post('{id}/report', [EnquiryController::class, 'report'])->whereNumber('id')->middleware('throttle:5,1')->name('report');
+            Route::get('{id}/files/{message}', [EnquiryController::class, 'attachment'])->whereNumber(['id', 'message'])->name('file');
+        });
+        Route::post('companies/{slug}/enquiry', [EnquiryController::class, 'store'])->middleware(['module:enquiries', 'throttle:10,1'])->name('enquiries.store');
         Route::post('companies/{slug}/save', [CollectionController::class, 'save'])->middleware(['module:collections', 'throttle:60,1'])->name('collections.save');
 
         Route::middleware('owner')->group(function () {
@@ -246,6 +258,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         crud_routes('industries', Admin\IndustryController::class, 'industries');
         crud_routes('categories', Admin\CategoryController::class, 'categories');
 
+        Route::get('enquiries', [Admin\EnquiryController::class, 'index'])->name('enquiries.index');
+        Route::get('enquiries/{id}', [Admin\EnquiryController::class, 'show'])->whereNumber('id')->name('enquiries.show');
+        Route::post('enquiries/{id}/close', [Admin\EnquiryController::class, 'close'])->whereNumber('id')->name('enquiries.close');
         Route::get('projects', [Admin\ProjectController::class, 'index'])->name('projects.index');
         Route::get('projects/{id}', [Admin\ProjectController::class, 'show'])->whereNumber('id')->name('projects.show');
         Route::post('projects/{id}/review', [Admin\ProjectController::class, 'review'])->whereNumber('id')->name('projects.review');

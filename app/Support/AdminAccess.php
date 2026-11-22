@@ -49,7 +49,7 @@ class AdminAccess
 
         foreach ($permissions as $permission) {
             $routes = match ($permission) {
-                'messages' => ['admin.messages.*'],
+                'messages' => ['admin.messages.*', 'admin.enquiries.*'],
                 'verification' => ['admin.verification.*', 'admin.projects.*'],
                 'office' => ['admin.office.*'],
                 'procurement' => ['admin.tenders.*', 'admin.products.index', 'admin.products.show', 'admin.products.approve', 'admin.products.reject', 'admin.products.hide', 'admin.products.destroy', 'admin.industries.*', 'admin.categories.*'],
