@@ -32,6 +32,7 @@
     <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset_v('css/select2-fida.css') }}">
     <link rel="stylesheet" href="{{ asset_v('css/portal.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('css/mobile-nav.css') }}">
 </head>
 <body>
 <a class="pt-skip" href="#content">{{ __('Skip to the page') }}</a>
@@ -164,6 +165,7 @@
       data-confirm-ok="{{ __('app.nav.sign_out') }}" data-confirm-style="primary">@csrf</form>
 <form id="noticesReadForm" method="POST" action="{{ route('notices.read') }}" hidden>@csrf</form>
 
+@include('partials.mobile-nav', ['nav' => \App\Support\MobileNav::panel($user)])
 @include('partials.flash')
 @include('partials.scripts')
 <script>

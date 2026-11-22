@@ -40,7 +40,7 @@
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{{ $pageTitle }}</title>
 <meta name="description" content="{{ $description }}">
 <link rel="canonical" href="{{ $canonical }}">
@@ -76,6 +76,7 @@
 @include('partials.head-font')
 <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="{{ asset_v('css/site.css') }}">
+<link rel="stylesheet" href="{{ asset_v('css/mobile-nav.css') }}">
 <script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@graph' => $graph], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
 </head>
 <body>
@@ -179,6 +180,8 @@
         </div>
     </div>
 </footer>
+@include('partials.mobile-nav', ['nav' => \App\Support\MobileNav::site()])
+@if ($signedIn)<form id="mnavLogout" method="POST" action="{{ route('logout') }}" hidden>@csrf</form>@endif
 {{-- every pick list of the website is a Select2 list --}}
 @include('partials.select2-scripts')
 <script>

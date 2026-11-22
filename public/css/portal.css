@@ -168,3 +168,12 @@ html.portal .form-actions-sticky, html.portal .sticky-actions { border-radius: 1
 .pt-brand .brand-icon-img { background: none !important; overflow: hidden; }
 .pt-brand .brand-icon-img img { width: 100%; height: 100%; object-fit: contain; }
 @media (max-width: 640px) { .pt-brand .brand-img img { height: var(--brand-h-m, 30px); } }
+
+/* phones: the bottom bar and its menu sheet (css/mobile-nav.css) replace the burger and the row of account links */
+@media (max-width: 767.98px) {
+    .pt-burger, .pt-nav, .pt-side { display: none !important; }
+    .pt-top-in { flex-wrap: nowrap; min-height: 56px; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+    .pt-brand { min-width: 0; font-size: 19px; }
+    .pt-band-in { padding-top: 14px; padding-bottom: 18px; }
+    .pt-body { margin-top: 16px; }
+}

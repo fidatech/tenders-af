@@ -1,0 +1,54 @@
+/* The bottom bar and menu sheet of phones (partials/mobile-nav.blade.php, public/js/mobile-nav.js).
+   Used by the website and by the panel of companies. Above 767px they are not shown at all. */
+.mnav, .mnav-sheet, .mnav-backdrop { display: none; }
+
+@media (max-width: 767.98px) {
+    body { padding-bottom: calc(66px + env(safe-area-inset-bottom)); }
+    html.mnav-typing body { padding-bottom: 0; }
+    html.mnav-locked, html.mnav-locked body { overflow: hidden; }
+
+    .mnav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1030; display: flex; align-items: stretch; gap: 2px;
+        padding: 6px max(6px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+        background: rgba(255, 255, 255, .97); -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px);
+        border-top: 1px solid #E3E8E4; box-shadow: 0 -8px 24px rgba(14, 21, 18, .08); transition: transform .2s ease; }
+    html.mnav-typing .mnav { transform: translateY(115%); }
+    .mnav-tab { position: relative; flex: 1 1 0; min-width: 0; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+        padding: 4px 2px; border: 0; border-radius: 14px; background: none; color: #5B6660; text-decoration: none; cursor: pointer;
+        font: 600 11px/1.15 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    .mnav-tab svg { flex: 0 0 auto; width: 22px; height: 22px; padding: 3px 12px; border-radius: 999px; box-sizing: content-box; transition: background .15s, color .15s; }
+    .mnav-tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mnav-tab:hover, .mnav-tab:focus-visible { color: #0E1512; }
+    .mnav-tab.on { color: #0B6B3A; }
+    .mnav-tab.on svg { background: #DDF3E6; }
+    .mnav-tab:focus-visible { outline: 3px solid #5FE0A0; outline-offset: -3px; }
+    .mnav-badge { position: absolute; top: 1px; left: calc(50% + 8px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; border: 2px solid #fff;
+        background: #E8323F; color: #fff; font: 700 10px/14px system-ui, sans-serif; text-align: center; }
+
+    .mnav-backdrop { display: block; position: fixed; inset: 0; z-index: 1040; background: rgba(6, 11, 8, .5); opacity: 0; transition: opacity .2s; }
+    .mnav-backdrop.in { opacity: 1; }
+    .mnav-backdrop[hidden], .mnav-sheet[hidden] { display: none; }
+    .mnav-sheet { display: flex; flex-direction: column; position: fixed; left: 0; right: 0; bottom: 0; z-index: 1050; max-height: 86vh; max-height: 86dvh;
+        background: #fff; color: #0E1512; border-radius: 22px 22px 0 0; box-shadow: 0 -20px 60px rgba(0, 0, 0, .25);
+        padding: 0 max(0px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(0px, env(safe-area-inset-left));
+        transform: translateY(100%); transition: transform .22s ease; }
+    .mnav-sheet.in { transform: none; }
+    .mnav-grip { width: 40px; height: 5px; border-radius: 3px; background: #D5DCD8; margin: 8px auto 0; flex: 0 0 auto; }
+    .mnav-sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px 6px 20px; flex: 0 0 auto; }
+    .mnav-sheet-head strong { font: 800 18px/1.2 system-ui, sans-serif; }
+    .mnav-x { width: 44px; height: 44px; border: 0; border-radius: 12px; background: #F1F4F2; color: #0E1512; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+    .mnav-sheet-body { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 4px 16px 18px; }
+    .mnav-sheet-body section + section { margin-top: 16px; }
+    .mnav-sheet-body h2 { margin: 0 0 8px 4px; font: 700 11.5px/1 system-ui, sans-serif; letter-spacing: 1px; text-transform: uppercase; color: #5B6660; }
+    .mnav-sheet-body ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .mnav-link { position: relative; width: 100%; min-height: 50px; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #EBEFEC; border-radius: 14px;
+        background: #fff; color: #0E1512; text-decoration: none; text-align: left; font: 600 14px/1.25 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; cursor: pointer; }
+    .mnav-link svg { flex: 0 0 auto; width: 20px; height: 20px; color: #0B6B3A; }
+    .mnav-link span { min-width: 0; overflow-wrap: anywhere; }
+    .mnav-link:hover, .mnav-link:focus-visible { background: #F6F9F7; color: #0E1512; border-color: #D3DED7; }
+    .mnav-link.on { border-color: #18A05A; background: #F3FBF6; }
+    .mnav-link.primary { background: linear-gradient(135deg, #18A05A 0%, #0B6B3A 100%); border-color: transparent; color: #fff; }
+    .mnav-link.primary svg { color: #fff; }
+    .mnav-link .mnav-badge { position: static; margin-left: auto; border: 0; }
+    .erp-toasts { top: max(16px, env(safe-area-inset-top)); }
+    @media (prefers-reduced-motion: reduce) { .mnav, .mnav-sheet, .mnav-backdrop { transition: none; } }
+}
