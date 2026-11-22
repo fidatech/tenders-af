@@ -1,29 +1,37 @@
 @extends('layouts.admin', ['title' => __('Notification')])
 
 @section('content')
-<x-page-header :title="__('Notification')" icon="bell">
-    <a class="btn btn-outline-soft" href="{{ route('admin.notices.index') }}">{{ __('All notifications') }}</a>
+<x-page-header :title="__('Notification')" icon="bell" :crumbs="[[__('Notifications'), route('admin.notices.index')], [__('Notification')]]">
+    <a class="btn btn-outline-soft" href="{{ route('admin.notices.index') }}"><x-icon name="chevron-left" class="me-1" /> {{ __('All notifications') }}</a>
 </x-page-header>
 
-<div class="card">
+<article class="card h-auto nt-page">
     <div class="card-body">
-        <h2 class="h5" dir="auto" style="overflow-wrap:anywhere">{{ $notice->title }}</h2>
-        @if ($notice->created_at)
-            <time class="small text-muted" datetime="{{ $notice->created_at->toIso8601String() }}">{{ $notice->created_at->format('d M Y, H:i') }}</time>
-        @endif
+        <div class="d-flex align-items-start gap-3">
+            <span class="nt-ico nt-ico-lg nt-{{ $notice->kind }}"><x-icon :name="$notice->icon()" /></span>
+            <div class="min-w-0 flex-grow-1">
+                <h2 class="nt-page-title" dir="auto">{{ $notice->title }}</h2>
+                @if ($notice->created_at)
+                    <div class="small text-muted">
+                        <time datetime="{{ $notice->created_at->toIso8601String() }}">{{ fmt_datetime($notice->created_at) }}</time>
+                        · {{ $notice->created_at->diffForHumans() }}
+                    </div>
+                @endif
+            </div>
+        </div>
         @if ($notice->body)
-            <p class="mt-3 mb-0" dir="auto" style="white-space:pre-wrap;overflow-wrap:anywhere;unicode-bidi:plaintext">{{ $notice->full_body ?? $notice->body }}</p>
+            <div class="nt-page-body" dir="auto">{{ $notice->full_body ?? $notice->body }}</div>
         @endif
     </div>
     @if ($notice->url)
-        <div class="card-footer">
+        <div class="card-footer d-flex flex-wrap align-items-center gap-2">
             @if (str_starts_with($notice->url, 'mailto:'))
-                <a class="btn btn-outline-soft" href="{{ $notice->url }}">{{ __('Reply by email') }}</a>
-                <span class="small text-muted ms-2" dir="ltr">{{ rawurldecode(substr($notice->url, 7)) }}</span>
+                <a class="btn btn-primary" href="{{ $notice->url }}"><x-icon name="reply" class="me-1" /> {{ __('Reply by email') }}</a>
+                <span class="small text-muted text-break" dir="ltr">{{ rawurldecode(\Illuminate\Support\Str::before(substr($notice->url, 7), '?')) }}</span>
             @else
-                <a class="btn btn-primary" href="{{ $notice->url }}">{{ __('Open related page') }}</a>
+                <a class="btn btn-primary" href="{{ $notice->url }}"><x-icon name="up-right-from-square" class="me-1" /> {{ __('Open related page') }}</a>
             @endif
         </div>
     @endif
-</div>
+</article>
 @endsection

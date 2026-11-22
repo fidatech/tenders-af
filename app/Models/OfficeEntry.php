@@ -16,6 +16,14 @@ class OfficeEntry extends Model
         'handover' => 'Handover',
     ];
 
+    /** The icon of each kind in the register and on the form (listed in resources/assets/safelist.txt). */
+    public const ICONS = [
+        'subscription' => 'receipt',
+        'income' => 'arrow-trend-up',
+        'expense' => 'arrow-trend-down',
+        'handover' => 'hand-holding-dollar',
+    ];
+
     public const STATUSES = ['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected'];
 
     protected $guarded = [];
