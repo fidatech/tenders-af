@@ -51,3 +51,7 @@ avatar-soft-success icon-soft
 
 # kinds of admin notifications (nt-{kind})
 nt-company nt-verification nt-tender nt-product nt-payment nt-message nt-info
+
+# Tenders.af: office register kind icons (OfficeEntry::ICONS) and the recording state of the voice button (public/js/messages.js)
+#s-receipt #s-arrow-trend-up #s-arrow-trend-down #s-hand-holding-dollar
+is-recording

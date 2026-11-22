@@ -1730,3 +1730,63 @@ textarea.form-control { min-height: 96px; line-height: 1.6; resize: vertical; }
 .vr-exit { position: absolute; top: 14px; right: 14px; z-index: 2; display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; border: 0; border-radius: 10px; background: rgba(15, 20, 30, .78); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
 .vr-exit:hover { background: rgba(15, 20, 30, .92); }
 .vr-exit kbd { margin-inline-start: 6px; padding: 1px 6px; border-radius: 5px; background: rgba(255,255,255,.18); font-size: 11px; }
+
+/* one notification on its own page */
+.nt-page { max-width: 860px; }
+.nt-ico.nt-ico-lg { width: 46px; height: 46px; border-radius: 12px; font-size: 18px; }
+.nt-page-title { font-size: 18px; margin: 0 0 4px; overflow-wrap: anywhere; }
+.nt-page-body { margin-top: 18px; padding: 16px 18px; border-radius: 12px; background: var(--hover); border: 1px solid var(--border); font-size: 14px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; unicode-bidi: plaintext; }
+
+/* office register: the kind of each entry, the money employees hold, the steps of an entry */
+.of-ico { flex: 0 0 auto; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font-size: 14px; background: var(--primary-soft); color: var(--primary); }
+.of-ico.of-income { background: rgba(var(--success-rgb), .12); color: var(--success); }
+.of-ico.of-expense { background: rgba(var(--danger-rgb), .1); color: var(--danger); }
+.of-ico.of-handover { background: rgba(var(--warning-rgb), .16); color: #b26b00; }
+.of-entry { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.of-entry .of-desc { max-width: 360px; white-space: normal; font-size: 12.5px; color: var(--text); margin-top: 2px; }
+.of-held { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); height: 100%; min-width: 0; }
+.of-held .of-amount { font-size: 16px; font-weight: 800; color: var(--heading); line-height: 1.2; }
+.of-kinds { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.of-kinds .nav-link { white-space: nowrap; text-decoration: none; }
+.of-steps { list-style: none; padding: 0; margin: 0; counter-reset: step; display: grid; gap: 16px; }
+.of-steps li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; font-size: 13px; color: var(--muted); }
+.of-steps li::before { counter-increment: step; content: counter(step); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary); font-size: 12px; font-weight: 800; }
+.of-steps b { display: block; color: var(--heading); font-size: 13.5px; margin-bottom: 2px; }
+
+/* messages between the team and a company: the conversation and the box to write in */
+.chat-thread { display: flex; flex-direction: column; overflow: hidden; }
+.chat-thread .chat-body { flex: 1; min-height: 320px; max-height: min(62vh, 640px); overflow-y: auto; padding: 20px; display: flex; flex-direction: column; }
+.chat-thread .chat-body > :first-child:not(.empty-state) { margin-top: auto; }
+.chat-thread .msg { max-width: min(78%, 560px); margin-bottom: 14px; }
+.chat-thread .msg .avatar { margin-top: 18px; }
+.msg-name { font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 3px; }
+.msg.me .msg-name { text-align: end; }
+.msg .bubble { overflow-wrap: anywhere; }
+.msg-text { white-space: pre-wrap; unicode-bidi: plaintext; }
+.msg-file { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 7px 10px; border-radius: 9px; background: var(--hover); color: var(--heading); font-size: 12.5px; font-weight: 600; text-decoration: none; }
+.msg-file:hover { color: var(--primary); }
+.msg.me .msg-file { background: rgba(255, 255, 255, .16); color: #fff; }
+.msg.me .msg-file:hover { background: rgba(255, 255, 255, .26); color: #fff; }
+.msg .bubble audio { display: block; width: min(260px, 60vw); max-width: 100%; height: 38px; margin-top: 8px; }
+.chat-compose { padding: 14px 16px; border-top: 1px solid var(--border); background: var(--card); }
+.chat-compose textarea { resize: vertical; min-height: 48px; max-height: 240px; border-radius: 12px; }
+.chat-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chat-tools label:has(+ input:focus-visible) { box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .25); }
+.chat-tools .is-recording { background: var(--danger); border-color: var(--danger); color: #fff; }
+.chat-hint { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.chat-hint[data-invalid="true"] { color: var(--danger); }
+.chat-preview:not([hidden]) { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 10px; border: 1px dashed var(--border-strong); border-radius: 12px; }
+.chat-preview audio { flex: 1; min-width: 0; height: 36px; }
+@media (max-width: 767.98px) {
+    .chat-thread .chat-body { max-height: 58dvh; padding: 14px; }
+    .chat-thread .msg { max-width: 90%; }
+    .chat-thread .msg .avatar { display: none; }
+    .chat-tools .btn-label { display: none; }
+}
+.of-ico.of-ico-sm { width: 28px; height: 28px; border-radius: 8px; font-size: 12px; }
+.of-note { max-width: 240px; white-space: normal; }
+.mt-icon.is-danger { background: rgba(var(--danger-rgb), .12); color: var(--danger); }
+/* a choice of two or three, as one segmented control (radio buttons in a .nav-segment) */
+.nav-segment label.nav-link { cursor: pointer; }
+.nav-segment .btn-check:checked + .nav-link { background: var(--card); color: var(--primary); box-shadow: var(--shadow-sm); }
+.nav-segment .btn-check:focus-visible + .nav-link { box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .25); }

@@ -78,10 +78,10 @@
                 <div class="d-flex align-items-center gap-2 mb-2"><span class="sc-icon icon-soft warning flex-shrink-0" style="width:36px;height:36px"><x-icon name="scale-balanced" /></span><span class="small fw-semibold text-muted">{{ __('Balance') }}</span></div>
                 <div class="fs-5 fw-bold" dir="ltr">{{ $balance ? collect($balance)->map(fn ($amount, $currency) => money($amount, $currency))->implode(' · ') : '0' }}</div>
                 <div class="small text-muted mt-1">{{ trans_choice('{0} no payments|{1} 1 payment|[2,*] :count payments', $count, ['count' => $count]) }} · {{ __('spent') }} <span dir="ltr">{{ sums($spent) }}</span></div>
-                @if ($officeIncome)<div class="small">{{ __('Other income') }} · {{ sums($officeIncome) }}</div>@endif
+                @if ($officeIncome)<div class="small text-muted">{{ __('Other income') }} <span dir="ltr">{{ sums($officeIncome) }}</span></div>@endif
                 @if ($held)
-                    <div class="small">{{ __('Held by employees') }} · {{ sums($held) }}</div>
-                    <div class="small">{{ __('Office balance') }} · {{ sums($officeBalance) }}</div>
+                    <div class="d-flex justify-content-between gap-2 small border-top pt-2 mt-2"><span class="text-muted">{{ __('Held by employees') }}</span><span class="fw-semibold" dir="ltr">{{ sums($held) }}</span></div>
+                    <div class="d-flex justify-content-between gap-2 small"><span class="text-muted">{{ __('Office balance') }}</span><span class="fw-semibold" dir="ltr">{{ sums($officeBalance) }}</span></div>
                 @endif
             </div>
         </div>

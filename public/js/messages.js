@@ -39,6 +39,8 @@
     if (!form) return;
 
     const record = form.querySelector('[data-chat-record]');
+    const recordLabel = record.querySelector('[data-chat-record-label]') || record;
+    const text = form.querySelector('[data-chat-text]');
     const voice = form.querySelector('[data-chat-voice]');
     const files = form.querySelector('[data-chat-files]');
     const preview = form.querySelector('[data-chat-preview]');
@@ -71,6 +73,13 @@
             event.preventDefault();
             status.textContent = status.dataset.limit;
             form.querySelector('label[for="chat-files"]').scrollIntoView({ block: 'nearest' });
+        }
+    });
+    // Ctrl + Enter (Cmd + Enter on a Mac) sends; Enter alone starts a new line
+    text?.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && (event.ctrlKey || event.metaKey) && !send.disabled) {
+            event.preventDefault();
+            form.requestSubmit();
         }
     });
     files.addEventListener('change', showSelection);
@@ -110,7 +119,8 @@
                 } else {
                     status.textContent = status.dataset.limit;
                 }
-                record.textContent = record.dataset.start;
+                recordLabel.textContent = record.dataset.start;
+                record.classList.remove('is-recording');
                 record.disabled = false;
                 send.disabled = false;
             }, { once: true });
@@ -119,7 +129,8 @@
                 if (recorder.state === 'recording') recorder.stop();
             }, 120000);
             status.textContent = record.dataset.capturing;
-            record.textContent = record.dataset.stop;
+            recordLabel.textContent = record.dataset.stop;
+            record.classList.add('is-recording');
             record.disabled = false;
         } catch {
             stream?.getTracks().forEach(track => track.stop());
