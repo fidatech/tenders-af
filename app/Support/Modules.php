@@ -30,6 +30,7 @@ class Modules
                 'public_nav' => false,
                 'dashboard_nav' => false,
                 'notifications' => false,
+                'access' => 'all',
             ];
         }
 
@@ -108,7 +109,7 @@ class Modules
     {
         $module = self::definition($key);
         $saved = Platform::all()['module_'.$key.'_'.$option] ?? null;
-        $default = $option === 'access' ? 'all' : ($module[$option] ?? false);
+        $default = $option === 'access' ? ($module['access'] === 'paid' ? 'paid' : 'all') : ($module[$option] ?? false);
         if ($saved === null || $saved === '') {
             return $default;
         }

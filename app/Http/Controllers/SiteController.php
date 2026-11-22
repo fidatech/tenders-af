@@ -14,7 +14,10 @@ use App\Models\PlatformAccount;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Province;
+use App\Models\SupplierCollection;
+use App\Models\SupplierCollectionItem;
 use App\Models\Tender;
+use App\Support\Modules;
 use App\Support\Platform;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -255,6 +258,7 @@ class SiteController extends Controller
             'mini' => module_on('mini_websites'),
             'projects' => $projects,
             'contact' => $company->contactFor(auth('web')->user()),
+            'save' => $this->saveTargets($company),
             // what this organisation posted itself: open ones first, then the newest results
             'products' => module_on('products') ? Product::live()->where('company_id', $company->id)->with('company', 'images', 'province')->sponsoredFirst()->limit(6)->get() : collect(),
             'posted' => Tender::visible()->where('company_id', $company->id)->with('industry', 'province')
@@ -266,6 +270,28 @@ class SiteController extends Controller
             // an empty profile is not offered to search engines until the company writes about itself
             'noindex' => blank($company->about),
         ]);
+    }
+
+    /**
+     * The "Save" control of a company page: null when it is not offered (module off, a visitor, the company itself),
+     * otherwise whether the viewer may save, the lists they may save into and where it is saved already.
+     */
+    private function saveTargets(Company $company): ?array
+    {
+        $user = auth('web')->user();
+        if (! module_on('collections') || ! $user || $user->company_id === $company->id) {
+            return null;
+        }
+        if (! Modules::allows('collections', $user->company)) {
+            return ['allowed' => false];
+        }
+        $lists = SupplierCollection::visibleTo($user)->orderByDesc('is_favourites')->orderBy('name')->get(['id', 'name', 'is_favourites']);
+
+        return [
+            'allowed' => true,
+            'lists' => $lists,
+            'savedIn' => SupplierCollectionItem::whereIn('supplier_collection_id', $lists->pluck('id'))->where('company_id', $company->id)->pluck('supplier_collection_id')->all(),
+        ];
     }
 
     /** One project of a company's portfolio. */

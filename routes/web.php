@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BrandingController;
+use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\CompanyMessageController;
 use App\Http\Controllers\CompanyPdfController;
 use App\Http\Controllers\DashboardController;
@@ -131,6 +132,20 @@ Route::middleware('auth:web')->group(function () {
             Route::get('{id}/sponsor', [ProductController::class, 'sponsor'])->whereNumber('id')->name('sponsor');
             Route::post('{id}/sponsor', [ProductController::class, 'storeSponsor'])->whereNumber('id')->name('sponsor.store');
         });
+
+        // saved suppliers (Supplier Favourites & Collections): every member of the company
+        Route::prefix('my/collections')->name('collections.')->middleware('module:collections')->group(function () {
+            Route::get('/', [CollectionController::class, 'index'])->name('index');
+            Route::post('/', [CollectionController::class, 'store'])->name('store');
+            Route::get('{id}', [CollectionController::class, 'show'])->whereNumber('id')->name('show');
+            Route::put('{id}', [CollectionController::class, 'update'])->whereNumber('id')->name('update');
+            Route::delete('{id}', [CollectionController::class, 'destroy'])->whereNumber('id')->name('destroy');
+            Route::get('{id}/compare', [CollectionController::class, 'compare'])->whereNumber('id')->name('compare');
+            Route::get('{id}/export', [CollectionController::class, 'export'])->whereNumber('id')->middleware('throttle:10,1')->name('export');
+            Route::put('{id}/items/{item}', [CollectionController::class, 'updateItem'])->whereNumber(['id', 'item'])->name('items.update');
+            Route::delete('{id}/items/{item}', [CollectionController::class, 'removeItem'])->whereNumber(['id', 'item'])->name('items.destroy');
+        });
+        Route::post('companies/{slug}/save', [CollectionController::class, 'save'])->middleware(['module:collections', 'throttle:60,1'])->name('collections.save');
 
         Route::middleware('owner')->group(function () {
             // the projects of the company (Company Project Portfolios)

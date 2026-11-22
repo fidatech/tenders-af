@@ -109,6 +109,7 @@ class MobileNav
             ['label' => 'My dashboard', 'url' => route('dashboard'), 'glyph' => 'home', 'primary' => true],
             ['label' => 'Notifications', 'url' => route('notices.index'), 'glyph' => 'bell', 'badge' => self::unread($user)],
             ['label' => 'Messages', 'url' => route('messages.show'), 'glyph' => 'mail'],
+            Modules::inDashboardNav('collections') ? ['label' => 'Saved suppliers', 'url' => route('collections.index'), 'glyph' => 'folder'] : null,
             $company?->is_supplier ? ['label' => 'Saved tenders', 'url' => route('tenders.saved'), 'glyph' => 'bookmark'] : null,
             $user->isOwner() ? ['label' => 'Company profile', 'url' => route('settings.edit'), 'glyph' => 'companies'] : null,
             Modules::inDashboardNav('products') ? ['label' => 'My products', 'url' => route('products.index'), 'glyph' => 'products'] : null,

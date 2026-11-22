@@ -21,6 +21,7 @@ return [
 
     ['heading' => 'My company'],
     ['label' => 'Company profile', 'icon' => 'building', 'route' => 'settings.edit', 'owner' => true],
+    ['label' => 'Saved suppliers', 'icon' => 'folder-open', 'route' => 'collections.index', 'active' => 'collections.*', 'module' => 'collections'],
     ['label' => 'Projects', 'icon' => 'briefcase', 'route' => 'projects.index', 'active' => 'projects.*', 'owner' => true, 'module' => 'portfolios'],
     ['label' => 'Profile PDF', 'icon' => 'file-pdf', 'route' => 'pdf.show', 'active' => 'pdf.*', 'owner' => true, 'module' => 'company_pdf'],
     ['label' => 'Tender alerts', 'icon' => 'paper-plane', 'route' => 'alerts.edit', 'owner' => true, 'supplier' => true],

@@ -13,7 +13,8 @@
  *   built               false: planned, not built yet. Listed honestly, but there is nothing to switch on.
  *   public_nav, dashboard_nav   whether the module offers links in those menus (each can be hidden)
  *   notifications       whether the module sends notifications (each can be silenced)
- *   access              who may use it when it is on: "all" companies, or "paid" plans only
+ *   access              who may use it when it is on, until an administrator changes it: "all" companies,
+ *                       or "paid" plans only
  */
 return [
     'tenders' => [
@@ -111,10 +112,14 @@ return [
     ],
     'collections' => [
         'name' => 'Supplier Favourites & Collections',
-        'description' => 'Saved companies in private collections with notes, tags and statuses.',
+        'description' => 'Companies save suppliers into collections (private or shared with their team) with statuses, private notes and tags, compare them side by side and export the list.',
         'default' => false,
         'depends' => ['directory'],
-        'built' => false,
+        'built' => true,
+        'public_nav' => false,
+        'dashboard_nav' => true,
+        'notifications' => false,
+        'access' => 'paid',
     ],
     'catalogue_pdf' => [
         'name' => 'Product Catalogue PDF Generator',

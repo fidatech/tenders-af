@@ -64,6 +64,28 @@
         <div class="co-cta">
             <a class="btn btn-green btn-sm" href="#contact">Contact</a>
             @if (module_on('company_pdf'))<a class="btn btn-ghost btn-sm" href="{{ route('site.companies.pdf', ['slug' => $company->slug]) }}" rel="nofollow">Profile PDF</a>@endif
+            @if ($save)
+                @if (! $save['allowed'])
+                    <a class="btn btn-ghost btn-sm" href="{{ route('billing.show') }}" title="Saving suppliers is part of the paid plans">☆ Save</a>
+                @else
+                    <details class="co-save">
+                        <summary class="btn btn-ghost btn-sm">{{ $save['savedIn'] ? '★ Saved' : '☆ Save' }}</summary>
+                        <form method="POST" action="{{ route('collections.save', ['slug' => $company->slug]) }}">
+                            @csrf
+                            <label for="saveList">Save in</label>
+                            <select id="saveList" name="collection_id" data-native>
+                                @foreach ($save['lists'] as $list)
+                                    <option value="{{ $list->id }}">{{ $list->name }}{{ in_array($list->id, $save['savedIn'], true) ? ' (saved)' : '' }}</option>
+                                @endforeach
+                            </select>
+                            <label for="saveNew">or a new collection</label>
+                            <input id="saveNew" type="text" name="new_collection" maxlength="100" placeholder="Name of the new collection">
+                            <button type="submit" class="btn btn-green btn-sm">Save</button>
+                            <a href="{{ route('collections.index') }}">My saved suppliers</a>
+                        </form>
+                    </details>
+                @endif
+            @endif
         </div>
     </div>
 </section>

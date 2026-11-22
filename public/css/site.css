@@ -750,3 +750,14 @@ a.side-card.tl:hover { color: #fff; border-color: rgba(255,255,255,.4); }
 }
 
 .co-body { padding-top: 28px; }
+
+/* the "Save" control of a company page (Supplier Favourites & Collections) */
+.co-save { position: relative; }
+.co-save summary { list-style: none; cursor: pointer; }
+.co-save summary::-webkit-details-marker { display: none; }
+.co-save[open] { flex: 1 1 100%; }
+.co-save form { margin-top: 10px; width: min(320px, 100%); display: grid; gap: 8px; padding: 16px; border-radius: 16px; background: #fff; color: var(--ink); box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+.co-save label { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.co-save select, .co-save input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 14px; }
+.co-save form a { font-size: 13px; text-align: center; color: var(--green); }
+@media (max-width: 640px) { .co-save { flex: 1 1 100%; } .co-save summary { width: 100%; } .co-save form { width: 100%; } }
