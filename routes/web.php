@@ -8,6 +8,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\CompanyMessageController;
+use App\Http\Controllers\CompanyPdfController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DirectMessageController;
 use App\Http\Controllers\PostedTenderController;
@@ -36,7 +38,11 @@ Route::get('provinces', [SiteController::class, 'provinces'])->name('site.provin
 Route::middleware('module:directory')->group(function () {
     Route::get('companies', [SiteController::class, 'companies'])->name('site.companies');
     Route::get('companies/{slug}', [SiteController::class, 'company'])->name('site.companies.show');
+    Route::get('companies/{slug}/profile', [CompanyPdfController::class, 'public'])->middleware(['module:company_pdf', 'throttle:20,1'])->name('site.companies.pdf');
+    Route::get('companies/{slug}/projects/{project}', [SiteController::class, 'project'])->middleware('module:portfolios')->name('site.projects.show');
+    Route::get('project-images/{id}', [SiteController::class, 'projectImage'])->whereNumber('id')->middleware('module:portfolios')->name('site.projects.image');
 });
+Route::get('companies/{slug}/cover', [SiteController::class, 'cover'])->name('site.companies.cover');
 Route::get('companies/{slug}/logo', [SiteController::class, 'logo'])->name('site.companies.logo');
 
 // products for wholesale (the module is switched on in the settings of the administrators)
@@ -127,6 +133,20 @@ Route::middleware('auth:web')->group(function () {
         });
 
         Route::middleware('owner')->group(function () {
+            // the projects of the company (Company Project Portfolios)
+            Route::prefix('my/projects')->name('projects.')->middleware('module:portfolios')->group(function () {
+                Route::get('/', [ProjectController::class, 'index'])->name('index');
+                Route::get('create', [ProjectController::class, 'create'])->name('create');
+                Route::post('/', [ProjectController::class, 'store'])->name('store');
+                Route::get('{id}/edit', [ProjectController::class, 'edit'])->whereNumber('id')->name('edit');
+                Route::put('{id}', [ProjectController::class, 'update'])->whereNumber('id')->name('update');
+                Route::delete('{id}', [ProjectController::class, 'destroy'])->whereNumber('id')->name('destroy');
+                Route::get('{id}/files/{file}', [ProjectController::class, 'file'])->whereNumber(['id', 'file'])->name('file');
+                Route::delete('{id}/files/{file}', [ProjectController::class, 'destroyFile'])->whereNumber(['id', 'file'])->name('file.destroy');
+            });
+            // the company profile as a PDF (Company Profile PDF Generator)
+            Route::get('my/profile-pdf', [CompanyPdfController::class, 'show'])->middleware('module:company_pdf')->name('pdf.show');
+            Route::get('my/profile-pdf/print', [CompanyPdfController::class, 'print'])->middleware(['module:company_pdf', 'throttle:30,1'])->name('pdf.print');
             crud_routes('team', TeamController::class, 'team');
             Route::get('company', [SettingsController::class, 'edit'])->name('settings.edit');
             Route::put('company', [SettingsController::class, 'update'])->name('settings.update');
@@ -211,6 +231,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         crud_routes('industries', Admin\IndustryController::class, 'industries');
         crud_routes('categories', Admin\CategoryController::class, 'categories');
 
+        Route::get('projects', [Admin\ProjectController::class, 'index'])->name('projects.index');
+        Route::get('projects/{id}', [Admin\ProjectController::class, 'show'])->whereNumber('id')->name('projects.show');
+        Route::post('projects/{id}/review', [Admin\ProjectController::class, 'review'])->whereNumber('id')->name('projects.review');
+        Route::get('projects/{id}/files/{file}', [Admin\ProjectController::class, 'file'])->whereNumber(['id', 'file'])->name('projects.file');
         Route::get('verification', [Admin\VerificationController::class, 'index'])->name('verification.index');
         Route::post('verification/{id}/approve', [Admin\VerificationController::class, 'approve'])->whereNumber('id')->name('verification.approve');
         Route::post('verification/{id}/reject', [Admin\VerificationController::class, 'reject'])->whereNumber('id')->name('verification.reject');

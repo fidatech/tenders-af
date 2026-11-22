@@ -10,8 +10,8 @@ use App\Models\User;
  * The bottom bar and the menu sheet shown on phones (resources/views/partials/mobile-nav.blade.php).
  * Only modules that are on, and pages the person may open, are offered.
  *
- * A tab:   ['label', 'url', 'icon', 'active' => bool, 'badge' => int]
- * A sheet: ['heading' => [entries...]], an entry: ['label', 'url', 'icon', 'badge' => int, 'form' => id]
+ * A tab:   ['label', 'url', 'glyph', 'active' => bool, 'badge' => int]
+ * A sheet: ['heading' => [entries...]], an entry: ['label', 'url', 'glyph', 'badge' => int, 'form' => id]
  */
 class MobileNav
 {
@@ -20,27 +20,27 @@ class MobileNav
     {
         $user = auth('web')->user();
         $tabs = [
-            ['label' => 'Home', 'url' => route('site.home'), 'icon' => 'home', 'active' => request()->routeIs('site.home')],
-            ['label' => 'Tenders', 'url' => route('site.tenders'), 'icon' => 'tenders', 'active' => request()->routeIs('site.tenders', 'site.sector', 'site.province', 'site.tenders.show', 'site.sectors', 'site.provinces')],
+            ['label' => 'Home', 'url' => route('site.home'), 'glyph' => 'home', 'active' => request()->routeIs('site.home')],
+            ['label' => 'Tenders', 'url' => route('site.tenders'), 'glyph' => 'tenders', 'active' => request()->routeIs('site.tenders', 'site.sector', 'site.province', 'site.tenders.show', 'site.sectors', 'site.provinces')],
         ];
         if (Modules::inPublicNav('directory')) {
-            $tabs[] = ['label' => 'Companies', 'url' => route('site.companies'), 'icon' => 'companies', 'active' => request()->routeIs('site.companies', 'site.companies.show')];
+            $tabs[] = ['label' => 'Companies', 'url' => route('site.companies'), 'glyph' => 'companies', 'active' => request()->routeIs('site.companies', 'site.companies.show')];
         }
         if (Modules::inPublicNav('products')) {
-            $tabs[] = ['label' => 'Products', 'url' => route('site.products'), 'icon' => 'products', 'active' => request()->routeIs('site.products', 'site.products.show')];
+            $tabs[] = ['label' => 'Products', 'url' => route('site.products'), 'glyph' => 'products', 'active' => request()->routeIs('site.products', 'site.products.show')];
         }
-        $tabs[] = ['label' => $user ? 'Account' : 'Menu', 'url' => null, 'icon' => $user ? 'user' : 'menu', 'active' => false, 'badge' => $user ? self::unread($user) : 0];
+        $tabs[] = ['label' => $user ? 'Account' : 'Menu', 'url' => null, 'glyph' => $user ? 'user' : 'menu', 'active' => false, 'badge' => $user ? self::unread($user) : 0];
 
         $explore = [
-            ['label' => 'Tenders by sector', 'url' => route('site.sectors'), 'icon' => 'grid'],
-            ['label' => 'Tenders by province', 'url' => route('site.provinces'), 'icon' => 'map'],
-            ['label' => 'Statistics', 'url' => route('site.statistics'), 'icon' => 'chart'],
-            ['label' => 'Pricing', 'url' => route('site.pricing'), 'icon' => 'card'],
+            ['label' => 'Tenders by sector', 'url' => route('site.sectors'), 'glyph' => 'grid'],
+            ['label' => 'Tenders by province', 'url' => route('site.provinces'), 'glyph' => 'map'],
+            ['label' => 'Statistics', 'url' => route('site.statistics'), 'glyph' => 'chart'],
+            ['label' => 'Pricing', 'url' => route('site.pricing'), 'glyph' => 'card'],
         ];
         $help = [
-            ['label' => 'How it works', 'url' => route('site.how'), 'icon' => 'info'],
-            ['label' => 'Questions', 'url' => route('site.faq'), 'icon' => 'help'],
-            ['label' => 'Write to us', 'url' => route('site.contact'), 'icon' => 'mail'],
+            ['label' => 'How it works', 'url' => route('site.how'), 'glyph' => 'info'],
+            ['label' => 'Questions', 'url' => route('site.faq'), 'glyph' => 'help'],
+            ['label' => 'Write to us', 'url' => route('site.contact'), 'glyph' => 'mail'],
         ];
 
         $sheet = $user ? ['Your account' => self::account($user)] : ['Your account' => self::guest()];
@@ -53,17 +53,17 @@ class MobileNav
     {
         $company = $user->company;
         $tabs = [
-            ['label' => 'Home', 'url' => route('dashboard'), 'icon' => 'home', 'active' => request()->routeIs('dashboard')],
-            ['label' => 'Tenders', 'url' => route('tenders.index'), 'icon' => 'tenders', 'active' => request()->routeIs('tenders.*')],
+            ['label' => 'Home', 'url' => route('dashboard'), 'glyph' => 'home', 'active' => request()->routeIs('dashboard')],
+            ['label' => 'Tenders', 'url' => route('tenders.index'), 'glyph' => 'tenders', 'active' => request()->routeIs('tenders.*')],
         ];
         if ($company?->is_buyer && ! $company?->is_supplier) {
-            $tabs[] = ['label' => 'Posted', 'url' => route('posted.index'), 'icon' => 'megaphone', 'active' => request()->routeIs('posted.*')];
+            $tabs[] = ['label' => 'Posted', 'url' => route('posted.index'), 'glyph' => 'megaphone', 'active' => request()->routeIs('posted.*')];
         } elseif (Modules::inDashboardNav('products')) {
-            $tabs[] = ['label' => 'Products', 'url' => route('products.index'), 'icon' => 'products', 'active' => request()->routeIs('products.*')];
+            $tabs[] = ['label' => 'Products', 'url' => route('products.index'), 'glyph' => 'products', 'active' => request()->routeIs('products.*')];
         }
-        $tabs[] = ['label' => 'Messages', 'url' => route('messages.show'), 'icon' => 'mail', 'active' => request()->routeIs('messages.*'),
+        $tabs[] = ['label' => 'Messages', 'url' => route('messages.show'), 'glyph' => 'mail', 'active' => request()->routeIs('messages.*'),
             'badge' => DirectMessage::where('user_id', $user->id)->where('from_admin', true)->whereNull('read_at')->count()];
-        $tabs[] = ['label' => 'Menu', 'url' => null, 'icon' => 'menu', 'active' => false];
+        $tabs[] = ['label' => 'Menu', 'url' => null, 'glyph' => 'menu', 'active' => false];
 
         // the whole menu of the panel, by its headings
         $sheet = [];
@@ -75,16 +75,16 @@ class MobileNav
                 continue;
             }
             foreach ($item['children'] ?? [$item] as $link) {
-                $sheet[$heading][] = ['label' => $link['label'], 'url' => Menu::url($link), 'icon' => self::iconFor($link['icon'] ?? ''), 'badge' => Menu::badge($link), 'active' => ! empty($link['current'])];
+                $sheet[$heading][] = ['label' => $link['label'], 'url' => Menu::url($link), 'glyph' => self::iconFor($link['icon'] ?? ''), 'badge' => Menu::badge($link), 'active' => ! empty($link['current'])];
             }
         }
         $sheet['Account'] = array_values(array_filter([
-            ['label' => 'Notifications', 'url' => route('notices.index'), 'icon' => 'bell', 'badge' => self::unread($user)],
-            ['label' => 'My profile', 'url' => route('profile.edit'), 'icon' => 'user'],
-            ['label' => 'Change password', 'url' => route('profile.password'), 'icon' => 'key'],
-            $company?->is_listed && Modules::enabled('directory') ? ['label' => 'Our public page', 'url' => route('site.companies.show', ['slug' => $company->slug]), 'icon' => 'eye'] : null,
-            ['label' => 'Website home', 'url' => route('site.home'), 'icon' => 'globe'],
-            ['label' => 'Sign out', 'url' => null, 'icon' => 'out', 'form' => 'logoutForm'],
+            ['label' => 'Notifications', 'url' => route('notices.index'), 'glyph' => 'bell', 'badge' => self::unread($user)],
+            ['label' => 'My profile', 'url' => route('profile.edit'), 'glyph' => 'user'],
+            ['label' => 'Change password', 'url' => route('profile.password'), 'glyph' => 'key'],
+            $company?->is_listed && Modules::enabled('directory') ? ['label' => 'Our public page', 'url' => route('site.companies.show', ['slug' => $company->slug]), 'glyph' => 'eye'] : null,
+            ['label' => 'Website home', 'url' => route('site.home'), 'glyph' => 'globe'],
+            ['label' => 'Sign out', 'url' => null, 'glyph' => 'out', 'form' => 'logoutForm'],
         ]));
 
         return ['tabs' => $tabs, 'sheet' => $sheet];
@@ -95,9 +95,9 @@ class MobileNav
         $signup = Platform::bool('registration');
 
         return array_values(array_filter([
-            ['label' => 'Sign in', 'url' => route('login'), 'icon' => 'user'],
-            $signup ? ['label' => 'Register free', 'url' => route('register'), 'icon' => 'plus', 'primary' => true] : null,
-            ['label' => 'Post a tender', 'url' => $signup ? route('register', ['as' => 'buyer']) : route('site.contact'), 'icon' => 'megaphone'],
+            ['label' => 'Sign in', 'url' => route('login'), 'glyph' => 'user'],
+            $signup ? ['label' => 'Register free', 'url' => route('register'), 'glyph' => 'plus', 'primary' => true] : null,
+            ['label' => 'Post a tender', 'url' => $signup ? route('register', ['as' => 'buyer']) : route('site.contact'), 'glyph' => 'megaphone'],
         ]));
     }
 
@@ -106,14 +106,14 @@ class MobileNav
         $company = $user->company;
 
         return array_values(array_filter([
-            ['label' => 'My dashboard', 'url' => route('dashboard'), 'icon' => 'home', 'primary' => true],
-            ['label' => 'Notifications', 'url' => route('notices.index'), 'icon' => 'bell', 'badge' => self::unread($user)],
-            ['label' => 'Messages', 'url' => route('messages.show'), 'icon' => 'mail'],
-            $company?->is_supplier ? ['label' => 'Saved tenders', 'url' => route('tenders.saved'), 'icon' => 'bookmark'] : null,
-            $user->isOwner() ? ['label' => 'Company profile', 'url' => route('settings.edit'), 'icon' => 'companies'] : null,
-            Modules::inDashboardNav('products') ? ['label' => 'My products', 'url' => route('products.index'), 'icon' => 'products'] : null,
-            ['label' => 'Subscription', 'url' => route('billing.show'), 'icon' => 'card'],
-            ['label' => 'Sign out', 'url' => null, 'icon' => 'out', 'form' => 'mnavLogout'],
+            ['label' => 'My dashboard', 'url' => route('dashboard'), 'glyph' => 'home', 'primary' => true],
+            ['label' => 'Notifications', 'url' => route('notices.index'), 'glyph' => 'bell', 'badge' => self::unread($user)],
+            ['label' => 'Messages', 'url' => route('messages.show'), 'glyph' => 'mail'],
+            $company?->is_supplier ? ['label' => 'Saved tenders', 'url' => route('tenders.saved'), 'glyph' => 'bookmark'] : null,
+            $user->isOwner() ? ['label' => 'Company profile', 'url' => route('settings.edit'), 'glyph' => 'companies'] : null,
+            Modules::inDashboardNav('products') ? ['label' => 'My products', 'url' => route('products.index'), 'glyph' => 'products'] : null,
+            ['label' => 'Subscription', 'url' => route('billing.show'), 'glyph' => 'card'],
+            ['label' => 'Sign out', 'url' => null, 'glyph' => 'out', 'form' => 'mnavLogout'],
         ]));
     }
 

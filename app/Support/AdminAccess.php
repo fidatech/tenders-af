@@ -9,7 +9,7 @@ class AdminAccess
 {
     public const PERMISSIONS = [
         'messages' => 'Contact companies and bidders',
-        'verification' => 'Review company licences',
+        'verification' => 'Review company licences and project evidence',
         'office' => 'Submit office collections, expenses and handovers',
         'procurement' => 'Manage tenders, products and categories',
     ];
@@ -48,7 +48,7 @@ class AdminAccess
         foreach ($permissions as $permission) {
             $routes = match ($permission) {
                 'messages' => ['admin.messages.*'],
-                'verification' => ['admin.verification.*'],
+                'verification' => ['admin.verification.*', 'admin.projects.*'],
                 'office' => ['admin.office.*'],
                 'procurement' => ['admin.tenders.*', 'admin.products.index', 'admin.products.show', 'admin.products.approve', 'admin.products.reject', 'admin.products.hide', 'admin.products.destroy', 'admin.industries.*', 'admin.categories.*'],
                 default => [],

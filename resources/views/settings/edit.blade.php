@@ -4,6 +4,10 @@
     $sizes = \App\Models\Company::SIZES;
     $pickedIndustries = array_map('intval', old('industries', $mineIndustries));
     $pickedCategories = array_map('intval', old('categories', $mineCategories));
+    $pickedTypes = old('business_types', (array) $company->business_types);
+    $pickedFields = old('contact_fields', $company->approvedContactFields());
+    $services = old('services', $company->serviceList());
+    $services = array_pad(array_values($services), max(3, count($services) + 1), ['name' => '', 'text' => '']);
 @endphp
 
 @section('content')
@@ -45,6 +49,11 @@
                             </div>
                             <div class="form-text" id="s-website-help">{{ __('Only the address, like yourcompany.af. No www or https.') }}</div>
                             @error('website')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="s-email">{{ __('Business email') }}</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="s-email" name="email" value="{{ old('email', $company->email) }}" maxlength="255" dir="ltr" autocomplete="email">
+                            @error('email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-12 col-md-6">
                             <label class="form-label" for="s-country">{{ __('Country') }}</label>
@@ -108,6 +117,116 @@
                             @error('size')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="card mb-0" id="business-type">
+                <div class="card-header">
+                    <div class="set-head"><span class="set-icon icon-soft info"><x-icon name="industry" /></span><div><h5>{{ __('What kind of business') }}</h5><p>{{ __('Tick every kind that fits. Buyers filter the directory by these.') }}</p></div></div>
+                </div>
+                <div class="card-body">
+                    <input type="hidden" name="business_types_shown" value="1">
+                    <div class="row g-2">
+                        @foreach (\App\Models\Company::BUSINESS_TYPES as $key => $label)
+                            <div class="col-6 col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="bt-{{ $key }}" name="business_types[]" value="{{ $key }}" @checked(in_array($key, $pickedTypes, true))>
+                                    <label class="form-check-label" for="bt-{{ $key }}">{{ __($label) }}</label>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    @error('business_types.*')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                </div>
+            </div>
+
+            @if (module_on('mini_websites'))
+            <div class="card mb-0" id="page">
+                <div class="card-header">
+                    <div class="set-head"><span class="set-icon icon-soft primary"><x-icon name="window-maximize" /></span><div><h5>{{ __('Your public page') }}</h5><p>{{ __('How your page looks to buyers. Write only what is true; nothing is added for you.') }}</p></div></div>
+                </div>
+                <div class="card-body">
+                    <input type="hidden" name="page_shown" value="1">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label" for="s-tagline">{{ __('Slogan') }}</label>
+                            <input type="text" class="form-control @error('tagline') is-invalid @enderror" id="s-tagline" name="tagline" value="{{ old('tagline', $company->tagline) }}" maxlength="160" dir="auto" placeholder="{{ __('For example: Roads and bridges across the north since 2008') }}">
+                            @error('tagline')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="s-template">{{ __('Template') }}</label>
+                            <select class="form-select" id="s-template" name="page_template" data-plain>
+                                @foreach (\App\Models\Company::TEMPLATES as $key => $label)
+                                    <option value="{{ $key }}" @selected(old('page_template', $company->template()) === $key)>{{ __($label) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <span class="form-label d-block" id="s-accent-label">{{ __('Colour') }}</span>
+                            <div class="d-flex flex-wrap gap-2" role="radiogroup" aria-labelledby="s-accent-label">
+                                @foreach (\App\Models\Company::ACCENTS as $hex => $label)
+                                    <label class="accent-pick" title="{{ __($label) }}">
+                                        <input type="radio" name="page_accent" value="{{ $hex }}" @checked(old('page_accent', $company->accent()) === $hex)>
+                                        <span style="background: {{ $hex }}"></span><em class="visually-hidden">{{ __($label) }}</em>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="s-cover">{{ __('Cover picture') }}</label>
+                            @if ($company->cover_path)
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <img src="{{ route('site.companies.cover', ['slug' => $company->slug]) }}" alt="{{ __('Cover picture') }}" class="rounded-3 border" style="width:160px;height:60px;object-fit:cover">
+                                    <div class="form-check"><input class="form-check-input" type="checkbox" name="remove_cover" value="1" id="s-remove-cover"><label class="form-check-label" for="s-remove-cover">{{ __('Remove it') }}</label></div>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control @error('cover') is-invalid @enderror" id="s-cover" name="cover" accept="image/png,image/jpeg,image/webp">
+                            @error('cover')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                            <div class="form-text">{{ __('A wide photo of your work, at least 600 pixels wide, up to 4 MB.') }}</div>
+                        </div>
+                        <div class="col-12">
+                            <span class="form-label d-block">{{ __('Services') }}</span>
+                            <div class="d-flex flex-column gap-2">
+                                @foreach ($services as $i => $service)
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-4"><input type="text" class="form-control" name="services[{{ $i }}][name]" value="{{ $service['name'] ?? '' }}" maxlength="100" dir="auto" placeholder="{{ __('Service') }}" aria-label="{{ __('Service :n', ['n' => $i + 1]) }}"></div>
+                                        <div class="col-12 col-md-8"><input type="text" class="form-control" name="services[{{ $i }}][text]" value="{{ $service['text'] ?? '' }}" maxlength="300" dir="auto" placeholder="{{ __('One sentence about it (optional)') }}" aria-label="{{ __('About service :n', ['n' => $i + 1]) }}"></div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            @error('services.*.name')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                            <div class="form-text">{{ __('Save to get another empty row. Up to 20 services.') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <div class="card mb-0" id="contact">
+                <div class="card-header">
+                    <div class="set-head"><span class="set-icon icon-soft danger"><x-icon name="address-card" /></span><div><h5>{{ __('Contact details on your page') }}</h5><p>{{ __('You decide which details are shown, and to whom. Nothing is shown without your tick.') }}</p></div></div>
+                </div>
+                <div class="card-body">
+                    <input type="hidden" name="contact_shown" value="1">
+                    <div class="small fw-semibold text-muted text-uppercase mb-2">{{ __('Details I allow on the page') }}</div>
+                    <div class="row g-2 mb-3">
+                        @foreach (\App\Models\Company::CONTACT_FIELDS as $field => $label)
+                            <div class="col-12 col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="cf-{{ $field }}" name="contact_fields[]" value="{{ $field }}" @checked(in_array($field, $pickedFields, true))>
+                                    <label class="form-check-label" for="cf-{{ $field }}">{{ __($label) }} <span class="text-muted small" dir="ltr">{{ $company->{$field} ? '· '.preg_replace('#^https?://#', '', $company->{$field}) : '· '.__('not filled in') }}</span></label>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="small fw-semibold text-muted text-uppercase mb-2">{{ __('Who may see them') }}</div>
+                    @foreach (\App\Models\Company::CONTACT_VISIBILITY as $key => $label)
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="cv-{{ $key }}" name="contact_visibility" value="{{ $key }}" @checked(old('contact_visibility', $company->contact_visibility ?: 'public') === $key)>
+                            <label class="form-check-label" for="cv-{{ $key }}">{{ __($label) }}</label>
+                        </div>
+                    @endforeach
+                    <div class="form-text">{{ __('Restricted details are left out of the page itself, of search engines and of the PDF profile, not just hidden on screen. Details you publish elsewhere may still be found there.') }}</div>
                 </div>
             </div>
 

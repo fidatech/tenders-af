@@ -87,7 +87,7 @@ return [
     ],
     'company_pdf' => [
         'name' => 'Company Profile PDF Generator',
-        'description' => 'A printable company profile made from what the company entered, with a QR code to its page.',
+        'description' => 'A print-ready A4 company profile made from what the company entered, saved as PDF from the browser. Short, standard and detailed versions; contacts follow the company\'s sharing choice.',
         'default' => true,
         'depends' => ['directory'],
         'built' => true,

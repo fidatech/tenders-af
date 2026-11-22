@@ -143,7 +143,7 @@ class CompanyTest extends TestCase
         $this->post('/admin/verification/'.$company->id.'/approve')->assertRedirect();
 
         $this->assertTrue($company->fresh()->isVerified());
-        $this->get('/companies/'.$company->slug)->assertOk()->assertSee('Verified company');
+        $this->get('/companies/'.$company->slug)->assertOk()->assertSee('Business licence checked');
     }
 
     public function test_an_administrator_enters_a_tender_and_publishes_it(): void

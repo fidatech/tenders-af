@@ -38,6 +38,7 @@
         'Companies and bidders' => [
             ['Companies', 'building', 'admin.companies.index', 'admin.companies.*', 0],
             ['Verification', 'shield-halved', 'admin.verification.index', 'admin.verification.*', $waitingVerify],
+            module_on('portfolios') || \App\Models\CompanyProject::exists() ? ['Company projects', 'briefcase', 'admin.projects.index', 'admin.projects.*', \App\Models\CompanyProject::where('review_status', 'pending')->count()] : null,
         ],
         'Office and finance' => [
             ['Office register', 'receipt', 'admin.office.index', 'admin.office.*', 0],

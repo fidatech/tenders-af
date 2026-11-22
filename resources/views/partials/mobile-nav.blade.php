@@ -39,9 +39,9 @@
 <nav class="mnav" aria-label="{{ __('Main') }}" data-mnav>
     @foreach ($nav['tabs'] as $tab)
         @if ($tab['url'])
-            <a class="mnav-tab {{ $tab['active'] ? 'on' : '' }}" href="{{ $tab['url'] }}" @if ($tab['active']) aria-current="page" @endif>{!! $svg($tab['icon']) !!}{!! $badge($tab['badge'] ?? 0) !!}<span>{{ __($tab['label']) }}</span></a>
+            <a class="mnav-tab {{ $tab['active'] ? 'on' : '' }}" href="{{ $tab['url'] }}" @if ($tab['active']) aria-current="page" @endif>{!! $svg($tab['glyph']) !!}{!! $badge($tab['badge'] ?? 0) !!}<span>{{ __($tab['label']) }}</span></a>
         @else
-            <button type="button" class="mnav-tab" data-mnav-open aria-haspopup="dialog" aria-controls="mnavSheet" aria-expanded="false">{!! $svg($tab['icon']) !!}{!! $badge($tab['badge'] ?? 0) !!}<span>{{ __($tab['label']) }}</span></button>
+            <button type="button" class="mnav-tab" data-mnav-open aria-haspopup="dialog" aria-controls="mnavSheet" aria-expanded="false">{!! $svg($tab['glyph']) !!}{!! $badge($tab['badge'] ?? 0) !!}<span>{{ __($tab['label']) }}</span></button>
         @endif
     @endforeach
 </nav>
@@ -62,9 +62,9 @@
                     @foreach ($entries as $entry)
                         <li>
                             @if (! empty($entry['form']))
-                                <button type="submit" form="{{ $entry['form'] }}" class="mnav-link">{!! $svg($entry['icon']) !!}<span>{{ __($entry['label']) }}</span></button>
+                                <button type="submit" form="{{ $entry['form'] }}" class="mnav-link">{!! $svg($entry['glyph']) !!}<span>{{ __($entry['label']) }}</span></button>
                             @else
-                                <a class="mnav-link {{ ! empty($entry['primary']) ? 'primary' : '' }} {{ ! empty($entry['active']) ? 'on' : '' }}" href="{{ $entry['url'] }}" @if (! empty($entry['active'])) aria-current="page" @endif>{!! $svg($entry['icon']) !!}<span>{{ __($entry['label']) }}</span>{!! $badge($entry['badge'] ?? 0) !!}</a>
+                                <a class="mnav-link {{ ! empty($entry['primary']) ? 'primary' : '' }} {{ ! empty($entry['active']) ? 'on' : '' }}" href="{{ $entry['url'] }}" @if (! empty($entry['active'])) aria-current="page" @endif>{!! $svg($entry['glyph']) !!}<span>{{ __($entry['label']) }}</span>{!! $badge($entry['badge'] ?? 0) !!}</a>
                             @endif
                         </li>
                     @endforeach

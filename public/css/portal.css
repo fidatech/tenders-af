@@ -177,3 +177,10 @@ html.portal .form-actions-sticky, html.portal .sticky-actions { border-radius: 1
     .pt-band-in { padding-top: 14px; padding-bottom: 18px; }
     .pt-body { margin-top: 16px; }
 }
+
+/* the colour choice of the company page (Company profile > Your public page) */
+.accent-pick { position: relative; cursor: pointer; }
+.accent-pick input { position: absolute; opacity: 0; }
+.accent-pick span { display: block; width: 38px; height: 38px; border-radius: 12px; border: 3px solid #fff; box-shadow: 0 0 0 1px #D5DCD8; }
+.accent-pick input:checked + span { box-shadow: 0 0 0 3px #0E1512; }
+.accent-pick input:focus-visible + span { outline: 3px solid #5FE0A0; outline-offset: 2px; }

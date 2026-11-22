@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Mail\ContactMessage;
 use App\Models\Admin;
 use App\Models\Company;
+use App\Models\CompanyProject;
+use App\Models\CompanyProjectFile;
 use App\Models\Industry;
 use App\Models\Plan;
 use App\Models\PlatformAccount;
@@ -48,6 +50,15 @@ class SiteController extends Controller
         'site.privacy' => ['/privacy', 'Privacy'],
         'site.terms' => ['/terms', 'Terms'],
     ];
+
+    /**
+     * The business types the directory can be filtered by. A type tied to a module (manufacturers;
+     * importers, exporters and wholesalers) is offered only while that module is on.
+     */
+    public static function directoryTypes(): array
+    {
+        return array_filter(Company::BUSINESS_TYPES, fn (string $key) => ! isset(Company::TYPE_MODULES[$key]) || module_on(Company::TYPE_MODULES[$key]), ARRAY_FILTER_USE_KEY);
+    }
 
     /** The fixed pages of the site, without those of modules that are switched off. */
     public static function pages(): array
@@ -204,11 +215,13 @@ class SiteController extends Controller
     public function companies(Request $request): View
     {
         $term = trim((string) $request->query('q', ''));
+        $types = self::directoryTypes();
         $rows = Company::listed()
             ->when($term !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner->where('name', 'like', "%$term%")->orWhere('about', 'like', "%$term%")))
             ->when($request->query('industry'), fn (Builder $q, $id) => $q->whereHas('industries', fn (Builder $i) => $i->whereKey($id)))
             ->when($request->query('province'), fn (Builder $q, $id) => $q->where('province_id', $id))
             ->when($request->boolean('verified'), fn (Builder $q) => $q->where('verify_status', 'verified'))
+            ->when(array_key_exists((string) $request->query('type'), $types), fn (Builder $q) => $q->whereJsonContains('business_types', (string) $request->query('type')))
             ->with('province', 'industries')
             ->orderByRaw("case when verify_status = 'verified' then 0 else 1 end")->orderBy('name')
             ->paginate(24)->withQueryString();
@@ -220,31 +233,74 @@ class SiteController extends Controller
             'term' => $term,
             'industries' => Industry::options(),
             'provinceOptions' => Province::options(),
-            'noindex' => $request->hasAny(['q', 'industry', 'province', 'verified', 'page']),
+            'types' => $types,
+            'noindex' => $request->hasAny(['q', 'industry', 'province', 'verified', 'page', 'type']),
         ]);
     }
 
     public function company(string $slug): View
     {
-        $company = Company::listed()->with('province', 'industries', 'categories')->where('slug', $slug)->firstOrFail();
+        $company = Company::listed()->with('province', 'industries', 'categories', 'users:id,company_id,role')->where('slug', $slug)->firstOrFail();
         $place = $company->province?->name ?: $company->country;
+        $projects = module_on('portfolios')
+            ? CompanyProject::visible()->where('company_id', $company->id)->with('images', 'industry')->orderByDesc('is_featured')->orderBy('sort')->orderByDesc('completed_on')->orderByDesc('id')->limit(12)->get()
+            : collect();
+        $industryIds = $company->industries->pluck('id');
 
         return $this->page('site.company', [
             'title' => $company->name.($place ? ', '.$place : ''),
-            'description' => mb_substr($company->about ? preg_replace('/\s+/', ' ', $company->about) : $company->name.' is a '.mb_strtolower($company->kindLabel()).($place ? ' in '.$place : '').' registered on '.config('app.name').'.', 0, 300),
+            'description' => mb_substr((module_on('mini_websites') ? $company->tagline : null) ?: ($company->about ? preg_replace('/\s+/', ' ', $company->about) : $company->name.' is a '.mb_strtolower($company->kindLabel()).($place ? ' in '.$place : '').' registered on '.config('app.name').'.'), 0, 300),
             'company' => $company,
+            'mini' => module_on('mini_websites'),
+            'projects' => $projects,
+            'contact' => $company->contactFor(auth('web')->user()),
             // what this organisation posted itself: open ones first, then the newest results
             'products' => module_on('products') ? Product::live()->where('company_id', $company->id)->with('company', 'images', 'province')->sponsoredFirst()->limit(6)->get() : collect(),
             'posted' => Tender::visible()->where('company_id', $company->id)->with('industry', 'province')
                 ->orderByRaw("case when status = 'published' then 0 else 1 end")->orderByDesc('published_on')->orderByDesc('id')->limit(12)->get(),
+            'similar' => $industryIds->isEmpty() ? collect() : Company::listed()->whereKeyNot($company->id)
+                ->whereHas('industries', fn (Builder $q) => $q->whereIn('industries.id', $industryIds))
+                ->with('province', 'industries')->orderByRaw("case when verify_status = 'verified' then 0 else 1 end")->orderByDesc('id')->limit(3)->get(),
             'crumbs' => [['Companies', route('site.companies')], [$company->name, null]],
             // an empty profile is not offered to search engines until the company writes about itself
             'noindex' => blank($company->about),
         ]);
     }
 
-    /** The logo of a listed company. */
-    /* ------------------------------------------------------------ products for wholesale */
+    /** One project of a company's portfolio. */
+    public function project(string $slug, string $project): View
+    {
+        $company = Company::listed()->where('slug', $slug)->firstOrFail();
+        $row = CompanyProject::visible()->where('company_id', $company->id)->where('slug', $project)->with('images', 'industry')->firstOrFail();
+        CompanyProject::whereKey($row->id)->increment('views');
+
+        return $this->page('site.project', [
+            'title' => $row->title.' · '.$company->name,
+            'description' => mb_substr(preg_replace('/\s+/', ' ', (string) ($row->description ?: $row->scope ?: $row->title.' by '.$company->name)), 0, 300),
+            'company' => $company,
+            'project' => $row,
+            'others' => CompanyProject::visible()->where('company_id', $company->id)->whereKeyNot($row->id)->with('images')->orderByDesc('is_featured')->orderByDesc('id')->limit(3)->get(),
+            'crumbs' => [['Companies', route('site.companies')], [$company->name, route('site.companies.show', ['slug' => $company->slug])], [$row->title, null]],
+            'noindex' => blank($row->description) && blank($row->scope),
+        ]);
+    }
+
+    /** A picture of a published project. Evidence documents are never served here. */
+    public function projectImage(int $id): StreamedResponse
+    {
+        $file = CompanyProjectFile::where('kind', 'image')->findOrFail($id);
+        abort_unless(CompanyProject::visible()->whereKey($file->company_project_id)->exists() && Storage::disk('local')->exists($file->path), 404);
+
+        return Storage::disk('local')->response($file->path, null, ['Cache-Control' => 'public, max-age=86400', 'X-Content-Type-Options' => 'nosniff']);
+    }
+
+    public function cover(string $slug): StreamedResponse
+    {
+        $company = Company::listed()->where('slug', $slug)->firstOrFail();
+        abort_unless($company->cover_path && Storage::disk('local')->exists($company->cover_path), 404);
+
+        return Storage::disk('local')->response($company->cover_path, null, ['Cache-Control' => 'public, max-age=86400', 'X-Content-Type-Options' => 'nosniff']);
+    }
 
     public function products(Request $request): View
     {
