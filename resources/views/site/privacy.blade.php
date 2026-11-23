@@ -23,6 +23,9 @@
     <p>We send tender alerts by email, and by WhatsApp only if you switched it on. You can switch both off under Tender alerts in your account.</p>
     <h2>Cookies</h2>
     <p>The site uses one cookie to keep you signed in and one to protect its forms. It uses no advertising cookies.</p>
+
+    <h2>Visitor figures</h2>
+    <p>To count visitors, the site notes each page opened, the day, the kind of device, the website you came from, and the country and city found from your internet address. The address itself is not kept: it is turned into a code that changes every day and cannot be turned back. The place is looked up on our own server; nothing is sent to another company, and no cookie is used for it. Browsers that send "Do Not Track" or "Global Privacy Control" are not counted. These records are deleted after 13 months. The totals by country and larger city appear on the <a href="{{ route('site.statistics') }}">statistics page</a>.</p>
     <h2>Deleting your account</h2>
     <p>Write to us from the <a href="{{ route('site.contact') }}">contact page</a> and we delete your company and its users. Records of payments are kept as long as the law requires.</p>
 </div>

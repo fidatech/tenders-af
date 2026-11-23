@@ -46,6 +46,9 @@ if [ -n "${ADMIN_EMAIL:-}" ] && [ -n "${ADMIN_PASSWORD:-}" ]; then
     "$PHP" artisan app:create-admin --sync --name="${ADMIN_NAME:-Administrator}" --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD" --no-interaction
 fi
 
+echo "== Location database for the visitor figures (in the background; it skips when the file is fresh)"
+nohup "$PHP" artisan geoip:update >> storage/logs/geoip.log 2>&1 &
+
 echo "== Caches"
 "$PHP" artisan storage:link --force >/dev/null 2>&1 || true
 "$PHP" artisan optimize:clear >/dev/null
