@@ -9,8 +9,8 @@ use Throwable;
 
 /**
  * The country and city of an IP address, looked up on the server in a local database file
- * (config/geoip.php). Without the file or the reader library every visit is counted with an
- * unknown place; nothing breaks.
+ * (config/geoip.php), read with App\Support\MmdbReader (or the maxmind-db/reader library when it
+ * is installed). Without the file every visit is counted with an unknown place; nothing breaks.
  */
 class GeoIp
 {
@@ -91,7 +91,9 @@ class GeoIp
         if (self::$reader === null) {
             $file = (string) config('geoip.database');
             try {
-                self::$reader = class_exists(Reader::class) && is_file($file) ? new Reader($file) : false;
+                // the maxmind-db/reader library when it is installed, otherwise the reader built into the app
+                self::$reader = ! is_file($file) ? false
+                    : (class_exists(Reader::class) ? new Reader($file) : new MmdbReader($file));
             } catch (Throwable) {
                 self::$reader = false;
             }

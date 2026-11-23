@@ -46,9 +46,6 @@ if [ -n "${ADMIN_EMAIL:-}" ] && [ -n "${ADMIN_PASSWORD:-}" ]; then
     "$PHP" artisan app:create-admin --sync --name="${ADMIN_NAME:-Administrator}" --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD" --no-interaction
 fi
 
-echo "== Location database for the visitor figures (in the background; it skips when the file is fresh)"
-nohup "$PHP" artisan geoip:update >> storage/logs/geoip.log 2>&1 &
-
 echo "== Caches"
 "$PHP" artisan storage:link --force >/dev/null 2>&1 || true
 "$PHP" artisan optimize:clear >/dev/null
@@ -108,3 +105,12 @@ HTACCESS
 
 touch storage/app/.installed
 echo "== Deployed $(date '+%Y-%m-%d %H:%M:%S')"
+
+# The location database of the visitor figures, after the site is back up so nobody waits for it.
+# It is skipped while the file is less than a month old; a failure never fails the deployment.
+"$PHP" artisan up >/dev/null 2>&1 || true
+echo "== Location database for the visitor figures"
+if command -v timeout >/dev/null 2>&1; then timeout 300 "$PHP" artisan geoip:update 2>&1 | sed 's/^/   /' || true
+else "$PHP" artisan geoip:update 2>&1 | sed 's/^/   /' || true; fi
+GEO="storage/app/geoip/dbip-city-lite.mmdb"
+if [ -f "$GEO" ]; then echo "   file: $(du -h "$GEO" | cut -f1), $(date -r "$GEO" '+%Y-%m-%d')"; else echo "!! no location database: visitors are counted with an unknown place"; fi
