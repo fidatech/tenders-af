@@ -57,3 +57,4 @@ nt-company nt-verification nt-tender nt-product nt-payment nt-message nt-info
 #s-industry #s-window-maximize #s-address-card #s-folder-open #s-file-pdf #s-briefcase #s-images #s-star #s-location-dot #s-calendar #s-user-tie #s-circle-question
 #s-table-columns #s-download #s-pen #s-star #s-folder-open #s-bookmark
 #s-comments #s-flag #s-paperclip #s-ban #s-lock
+#s-chart-line #s-triangle-exclamation

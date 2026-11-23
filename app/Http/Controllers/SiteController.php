@@ -19,6 +19,7 @@ use App\Models\SupplierCollectionItem;
 use App\Models\Tender;
 use App\Support\Modules;
 use App\Support\Platform;
+use App\Support\Statistics;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -420,43 +421,66 @@ class SiteController extends Controller
     /** Real numbers about the site, for visitors, journalists and AI assistants. Small figures stay hidden until they grow. */
     public function statistics(): View
     {
-        $min = (int) platform('stats_min');
-        $products = module_on('products');
-        // [label, number, explanation]
-        $figures = [
-            ['Tenders published', Tender::visible()->count(), 'Every tender published on the site so far, open or closed.'],
-            ['Open tenders', Tender::open()->count(), 'Tenders whose deadline has not passed.'],
-            ['Closing this week', Tender::closingWithin(7)->count(), 'Open tenders whose deadline is within seven days.'],
-            ['Tenders awarded', Tender::where('status', Tender::AWARDED)->count(), 'Tenders whose winner was published.'],
-            ['Buyers', Tender::visible()->distinct()->count('buyer_name'), 'Organisations whose tenders are on the site.'],
-            ['Registered companies', Company::where('status', '!=', Company::SUSPENDED)->count(), 'Companies and organisations with an account.'],
-            ['Verified companies', Company::listed()->where('verify_status', 'verified')->count(), 'Companies whose business licence we checked.'],
-            $products ? ['Products listed', Product::live()->count(), 'Wholesale products from factories and producers.'] : null,
-        ];
-        $figures = array_values(array_filter($figures, fn ($figure) => $figure && $figure[1] >= max(1, $min)));
-
         $open = $this->provinceCounts();
-        $all = Tender::visible()->whereNotNull('province_id')->selectRaw('province_id, count(*) as n')->groupBy('province_id')->pluck('n', 'province_id');
-        $companies = Company::listed()->whereNotNull('province_id')->selectRaw('province_id, count(*) as n')->groupBy('province_id')->pluck('n', 'province_id');
-        $made = $products ? Product::live()->whereNotNull('province_id')->selectRaw('province_id, count(*) as n')->groupBy('province_id')->pluck('n', 'province_id') : collect();
+        $tenders = Tender::visible()->count();
 
         return $this->page('site.statistics', [
-            'title' => 'Statistics: tenders and companies in Afghanistan, by province and sector',
-            'description' => 'Live figures from '.config('app.name').': tenders published and open, buyers, registered and verified companies, by province and by sector.',
-            'figures' => $figures,
-            'showTables' => Tender::visible()->count() >= max(1, $min),
-            'withProducts' => $products,
+            'title' => 'Statistics: tenders, companies and visitors of Tenders.af',
+            'description' => 'Live figures from '.config('app.name').': tenders published and open by month, sector, province and buyer; registered and verified companies; visitors by country. Counted, not estimated.',
+            'headline' => Statistics::headline(),
+            'months' => Statistics::tendersByMonth(),
+            'sectors' => Statistics::sectors(),
+            'provinces' => Statistics::provinces($open),
             'map' => $this->map($open),
-            'provinces' => Province::orderBy('name')->get()->map(fn (Province $p) => [
-                'name' => $p->name, 'slug' => $p->slug, 'open' => (int) ($open[$p->id] ?? 0), 'all' => (int) ($all[$p->id] ?? 0),
-                'companies' => (int) ($companies[$p->id] ?? 0), 'products' => (int) ($made[$p->id] ?? 0),
-            ])->sortByDesc('all')->values(),
-            'sectors' => Industry::where('is_active', true)
-                ->withCount(['tenders as all_count' => fn (Builder $q) => $q->visible(), 'tenders as open_count' => fn (Builder $q) => $q->open()])
-                ->orderByDesc('all_count')->orderBy('name')->get(),
+            'hasTenders' => $tenders > 0,
+            'buyers' => Statistics::topBuyers(),
+            'buyerKinds' => Statistics::byKind('buyer_type', 'tenders.buyer_types'),
+            'tenderKinds' => Statistics::byKind('type', 'tenders.types'),
+            'deadlines' => Statistics::deadlines(),
+            'companies' => Statistics::companies(),
+            'visitors' => Statistics::visitors(30),
+            'withProducts' => module_on('products'),
+            'coverage' => ['provinces' => Province::count(), 'sectors' => Industry::where('is_active', true)->count()],
             'updated' => fmt_datetime(Tender::now()),
             'crumbs' => [['Statistics', null]],
         ]);
+    }
+
+    /** The figures of the statistics page as a CSV file, to quote or reuse (please name the source). */
+    public function statisticsCsv(): StreamedResponse
+    {
+        $rows = [['Section', 'Item', 'Value']];
+        foreach (Statistics::headline() as [$label, $number]) {
+            $rows[] = ['Headline', $label, $number];
+        }
+        foreach (Statistics::tendersByMonth() as [$month, $n]) {
+            $rows[] = ['Tenders published by month', $month, $n];
+        }
+        foreach (Statistics::sectors() as $sector) {
+            $rows[] = ['Tenders by sector (all)', $sector->name, $sector->all_count];
+            $rows[] = ['Tenders by sector (open)', $sector->name, $sector->open_count];
+        }
+        foreach (Statistics::provinces($this->provinceCounts()) as $p) {
+            $rows[] = ['Tenders by province (all)', $p['name'], $p['all']];
+            $rows[] = ['Companies by province', $p['name'], $p['companies']];
+        }
+        foreach (Statistics::topBuyers() as $buyer => $n) {
+            $rows[] = ['Top buyers', $buyer, $n];
+        }
+        $visitors = Statistics::visitors(30);
+        foreach ($visitors['countries'] ?? [] as $country) {
+            $rows[] = ['Visitors by country, last 30 days', $country['name'], $country['visitors']];
+        }
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Source: '.config('app.name').' statistics, '.url('/statistics').', counted '.Tender::now()->format('Y-m-d H:i').' Kabul time']);
+            foreach ($rows as $row) {
+                fputcsv($out, array_map(fn ($v) => is_string($v) && preg_match('/^[=+\-@]/', $v) ? "'".$v : $v, $row));
+            }
+            fclose($out);
+        }, 'tenders-af-statistics-'.Tender::now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8', 'X-Robots-Tag' => 'noindex']);
     }
 
     public function logo(string $slug): StreamedResponse

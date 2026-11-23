@@ -25,7 +25,7 @@ class Platform
         'sponsor_week_usd' => '25',
         'sponsor_month_usd' => '75',
         // public statistics: a figure smaller than this is not shown yet
-        'stats_min' => '10',
+        'stats_min' => '1', // statistics: a figure is shown from this number on (1: every figure but zero)
         'google_site_verification' => 'J8acjyDxEnvrlerggEuM0d1dpHi1GSlmrVjdZ4YoNU4',
         'bing_site_verification' => '',
         'billing_email' => '',

@@ -15,3 +15,7 @@ Schedule::command('tenders:alerts')->everyTenMinutes()->withoutOverlapping();
 Schedule::command('tenders:digest')->weeklyOn(6, '08:00')->timezone('Asia/Kabul')->withoutOverlapping();
 
 Schedule::command('tenders:lifecycle')->hourly()->withoutOverlapping();
+
+// the visitor figures: the location database is renewed every month, old visits are deleted
+Schedule::command('geoip:update')->monthlyOn(5, '03:20')->timezone('Asia/Kabul')->withoutOverlapping();
+Schedule::command('visits:prune')->dailyAt('03:40')->timezone('Asia/Kabul')->withoutOverlapping();

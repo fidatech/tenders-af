@@ -117,9 +117,11 @@ class ProductTest extends TestCase
     public function test_the_statistics_page_hides_small_numbers_and_shows_real_ones(): void
     {
         $this->tender();
-        $this->get('/statistics')->assertOk()->assertSee('The numbers are still growing')->assertDontSee('Open tenders by province');
-
-        Platform::set(['stats_min' => '1']);
+        // every figure above zero is shown by default
         $this->get('/statistics')->assertOk()->assertSee('Tenders published')->assertSee('Open tenders by province')->assertSee('Herat')->assertSee('How we count');
+
+        // an administrator may still hide headline figures below a minimum
+        Platform::set(['stats_min' => '10']);
+        $this->get('/statistics')->assertOk()->assertDontSee('<span>Tenders published</span>', false)->assertSee('Open tenders by province');
     }
 }

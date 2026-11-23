@@ -26,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*') ? route('admin.login') : route('login'));
         $middleware->redirectUsersTo(fn (Request $request) => $request->is('admin', 'admin/*') ? route('admin.dashboard') : route('dashboard'));
 
-        $middleware->web(append: [StripNumberCommas::class, EnsureUserIsActive::class]);
+        $middleware->web(append: [StripNumberCommas::class, EnsureUserIsActive::class, \App\Http\Middleware\CountVisit::class]);
         // tender.af and the www addresses lead to tenders.af
         $middleware->prepend(CanonicalHost::class);
         $middleware->prepend(CompressResponse::class);

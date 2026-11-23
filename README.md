@@ -254,3 +254,30 @@ from a copy.
   plan. Either side can close the thread, block the other company or report it. Administrators with the "messages"
   permission see a thread only after it is reported (**Admin > Reported enquiries**), and opening it is logged.
   A company starts at most 20 enquiries a day.
+
+## Statistics and visitors
+
+`/statistics` shows tenders by month, sector, province, buyer, kind and deadline; companies by kind of business
+and verification; and visitors of the last 30 days by day, country, city and device. Every figure is counted;
+a section appears once it has data and zeros are left out (the minimum is **Admin > Settings > stats_min**, 1 by
+default). The figures can be downloaded as CSV from `/statistics.csv`. **Admin > Platform > Visitors** shows the
+full detail (every city, pages opened, referring websites) for 7, 30, 90 or 365 days.
+
+Visitors are counted by `App\Http\Middleware\CountVisit` on public pages only, after the page is sent. No cookie is
+set and no IP address is stored: a visitor is a daily code that cannot be turned back into the address. Robots,
+prefetches, signed-in administrators and browsers sending Do Not Track or Global Privacy Control are skipped.
+Records older than 13 months are deleted every night (`visits:prune`). Cities with fewer than 3 visitors are left
+off the public page.
+
+### Visitor locations (country and city)
+
+The place is looked up on the server, in the free DB-IP "IP to City Lite" database (CC BY 4.0; the statistics page
+shows the required "IP Geolocation by DB-IP" line). Two parts are needed:
+
+1. The reader library, once: `composer require maxmind-db/reader` (commit `composer.json` and `composer.lock`).
+2. The database file: `php artisan geoip:update` downloads it to `storage/app/geoip/`. The deployment runs it in the
+   background when the file is missing, and the scheduler renews it on the 5th of every month.
+
+Until both are there, visits are still counted, with the place "Unknown". Behind Cloudflare, set
+`GEOIP_TRUST_CLOUDFLARE=true` to use its country header as well. Country names come from PHP's `intl` extension,
+with `config/countries.php` as a fallback.
