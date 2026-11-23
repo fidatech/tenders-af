@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /*
@@ -12,6 +13,14 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // The first run of this migration on MySQL stopped half way (an index name over MySQL's 64-character
+        // limit) after creating these two tables, before anyone could use them. Remove what it left so it can
+        // run again. Nothing else ever writes to these tables before this migration has finished.
+        if (! DB::table('migrations')->where('migration', '2026_11_22_000003_create_supplier_collections')->exists()) {
+            Schema::dropIfExists('supplier_collection_items');
+            Schema::dropIfExists('supplier_collections');
+        }
+
         Schema::create('supplier_collections', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->cascadeOnDelete(); // the company that keeps the list
@@ -33,7 +42,7 @@ return new class extends Migration
             $table->text('note')->nullable(); // private to the company that saved it
             $table->json('tags')->nullable();
             $table->timestamps();
-            $table->unique(['supplier_collection_id', 'company_id']);
+            $table->unique(['supplier_collection_id', 'company_id'], 'sci_collection_company_unique'); // MySQL allows 64 characters
             $table->index('company_id');
         });
     }
