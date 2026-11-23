@@ -272,12 +272,12 @@ off the public page.
 ### Visitor locations (country and city)
 
 The place is looked up on the server, in the free DB-IP "IP to City Lite" database (CC BY 4.0; the statistics page
-shows the required "IP Geolocation by DB-IP" line). Two parts are needed:
+shows the required "IP Geolocation by DB-IP" line). The file is read by `App\Support\MmdbReader`, written to the
+open MaxMind DB format, so no extra package is needed (if `maxmind-db/reader` is installed, it is used instead).
 
-1. The reader library, once: `composer require maxmind-db/reader` (commit `composer.json` and `composer.lock`).
-2. The database file: `php artisan geoip:update` downloads it to `storage/app/geoip/`. The deployment runs it in the
-   background when the file is missing, and the scheduler renews it on the 5th of every month.
-
-Until both are there, visits are still counted, with the place "Unknown". Behind Cloudflare, set
-`GEOIP_TRUST_CLOUDFLARE=true` to use its country header as well. Country names come from PHP's `intl` extension,
-with `config/countries.php` as a fallback.
+`php artisan geoip:update` downloads the file to `storage/app/geoip/`. Every deployment runs it after the site is
+back up (it skips a file less than a month old) and prints the result under "Location database" in the deploy log;
+the scheduler renews it on the 5th of every month. Without the file, visits are still counted, with the place
+"Unknown". Visits counted before the file was there stay "Unknown": no IP address is kept to look them up later.
+Behind Cloudflare, `GEOIP_TRUST_CLOUDFLARE=true` adds its country header as a fallback. Country names come from
+PHP's `intl` extension, with `config/countries.php` as a fallback.
