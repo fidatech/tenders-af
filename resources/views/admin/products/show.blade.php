@@ -17,7 +17,7 @@
 
 @section('content')
 <x-page-header :title="$product->name" icon="boxes-stacked" :crumbs="[[__('Products'), route('admin.products.index')], [$product->statusLabel()]]">
-    @if ($product->status === 'published' && \App\Support\Platform::bool('products_enabled'))
+    @if ($product->status === 'published' && module_on('products'))
         <a class="btn btn-outline-soft" href="{{ route('site.products.show', ['slug' => $product->slug]) }}" target="_blank" rel="noopener"><x-icon name="eye" class="me-1" /> {{ __('See on the site') }}</a>
     @endif
 </x-page-header>

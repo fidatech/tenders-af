@@ -9,13 +9,15 @@ class AdminAccess
 {
     public const PERMISSIONS = [
         'messages' => 'Contact companies and bidders',
-        'verification' => 'Review company licences',
+        'verification' => 'Review company licences and project evidence',
         'office' => 'Submit office collections, expenses and handovers',
         'procurement' => 'Manage tenders, products and categories',
     ];
 
     private const OWN = ['admin.logout', 'admin.profile.*'];
-    private const OWNER_ONLY = ['admin.admins.*', 'admin.settings.*', 'admin.logs.*', 'admin.companies.destroy', 'admin.office.review', 'admin.office.approvals'];
+
+    private const OWNER_ONLY = ['admin.admins.*', 'admin.settings.*', 'admin.branding.*', 'admin.modules.update', 'admin.logs.*', 'admin.companies.destroy', 'admin.office.review', 'admin.office.approvals'];
+
     private const FINANCE = ['admin.accounts.*', 'admin.expenses.*', 'admin.plans.*', 'admin.subscriptions.*', 'admin.products.payments.*'];
 
     public static function allows(Admin $admin, string $name, bool $readOnly = true): bool
@@ -47,8 +49,8 @@ class AdminAccess
 
         foreach ($permissions as $permission) {
             $routes = match ($permission) {
-                'messages' => ['admin.messages.*'],
-                'verification' => ['admin.verification.*'],
+                'messages' => ['admin.messages.*', 'admin.enquiries.*'],
+                'verification' => ['admin.verification.*', 'admin.projects.*'],
                 'office' => ['admin.office.*'],
                 'procurement' => ['admin.tenders.*', 'admin.products.index', 'admin.products.show', 'admin.products.approve', 'admin.products.reject', 'admin.products.hide', 'admin.products.destroy', 'admin.industries.*', 'admin.categories.*'],
                 default => [],

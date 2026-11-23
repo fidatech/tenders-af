@@ -160,3 +160,27 @@ html.portal .form-actions-sticky, html.portal .sticky-actions { border-radius: 1
     html.portal .card-body { padding: 16px; }
     html.portal .card-header { padding: 14px 16px; }
 }
+
+/* the brand: an uploaded logo (Admin > Branding & Logo) or the text brand */
+.pt-brand .brand-img { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.pt-brand .brand-img picture { display: flex; }
+.pt-brand .brand-img img { display: block; height: var(--brand-h, 40px); width: auto; max-width: min(220px, 46vw); object-fit: contain; }
+.pt-brand .brand-icon-img { background: none !important; overflow: hidden; }
+.pt-brand .brand-icon-img img { width: 100%; height: 100%; object-fit: contain; }
+@media (max-width: 640px) { .pt-brand .brand-img img { height: var(--brand-h-m, 30px); } }
+
+/* phones: the bottom bar and its menu sheet (css/mobile-nav.css) replace the burger and the row of account links */
+@media (max-width: 767.98px) {
+    .pt-burger, .pt-nav, .pt-side { display: none !important; }
+    .pt-top-in { flex-wrap: nowrap; min-height: 56px; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+    .pt-brand { min-width: 0; font-size: 19px; }
+    .pt-band-in { padding-top: 14px; padding-bottom: 18px; }
+    .pt-body { margin-top: 16px; }
+}
+
+/* the colour choice of the company page (Company profile > Your public page) */
+.accent-pick { position: relative; cursor: pointer; }
+.accent-pick input { position: absolute; opacity: 0; }
+.accent-pick span { display: block; width: 38px; height: 38px; border-radius: 12px; border: 3px solid #fff; box-shadow: 0 0 0 1px #D5DCD8; }
+.accent-pick input:checked + span { box-shadow: 0 0 0 3px #0E1512; }
+.accent-pick input:focus-visible + span { outline: 3px solid #5FE0A0; outline-offset: 2px; }

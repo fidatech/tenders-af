@@ -4,14 +4,20 @@ namespace App\Http\Controllers;
 
 use App\Mail\ContactMessage;
 use App\Models\Admin;
+use App\Models\AdminNotice;
 use App\Models\Company;
+use App\Models\CompanyProject;
+use App\Models\CompanyProjectFile;
 use App\Models\Industry;
 use App\Models\Plan;
 use App\Models\PlatformAccount;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Province;
+use App\Models\SupplierCollection;
+use App\Models\SupplierCollectionItem;
 use App\Models\Tender;
+use App\Support\Modules;
 use App\Support\Platform;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -49,6 +55,21 @@ class SiteController extends Controller
         'site.terms' => ['/terms', 'Terms'],
     ];
 
+    /**
+     * The business types the directory can be filtered by. A type tied to a module (manufacturers;
+     * importers, exporters and wholesalers) is offered only while that module is on.
+     */
+    public static function directoryTypes(): array
+    {
+        return array_filter(Company::BUSINESS_TYPES, fn (string $key) => ! isset(Company::TYPE_MODULES[$key]) || module_on(Company::TYPE_MODULES[$key]), ARRAY_FILTER_USE_KEY);
+    }
+
+    /** The fixed pages of the site, without those of modules that are switched off. */
+    public static function pages(): array
+    {
+        return array_filter(self::PAGES, fn (string $name) => $name !== 'site.companies' || module_on('directory'), ARRAY_FILTER_USE_KEY);
+    }
+
     public function home(): View
     {
         $counts = $this->provinceCounts();
@@ -69,7 +90,7 @@ class SiteController extends Controller
             'map' => $this->map($counts),
             'top' => Province::whereIn('id', array_keys($counts))->get()->sortByDesc(fn (Province $p) => $counts[$p->id])->take(4)->values()
                 ->map(fn (Province $p) => ['name' => $p->name, 'slug' => $p->slug, 'count' => $counts[$p->id]]),
-            'sponsored' => Platform::bool('products_enabled') ? Product::live()->sponsored()->with('company', 'images', 'province')->inRandomOrder()->limit(4)->get() : collect(),
+            'sponsored' => module_on('products') ? Product::live()->sponsored()->with('company', 'images', 'province')->inRandomOrder()->limit(4)->get() : collect(),
             'featured' => Company::listed()->where('verify_status', 'verified')->with('province', 'industries')->orderByDesc('verified_at')->limit(4)->get(),
             'faqSchema' => array_slice($this->faqs(), 0, 4),
         ]);
@@ -198,11 +219,13 @@ class SiteController extends Controller
     public function companies(Request $request): View
     {
         $term = trim((string) $request->query('q', ''));
+        $types = self::directoryTypes();
         $rows = Company::listed()
             ->when($term !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner->where('name', 'like', "%$term%")->orWhere('about', 'like', "%$term%")))
             ->when($request->query('industry'), fn (Builder $q, $id) => $q->whereHas('industries', fn (Builder $i) => $i->whereKey($id)))
             ->when($request->query('province'), fn (Builder $q, $id) => $q->where('province_id', $id))
             ->when($request->boolean('verified'), fn (Builder $q) => $q->where('verify_status', 'verified'))
+            ->when(array_key_exists((string) $request->query('type'), $types), fn (Builder $q) => $q->whereJsonContains('business_types', (string) $request->query('type')))
             ->with('province', 'industries')
             ->orderByRaw("case when verify_status = 'verified' then 0 else 1 end")->orderBy('name')
             ->paginate(24)->withQueryString();
@@ -214,33 +237,104 @@ class SiteController extends Controller
             'term' => $term,
             'industries' => Industry::options(),
             'provinceOptions' => Province::options(),
-            'noindex' => $request->hasAny(['q', 'industry', 'province', 'verified', 'page']),
+            'types' => $types,
+            'noindex' => $request->hasAny(['q', 'industry', 'province', 'verified', 'page', 'type']),
         ]);
     }
 
     public function company(string $slug): View
     {
-        $company = Company::listed()->with('province', 'industries', 'categories')->where('slug', $slug)->firstOrFail();
+        $company = Company::listed()->with('province', 'industries', 'categories', 'users:id,company_id,role')->where('slug', $slug)->firstOrFail();
         $place = $company->province?->name ?: $company->country;
+        $projects = module_on('portfolios')
+            ? CompanyProject::visible()->where('company_id', $company->id)->with('images', 'industry')->orderByDesc('is_featured')->orderBy('sort')->orderByDesc('completed_on')->orderByDesc('id')->limit(12)->get()
+            : collect();
+        $industryIds = $company->industries->pluck('id');
 
         return $this->page('site.company', [
             'title' => $company->name.($place ? ', '.$place : ''),
-            'description' => mb_substr($company->about ? preg_replace('/\s+/', ' ', $company->about) : $company->name.' is a '.mb_strtolower($company->kindLabel()).($place ? ' in '.$place : '').' registered on '.config('app.name').'.', 0, 300),
+            'description' => mb_substr((module_on('mini_websites') ? $company->tagline : null) ?: ($company->about ? preg_replace('/\s+/', ' ', $company->about) : $company->name.' is a '.mb_strtolower($company->kindLabel()).($place ? ' in '.$place : '').' registered on '.config('app.name').'.'), 0, 300),
             'company' => $company,
+            'mini' => module_on('mini_websites'),
+            'projects' => $projects,
+            'contact' => $company->contactFor(auth('web')->user()),
+            'save' => $this->saveTargets($company),
+            // the enquiry form: null (module off), 'guest', 'own', 'paid' (the plan does not allow it) or 'yes'
+            'enquiry' => ! module_on('enquiries') ? null : (! auth('web')->check() ? 'guest' : (auth('web')->user()->company_id === $company->id ? 'own'
+                : (Modules::allows('enquiries', auth('web')->user()->company) ? 'yes' : 'paid'))),
             // what this organisation posted itself: open ones first, then the newest results
-            'products' => Platform::bool('products_enabled') ? Product::live()->where('company_id', $company->id)->with('company', 'images', 'province')->sponsoredFirst()->limit(6)->get() : collect(),
+            'products' => module_on('products') ? Product::live()->where('company_id', $company->id)->with('company', 'images', 'province')->sponsoredFirst()->limit(6)->get() : collect(),
             'posted' => Tender::visible()->where('company_id', $company->id)->with('industry', 'province')
                 ->orderByRaw("case when status = 'published' then 0 else 1 end")->orderByDesc('published_on')->orderByDesc('id')->limit(12)->get(),
+            'similar' => $industryIds->isEmpty() ? collect() : Company::listed()->whereKeyNot($company->id)
+                ->whereHas('industries', fn (Builder $q) => $q->whereIn('industries.id', $industryIds))
+                ->with('province', 'industries')->orderByRaw("case when verify_status = 'verified' then 0 else 1 end")->orderByDesc('id')->limit(3)->get(),
             'crumbs' => [['Companies', route('site.companies')], [$company->name, null]],
+            // an empty profile is not offered to search engines until the company writes about itself
+            'noindex' => blank($company->about),
         ]);
     }
 
-    /** The logo of a listed company. */
-    /* ------------------------------------------------------------ products for wholesale */
+    /**
+     * The "Save" control of a company page: null when it is not offered (module off, a visitor, the company itself),
+     * otherwise whether the viewer may save, the lists they may save into and where it is saved already.
+     */
+    private function saveTargets(Company $company): ?array
+    {
+        $user = auth('web')->user();
+        if (! module_on('collections') || ! $user || $user->company_id === $company->id) {
+            return null;
+        }
+        if (! Modules::allows('collections', $user->company)) {
+            return ['allowed' => false];
+        }
+        $lists = SupplierCollection::visibleTo($user)->orderByDesc('is_favourites')->orderBy('name')->get(['id', 'name', 'is_favourites']);
+
+        return [
+            'allowed' => true,
+            'lists' => $lists,
+            'savedIn' => SupplierCollectionItem::whereIn('supplier_collection_id', $lists->pluck('id'))->where('company_id', $company->id)->pluck('supplier_collection_id')->all(),
+        ];
+    }
+
+    /** One project of a company's portfolio. */
+    public function project(string $slug, string $project): View
+    {
+        $company = Company::listed()->where('slug', $slug)->firstOrFail();
+        $row = CompanyProject::visible()->where('company_id', $company->id)->where('slug', $project)->with('images', 'industry')->firstOrFail();
+        CompanyProject::whereKey($row->id)->increment('views');
+
+        return $this->page('site.project', [
+            'title' => $row->title.' · '.$company->name,
+            'description' => mb_substr(preg_replace('/\s+/', ' ', (string) ($row->description ?: $row->scope ?: $row->title.' by '.$company->name)), 0, 300),
+            'company' => $company,
+            'project' => $row,
+            'others' => CompanyProject::visible()->where('company_id', $company->id)->whereKeyNot($row->id)->with('images')->orderByDesc('is_featured')->orderByDesc('id')->limit(3)->get(),
+            'crumbs' => [['Companies', route('site.companies')], [$company->name, route('site.companies.show', ['slug' => $company->slug])], [$row->title, null]],
+            'noindex' => blank($row->description) && blank($row->scope),
+        ]);
+    }
+
+    /** A picture of a published project. Evidence documents are never served here. */
+    public function projectImage(int $id): StreamedResponse
+    {
+        $file = CompanyProjectFile::where('kind', 'image')->findOrFail($id);
+        abort_unless(CompanyProject::visible()->whereKey($file->company_project_id)->exists() && Storage::disk('local')->exists($file->path), 404);
+
+        return Storage::disk('local')->response($file->path, null, ['Cache-Control' => 'public, max-age=86400', 'X-Content-Type-Options' => 'nosniff']);
+    }
+
+    public function cover(string $slug): StreamedResponse
+    {
+        $company = Company::listed()->where('slug', $slug)->firstOrFail();
+        abort_unless($company->cover_path && Storage::disk('local')->exists($company->cover_path), 404);
+
+        return Storage::disk('local')->response($company->cover_path, null, ['Cache-Control' => 'public, max-age=86400', 'X-Content-Type-Options' => 'nosniff']);
+    }
 
     public function products(Request $request): View
     {
-        abort_unless(Platform::bool('products_enabled'), 404);
+        abort_unless(module_on('products'), 404);
         $term = trim((string) $request->query('q', ''));
         $rows = Product::live()
             ->when($term !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner->where('name', 'like', "%$term%")->orWhere('summary', 'like', "%$term%")))
@@ -262,7 +356,7 @@ class SiteController extends Controller
 
     public function product(string $slug): View
     {
-        abort_unless(Platform::bool('products_enabled'), 404);
+        abort_unless(module_on('products'), 404);
         $product = Product::live()->with('company.province', 'industry', 'province', 'images')->where('slug', $slug)->firstOrFail();
         $product->increment('views');
         $place = $product->province?->name ?: ($product->company->province?->name ?: 'Afghanistan');
@@ -284,7 +378,7 @@ class SiteController extends Controller
     /** A visitor presses "WhatsApp": the click is counted for the company, then WhatsApp opens. */
     public function productContact(string $slug): RedirectResponse
     {
-        abort_unless(Platform::bool('products_enabled'), 404);
+        abort_unless(module_on('products'), 404);
         $product = Product::live()->with('company')->where('slug', $slug)->firstOrFail();
         $number = preg_replace('/\D+/', '', (string) ($product->company->whatsapp ?: $product->company->phone));
         abort_if($number === '', 404);
@@ -317,7 +411,7 @@ class SiteController extends Controller
 
     private function maySee(Product $product): void
     {
-        $open = $product->isLive() && Platform::bool('products_enabled');
+        $open = $product->isLive() && module_on('products');
         abort_unless($open || auth('admin')->check() || auth('web')->user()?->company_id === $product->company_id, 404);
     }
 
@@ -327,7 +421,7 @@ class SiteController extends Controller
     public function statistics(): View
     {
         $min = (int) platform('stats_min');
-        $products = Platform::bool('products_enabled');
+        $products = module_on('products');
         // [label, number, explanation]
         $figures = [
             ['Tenders published', Tender::visible()->count(), 'Every tender published on the site so far, open or closed.'],
@@ -438,7 +532,7 @@ class SiteController extends Controller
                 }
             }
 
-            \App\Models\AdminNotice::messageToAll('Message from '.$data['name'], $data['message'], $data['email']);
+            AdminNotice::messageToAll('Message from '.$data['name'], $data['message'], $data['email']);
         }
 
         return redirect()->route('site.contact')->with('sent', true);
@@ -449,7 +543,7 @@ class SiteController extends Controller
     {
         $today = date('Y-m-d');
         $urls = [];
-        foreach (self::PAGES as $name => [$path]) {
+        foreach (self::pages() as $name => [$path]) {
             $urls[] = [url($path), $today, $path === '/' ? '1.0' : (in_array($name, ['site.privacy', 'site.terms'], true) ? '0.3' : '0.8')];
         }
         try {
@@ -462,14 +556,18 @@ class SiteController extends Controller
             foreach (Tender::whereIn('status', [Tender::PUBLISHED, Tender::AWARDED])->orderByDesc('id')->limit(20000)->get(['slug', 'updated_at']) as $tender) {
                 $urls[] = [route('site.tenders.show', ['slug' => $tender->slug]), $tender->updated_at?->toDateString() ?? $today, '0.6'];
             }
-            if (Platform::bool('products_enabled')) {
+            if (module_on('products')) {
                 $urls[] = [route('site.products'), $today, '0.8'];
                 foreach (Product::live()->orderByDesc('id')->limit(20000)->get(['slug', 'updated_at']) as $product) {
                     $urls[] = [route('site.products.show', ['slug' => $product->slug]), $product->updated_at?->toDateString() ?? $today, '0.6'];
                 }
             }
-            foreach (Company::listed()->orderByDesc('id')->limit(20000)->get(['slug', 'updated_at']) as $company) {
-                $urls[] = [route('site.companies.show', ['slug' => $company->slug]), $company->updated_at?->toDateString() ?? $today, '0.5'];
+            // company pages, while the directory is on; a profile with nothing written about the company is
+            // too thin to offer to search engines (it is also marked noindex on its page)
+            if (module_on('directory')) {
+                foreach (Company::listed()->whereNotNull('about')->where('about', '!=', '')->orderByDesc('id')->limit(20000)->get(['slug', 'updated_at']) as $company) {
+                    $urls[] = [route('site.companies.show', ['slug' => $company->slug]), $company->updated_at?->toDateString() ?? $today, '0.5'];
+                }
             }
         } catch (Throwable) {
             // before the database is set up the fixed pages are still listed
@@ -535,7 +633,7 @@ class SiteController extends Controller
             $text .= "### $question\n\n$answer\n\n";
         }
         $text .= "## Pages\n\n";
-        foreach (self::PAGES as [$path, $title]) {
+        foreach (self::pages() as [$path, $title]) {
             $text .= "- [$title](".url($path).")\n";
         }
 

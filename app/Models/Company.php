@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Casts\Day;
+use App\Support\Modules;
+use App\Support\Platform;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,12 +37,56 @@ class Company extends Model
 
     public const VERIFY = ['none' => 'Not verified', 'pending' => 'Waiting for review', 'verified' => 'Verified', 'rejected' => 'Not accepted'];
 
+    /** What a company does in trade. A company may tick several. Shown on its page and used by the directory's filters. */
+    public const BUSINESS_TYPES = [
+        'manufacturer' => 'Manufacturer',
+        'importer' => 'Importer',
+        'exporter' => 'Exporter',
+        'wholesaler' => 'Wholesaler',
+        'distributor' => 'Distributor',
+        'retailer' => 'Retailer',
+        'contractor' => 'Contractor',
+        'supplier' => 'Supplier',
+        'service' => 'Service provider',
+        'trading' => 'Trading company',
+        'logistics' => 'Logistics company',
+        'consulting' => 'Consulting company',
+        'other' => 'Other',
+    ];
+
+    /** Business types a module of the directory is about (config/modules.php). */
+    public const TYPE_MODULES = ['manufacturer' => 'manufacturers', 'importer' => 'trade', 'exporter' => 'trade', 'wholesaler' => 'trade'];
+
+    /** Looks of the company page. One set of shared parts; a template changes the order of emphasis and the cover. */
+    public const TEMPLATES = [
+        'corporate' => 'Corporate',
+        'construction' => 'Construction and engineering',
+        'industrial' => 'Manufacturing and industrial',
+        'trade' => 'Import, export and trading',
+        'services' => 'Services and consulting',
+    ];
+
+    /** The colours a company may choose for its page: readable with white text, so no arbitrary colours. */
+    public const ACCENTS = ['#0B6B3A' => 'Green', '#0E5A8A' => 'Blue', '#5B3FB3' => 'Violet', '#B3261E' => 'Red', '#9A5B00' => 'Amber', '#1F2937' => 'Graphite'];
+
+    /** Who may see the contact details the company approved. */
+    public const CONTACT_VISIBILITY = [
+        'public' => 'Everyone',
+        'premium' => 'Signed-in subscribers on a paid plan',
+        'private' => 'Nobody: enquiries only, through Tenders.af',
+    ];
+
+    public const CONTACT_FIELDS = ['phone' => 'Phone', 'whatsapp' => 'WhatsApp', 'email' => 'Email', 'website' => 'Website'];
+
     protected $guarded = [];
 
     protected function casts(): array
     {
         return [
             'alert_types' => 'array',
+            'business_types' => 'array',
+            'services' => 'array',
+            'contact_fields' => 'array',
             'alert_email' => 'boolean',
             'alert_whatsapp' => 'boolean',
             'is_listed' => 'boolean',
@@ -101,6 +147,66 @@ class Company extends Model
         return $this->belongsToMany(Category::class);
     }
 
+    public function projects(): HasMany
+    {
+        return $this->hasMany(CompanyProject::class);
+    }
+
+    /** The business types ticked, as labels: ['manufacturer' => 'Manufacturer', ...]. */
+    public function businessTypeLabels(): array
+    {
+        return array_intersect_key(self::BUSINESS_TYPES, array_flip((array) $this->business_types));
+    }
+
+    /** The details the company approved for its page. Before the choice existed the phone and website were shown. */
+    public function approvedContactFields(): array
+    {
+        $fields = $this->contact_fields ?? ['phone', 'website'];
+
+        return array_values(array_intersect(array_keys(self::CONTACT_FIELDS), (array) $fields));
+    }
+
+    /**
+     * What a visitor may see of the contact details: ['state' => open|locked|private, 'fields' => [field => value]].
+     * Decided here, on the server, so nothing restricted is ever written into the page.
+     */
+    public function contactFor(?User $viewer): array
+    {
+        $values = [];
+        foreach ($this->approvedContactFields() as $field) {
+            if (filled($this->{$field})) {
+                $values[$field] = $this->{$field};
+            }
+        }
+        $own = $viewer && $viewer->company_id === $this->id;
+        $visibility = $this->contact_visibility ?: 'public';
+
+        if ($own || $visibility === 'public') {
+            return ['state' => 'open', 'fields' => $values];
+        }
+        if ($visibility === 'premium' && $viewer?->company?->hasFullAccess()) {
+            return ['state' => 'open', 'fields' => $values];
+        }
+
+        return ['state' => $visibility === 'premium' ? 'locked' : 'private', 'fields' => []];
+    }
+
+    /** Services as written by the company: [['name' => ..., 'text' => ...], ...]. */
+    public function serviceList(): array
+    {
+        return array_values(array_filter((array) $this->services, fn ($row) => is_array($row) && filled($row['name'] ?? null)));
+    }
+
+    public function accent(): string
+    {
+        return array_key_exists((string) $this->page_accent, self::ACCENTS) ? $this->page_accent : '#0B6B3A';
+    }
+
+    public function template(): string
+    {
+        return array_key_exists((string) $this->page_template, self::TEMPLATES) ? $this->page_template : 'corporate';
+    }
+
     /** The tenders this buyer posted. */
     public function tenders(): HasMany
     {
@@ -139,7 +245,7 @@ class Company extends Model
             return false;
         }
 
-        return \App\Support\Platform::bool('posting_free') || ($this->isUsable() && (bool) $this->plan?->can_post);
+        return Platform::bool('posting_free') || ($this->isUsable() && (bool) $this->plan?->can_post);
     }
 
     /** What a website address may be once https:// and www. are taken off: example.af, shop.example.com/en */
@@ -173,19 +279,30 @@ class Company extends Model
         return __(self::VERIFY[$this->verify_status] ?? 'Not verified');
     }
 
-    /** How much of the profile is filled in, in percent, and what is still missing. */
+    /**
+     * How much of the profile is filled in, in percent, and what is still missing. A complete profile is
+     * not proof that a company is genuine; verification is a separate check.
+     */
     public function completeness(): array
     {
         $checks = [
             'About the company' => filled($this->about),
             'Phone' => filled($this->phone),
-            'Province' => filled($this->province_id),
+            'Province' => filled($this->province_id) || filled($this->country),
             'Address' => filled($this->address),
             'Licence number' => filled($this->license_no),
             'Logo' => filled($this->logo_path),
             'Sectors' => $this->industries()->exists(),
+            'Business type' => ! empty($this->business_types),
+            'Services' => $this->serviceList() !== [],
             'Verification' => $this->isVerified(),
         ];
+        if (Modules::enabled('portfolios')) {
+            $checks['Projects'] = $this->projects()->where('status', 'published')->exists();
+        }
+        if (Modules::enabled('products')) {
+            $checks['Products'] = $this->hasMany(Product::class)->exists();
+        }
         $done = count(array_filter($checks));
 
         return ['percent' => (int) round(100 * $done / count($checks)), 'missing' => array_keys(array_filter($checks, fn (bool $ok) => ! $ok))];

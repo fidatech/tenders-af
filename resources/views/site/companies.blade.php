@@ -20,6 +20,12 @@
                 <option value="{{ $id }}" @selected((string) request('province') === (string) $id)>{{ $provinceName }}</option>
             @endforeach
         </select>
+        <select name="type" aria-label="Kind of business" onchange="this.form.submit()">
+            <option value="">Any kind of business</option>
+            @foreach ($types as $key => $label)
+                <option value="{{ $key }}" @selected(request('type') === $key)>{{ $label }}</option>
+            @endforeach
+        </select>
         <label class="check"><input type="checkbox" name="verified" value="1" @checked(request()->boolean('verified')) onchange="this.form.submit()"> Verified only</label>
         <button type="submit" class="btn btn-green btn-sm">Search</button>
     </form>

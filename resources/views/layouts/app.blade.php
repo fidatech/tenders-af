@@ -6,10 +6,11 @@
     $trialLeft = $company?->status === \App\Models\Company::TRIAL && $company->isUsable() ? $company->daysLeft() : null;
     $unread = \App\Models\Notice::where('user_id', $user->id)->whereNull('read_at')->count();
     $latest = \App\Models\Notice::where('user_id', $user->id)->orderByDesc('id')->limit(6)->get();
-    $productsOn = \App\Support\Platform::bool('products_enabled');
+    $productsOn = \App\Support\Modules::inPublicNav('products');
+    $directoryOn = module_on('directory');
     $siteNav = array_filter([
         [__('Tenders'), route('site.tenders')],
-        [__('Companies'), route('site.companies')],
+        \App\Support\Modules::inPublicNav('directory') ? [__('Companies'), route('site.companies')] : null,
         $productsOn ? [__('Products'), route('site.products')] : null,
         [__('Sectors'), route('site.sectors')],
         [__('Provinces'), route('site.provinces')],
@@ -24,22 +25,22 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#F6F8F5">
     <meta name="robots" content="noindex, nofollow">
-    <title>{{ $title ?? '' }}{{ isset($title) ? ' | ' : '' }}{{ config('app.name') }}</title>
-    <link rel="icon" href="{{ asset_v('img/favicon.svg') }}" type="image/svg+xml">
+    <title>{{ $title ?? '' }}{{ isset($title) ? ' | ' : '' }}{{ \App\Support\Branding::name() }}</title>
+    @include('partials.brand-head')
     @include('partials.head-font')
     <link rel="stylesheet" href="{{ asset_v(text_dir() === 'rtl' ? 'css/app.rtl.css' : 'css/app.css') }}">
     <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset_v('css/select2-fida.css') }}">
     <link rel="stylesheet" href="{{ asset_v('css/portal.css') }}">
+    <link rel="stylesheet" href="{{ asset_v('css/mobile-nav.css') }}">
 </head>
 <body>
 <a class="pt-skip" href="#content">{{ __('Skip to the page') }}</a>
 
 <header class="pt-top" id="ptTop">
     <div class="pt-wrap pt-top-in">
-        <a class="pt-brand" href="{{ route('site.home') }}" aria-label="{{ config('app.name') }}, {{ __('home') }}">
-            <i aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 17 9 11l4 3 7-8"/><path d="M15 6h5v5"/></svg></i>
-            <span>Tenders<b>.af</b></span>
+        <a class="pt-brand" href="{{ route('site.home') }}" aria-label="{{ \App\Support\Branding::name() }}, {{ __('home') }}">
+            <x-brand-mark tone="light" :size="20" />
         </a>
         <nav class="pt-nav" id="ptNav" aria-label="{{ __('Website') }}">
             @foreach ($siteNav as [$label, $url])
@@ -91,7 +92,7 @@
                     <li><a class="dropdown-item" href="{{ route('dashboard') }}"><x-icon name="gauge" /> {{ __('Dashboard') }}</a></li>
                     <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><x-icon name="user" /> {{ __('My Profile') }}</a></li>
                     <li><a class="dropdown-item" href="{{ route('profile.password') }}"><x-icon name="key" /> {{ __('Change Password') }}</a></li>
-                    @if ($company?->is_listed)
+                    @if ($company?->is_listed && $directoryOn)
                         <li><a class="dropdown-item" href="{{ route('site.companies.show', ['slug' => $company->slug]) }}" target="_blank" rel="noopener"><x-icon name="eye" /> {{ __('Our public page') }}</a></li>
                     @endif
                     <li><hr class="dropdown-divider"></li>
@@ -164,6 +165,7 @@
       data-confirm-ok="{{ __('app.nav.sign_out') }}" data-confirm-style="primary">@csrf</form>
 <form id="noticesReadForm" method="POST" action="{{ route('notices.read') }}" hidden>@csrf</form>
 
+@include('partials.mobile-nav', ['nav' => \App\Support\MobileNav::panel($user)])
 @include('partials.flash')
 @include('partials.scripts')
 <script>

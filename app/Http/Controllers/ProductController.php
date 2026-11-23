@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\UserError;
+use App\Models\AdminNotice;
 use App\Models\Company;
 use App\Models\Industry;
 use App\Models\PlatformAccount;
@@ -10,8 +11,6 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductPromotion;
 use App\Models\Province;
-use App\Models\Tender;
-use App\Support\Platform;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -69,7 +68,7 @@ class ProductController extends Controller
         }
 
         if ($send) {
-            \App\Models\AdminNotice::toAll('product', 'Product to approve: '.$product->name, $company->name, route('admin.products.show', ['id' => $product->id]));
+            AdminNotice::toAll('product', 'Product to approve: '.$product->name, $company->name, route('admin.products.show', ['id' => $product->id]));
         }
 
         return redirect()->route('products.edit', ['id' => $product->id])->with('success', $send
@@ -105,7 +104,7 @@ class ProductController extends Controller
         }
         if ($send) {
             $product->update(['status' => Product::PENDING, 'submitted_at' => now(), 'reject_reason' => null]);
-            \App\Models\AdminNotice::toAll('product', 'Product to approve: '.$product->name, company()->name, route('admin.products.show', ['id' => $product->id]));
+            AdminNotice::toAll('product', 'Product to approve: '.$product->name, company()->name, route('admin.products.show', ['id' => $product->id]));
         }
 
         return back()->with('success', $send ? __('Saved. We check the product before it is shown.') : __('The product is saved.'));
@@ -188,7 +187,7 @@ class ProductController extends Controller
             'receipt_path' => $request->file('receipt')->store('receipts/'.$company->id, 'local'),
         ]);
 
-        \App\Models\AdminNotice::toAll('payment', $company->name.' paid to sponsor a product', $product->name.' · '.number_format($prices[$data['period']]).' '.$company->currency, route('admin.products.index'));
+        AdminNotice::toAll('payment', $company->name.' paid to sponsor a product', $product->name.' · '.number_format($prices[$data['period']]).' '.$company->currency, route('admin.products.index'));
 
         return redirect()->route('products.index')->with('success', __('Thank you. We check your payment and then your product is sponsored.'));
     }
@@ -196,7 +195,7 @@ class ProductController extends Controller
     /** The module is off until an administrator switches it on. */
     private function company(): Company
     {
-        abort_unless(Platform::bool('products_enabled'), 404);
+        abort_unless(module_on('products'), 404);
 
         return company();
     }

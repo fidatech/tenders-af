@@ -51,3 +51,9 @@ avatar-soft-success icon-soft
 
 # kinds of admin notifications (nt-{kind})
 nt-company nt-verification nt-tender nt-product nt-payment nt-message nt-info
+
+# admin menu: Platform group, Module Management
+#s-puzzle-piece #s-image #s-link #s-sitemap #s-circle-info
+#s-industry #s-window-maximize #s-address-card #s-folder-open #s-file-pdf #s-briefcase #s-images #s-star #s-location-dot #s-calendar #s-user-tie #s-circle-question
+#s-table-columns #s-download #s-pen #s-star #s-folder-open #s-bookmark
+#s-comments #s-flag #s-paperclip #s-ban #s-lock

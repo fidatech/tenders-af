@@ -6,12 +6,17 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\BrandingController;
+use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\CompanyMessageController;
+use App\Http\Controllers\CompanyPdfController;
+use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DirectMessageController;
 use App\Http\Controllers\PostedTenderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\TeamController;
@@ -32,16 +37,24 @@ Route::get('sectors', [SiteController::class, 'sectors'])->name('site.sectors');
 Route::get('provinces', [SiteController::class, 'provinces'])->name('site.provinces');
 
 // the free company directory
-Route::get('companies', [SiteController::class, 'companies'])->name('site.companies');
-Route::get('companies/{slug}', [SiteController::class, 'company'])->name('site.companies.show');
+Route::middleware('module:directory')->group(function () {
+    Route::get('companies', [SiteController::class, 'companies'])->name('site.companies');
+    Route::get('companies/{slug}', [SiteController::class, 'company'])->name('site.companies.show');
+    Route::get('companies/{slug}/profile', [CompanyPdfController::class, 'public'])->middleware(['module:company_pdf', 'throttle:20,1'])->name('site.companies.pdf');
+    Route::get('companies/{slug}/projects/{project}', [SiteController::class, 'project'])->middleware('module:portfolios')->name('site.projects.show');
+    Route::get('project-images/{id}', [SiteController::class, 'projectImage'])->whereNumber('id')->middleware('module:portfolios')->name('site.projects.image');
+});
+Route::get('companies/{slug}/cover', [SiteController::class, 'cover'])->name('site.companies.cover');
 Route::get('companies/{slug}/logo', [SiteController::class, 'logo'])->name('site.companies.logo');
 
 // products for wholesale (the module is switched on in the settings of the administrators)
-Route::get('products', [SiteController::class, 'products'])->name('site.products');
-Route::get('products/image/{id}', [SiteController::class, 'productImage'])->whereNumber('id')->name('site.products.image');
-Route::get('products/video/{id}', [SiteController::class, 'productVideo'])->whereNumber('id')->name('site.products.video');
-Route::get('products/{slug}', [SiteController::class, 'product'])->name('site.products.show');
-Route::get('products/{slug}/whatsapp', [SiteController::class, 'productContact'])->middleware('throttle:30,1')->name('site.products.contact');
+Route::middleware('module:products')->group(function () {
+    Route::get('products', [SiteController::class, 'products'])->name('site.products');
+    Route::get('products/image/{id}', [SiteController::class, 'productImage'])->whereNumber('id')->name('site.products.image');
+    Route::get('products/video/{id}', [SiteController::class, 'productVideo'])->whereNumber('id')->name('site.products.video');
+    Route::get('products/{slug}', [SiteController::class, 'product'])->name('site.products.show');
+    Route::get('products/{slug}/whatsapp', [SiteController::class, 'productContact'])->middleware('throttle:30,1')->name('site.products.contact');
+});
 Route::get('statistics', [SiteController::class, 'statistics'])->name('site.statistics');
 
 Route::get('pricing', [SiteController::class, 'pricing'])->name('site.pricing');
@@ -54,6 +67,12 @@ Route::get('terms', [SiteController::class, 'terms'])->name('site.terms');
 Route::get('sitemap.xml', [SiteController::class, 'sitemap'])->name('site.sitemap');
 Route::get('robots.txt', [SiteController::class, 'robots'])->name('site.robots');
 Route::get('llms.txt', [SiteController::class, 'llms'])->name('site.llms');
+
+// the brand (Admin > Branding & Logo), the web app manifest and the offline page of the phone app
+Route::get('brand/{asset}', [BrandingController::class, 'asset'])->where('asset', '[a-z0-9_-]+')->name('brand.asset');
+Route::get('site.webmanifest', [BrandingController::class, 'manifest'])->name('site.manifest');
+Route::get('offline', [BrandingController::class, 'offline'])->name('site.offline');
+Route::get('sw.js', [BrandingController::class, 'serviceWorker'])->name('site.sw');
 
 /* ------------------------------------------------------------------ sign in, sign up */
 
@@ -103,7 +122,7 @@ Route::middleware('auth:web')->group(function () {
         });
 
         // the products a company offers for wholesale
-        Route::prefix('my/products')->name('products.')->group(function () {
+        Route::prefix('my/products')->name('products.')->middleware('module:products')->group(function () {
             Route::get('/', [ProductController::class, 'index'])->name('index');
             Route::get('create', [ProductController::class, 'create'])->name('create');
             Route::post('/', [ProductController::class, 'store'])->name('store');
@@ -115,7 +134,46 @@ Route::middleware('auth:web')->group(function () {
             Route::post('{id}/sponsor', [ProductController::class, 'storeSponsor'])->whereNumber('id')->name('sponsor.store');
         });
 
+        // saved suppliers (Supplier Favourites & Collections): every member of the company
+        Route::prefix('my/collections')->name('collections.')->middleware('module:collections')->group(function () {
+            Route::get('/', [CollectionController::class, 'index'])->name('index');
+            Route::post('/', [CollectionController::class, 'store'])->name('store');
+            Route::get('{id}', [CollectionController::class, 'show'])->whereNumber('id')->name('show');
+            Route::put('{id}', [CollectionController::class, 'update'])->whereNumber('id')->name('update');
+            Route::delete('{id}', [CollectionController::class, 'destroy'])->whereNumber('id')->name('destroy');
+            Route::get('{id}/compare', [CollectionController::class, 'compare'])->whereNumber('id')->name('compare');
+            Route::get('{id}/export', [CollectionController::class, 'export'])->whereNumber('id')->middleware('throttle:10,1')->name('export');
+            Route::put('{id}/items/{item}', [CollectionController::class, 'updateItem'])->whereNumber(['id', 'item'])->name('items.update');
+            Route::delete('{id}/items/{item}', [CollectionController::class, 'removeItem'])->whereNumber(['id', 'item'])->name('items.destroy');
+        });
+        // enquiries between companies (Business Enquiries): every member reads and answers them
+        Route::prefix('my/enquiries')->name('enquiries.')->middleware('module:enquiries')->group(function () {
+            Route::get('/', [EnquiryController::class, 'index'])->name('index');
+            Route::get('{id}', [EnquiryController::class, 'show'])->whereNumber('id')->name('show');
+            Route::post('{id}/reply', [EnquiryController::class, 'reply'])->whereNumber('id')->middleware('throttle:30,1')->name('reply');
+            Route::post('{id}/status', [EnquiryController::class, 'status'])->whereNumber('id')->name('status');
+            Route::post('{id}/block', [EnquiryController::class, 'block'])->whereNumber('id')->name('block');
+            Route::post('{id}/report', [EnquiryController::class, 'report'])->whereNumber('id')->middleware('throttle:5,1')->name('report');
+            Route::get('{id}/files/{message}', [EnquiryController::class, 'attachment'])->whereNumber(['id', 'message'])->name('file');
+        });
+        Route::post('companies/{slug}/enquiry', [EnquiryController::class, 'store'])->middleware(['module:enquiries', 'throttle:10,1'])->name('enquiries.store');
+        Route::post('companies/{slug}/save', [CollectionController::class, 'save'])->middleware(['module:collections', 'throttle:60,1'])->name('collections.save');
+
         Route::middleware('owner')->group(function () {
+            // the projects of the company (Company Project Portfolios)
+            Route::prefix('my/projects')->name('projects.')->middleware('module:portfolios')->group(function () {
+                Route::get('/', [ProjectController::class, 'index'])->name('index');
+                Route::get('create', [ProjectController::class, 'create'])->name('create');
+                Route::post('/', [ProjectController::class, 'store'])->name('store');
+                Route::get('{id}/edit', [ProjectController::class, 'edit'])->whereNumber('id')->name('edit');
+                Route::put('{id}', [ProjectController::class, 'update'])->whereNumber('id')->name('update');
+                Route::delete('{id}', [ProjectController::class, 'destroy'])->whereNumber('id')->name('destroy');
+                Route::get('{id}/files/{file}', [ProjectController::class, 'file'])->whereNumber(['id', 'file'])->name('file');
+                Route::delete('{id}/files/{file}', [ProjectController::class, 'destroyFile'])->whereNumber(['id', 'file'])->name('file.destroy');
+            });
+            // the company profile as a PDF (Company Profile PDF Generator)
+            Route::get('my/profile-pdf', [CompanyPdfController::class, 'show'])->middleware('module:company_pdf')->name('pdf.show');
+            Route::get('my/profile-pdf/print', [CompanyPdfController::class, 'print'])->middleware(['module:company_pdf', 'throttle:30,1'])->name('pdf.print');
             crud_routes('team', TeamController::class, 'team');
             Route::get('company', [SettingsController::class, 'edit'])->name('settings.edit');
             Route::put('company', [SettingsController::class, 'update'])->name('settings.update');
@@ -200,6 +258,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         crud_routes('industries', Admin\IndustryController::class, 'industries');
         crud_routes('categories', Admin\CategoryController::class, 'categories');
 
+        Route::get('enquiries', [Admin\EnquiryController::class, 'index'])->name('enquiries.index');
+        Route::get('enquiries/{id}', [Admin\EnquiryController::class, 'show'])->whereNumber('id')->name('enquiries.show');
+        Route::post('enquiries/{id}/close', [Admin\EnquiryController::class, 'close'])->whereNumber('id')->name('enquiries.close');
+        Route::get('projects', [Admin\ProjectController::class, 'index'])->name('projects.index');
+        Route::get('projects/{id}', [Admin\ProjectController::class, 'show'])->whereNumber('id')->name('projects.show');
+        Route::post('projects/{id}/review', [Admin\ProjectController::class, 'review'])->whereNumber('id')->name('projects.review');
+        Route::get('projects/{id}/files/{file}', [Admin\ProjectController::class, 'file'])->whereNumber(['id', 'file'])->name('projects.file');
         Route::get('verification', [Admin\VerificationController::class, 'index'])->name('verification.index');
         Route::post('verification/{id}/approve', [Admin\VerificationController::class, 'approve'])->whereNumber('id')->name('verification.approve');
         Route::post('verification/{id}/reject', [Admin\VerificationController::class, 'reject'])->whereNumber('id')->name('verification.reject');
@@ -228,6 +293,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('subscriptions/{id}/print', [Admin\SubscriptionController::class, 'print'])->whereNumber('id')->name('subscriptions.print');
         Route::get('reports', [Admin\ReportController::class, 'index'])->name('reports.index');
         Route::get('logs', [Admin\LogController::class, 'index'])->name('logs.index');
+        Route::get('modules', [Admin\ModuleController::class, 'index'])->name('modules.index');
+        Route::put('modules/{module}', [Admin\ModuleController::class, 'update'])->where('module', '[a-z_]+')->name('modules.update');
+        Route::get('branding', [Admin\BrandingController::class, 'edit'])->name('branding.edit');
+        Route::put('branding', [Admin\BrandingController::class, 'update'])->name('branding.update');
+        Route::delete('branding/{asset}', [Admin\BrandingController::class, 'destroy'])->where('asset', '[a-z_]+')->name('branding.destroy');
         Route::get('settings', [Admin\SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [Admin\SettingsController::class, 'update'])->name('settings.update');
     });

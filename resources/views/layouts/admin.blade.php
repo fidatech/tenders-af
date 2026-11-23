@@ -4,7 +4,8 @@
     $showNotices = $can('admin.notices.index');
     $waitingVerify = \App\Models\Company::where('verify_status', 'pending')->count();
     $waitingTenders = \App\Models\Tender::where('status', 'pending')->count();
-    $productsOn = \App\Support\Platform::bool('products_enabled');
+    $productsOn = module_on('products');
+    $productsInMenu = $productsOn || \App\Models\Product::exists();
     $waitingProducts = $productsOn ? \App\Models\Product::where('status', 'pending')->count() + \App\Models\ProductPromotion::where('status', 'pending')->count() : 0;
     $waitingPay = \App\Models\Subscription::waiting()->count();
     // the bell: what waits for an administrator, then the newest notifications
@@ -29,13 +30,16 @@
         ],
         'Procurement' => [
             ['Tenders', 'gavel', 'admin.tenders.index', 'admin.tenders.*', $waitingTenders],
-            ['Products', 'boxes-stacked', 'admin.products.index', 'admin.products.*', $waitingProducts],
+            // products: while the module is on, or while there are products to look after
+            $productsInMenu ? ['Products', 'boxes-stacked', 'admin.products.index', 'admin.products.*', $waitingProducts] : null,
             ['Sectors', 'layer-group', 'admin.industries.index', 'admin.industries.*', 0],
             ['Categories', 'tags', 'admin.categories.index', 'admin.categories.*', 0],
         ],
         'Companies and bidders' => [
             ['Companies', 'building', 'admin.companies.index', 'admin.companies.*', 0],
             ['Verification', 'shield-halved', 'admin.verification.index', 'admin.verification.*', $waitingVerify],
+            module_on('enquiries') || \App\Models\Enquiry::whereNotNull('reported_at')->exists() ? ['Reported enquiries', 'flag', 'admin.enquiries.index', 'admin.enquiries.*', \App\Models\Enquiry::whereNotNull('reported_at')->where('status', 'open')->count()] : null,
+            module_on('portfolios') || \App\Models\CompanyProject::exists() ? ['Company projects', 'briefcase', 'admin.projects.index', 'admin.projects.*', \App\Models\CompanyProject::where('review_status', 'pending')->count()] : null,
         ],
         'Office and finance' => [
             ['Office register', 'receipt', 'admin.office.index', 'admin.office.*', 0],
@@ -46,10 +50,14 @@
             ['Expenses', 'money-bill-wave', 'admin.expenses.index', 'admin.expenses.*', 0],
             ['Reports', 'chart-line', 'admin.reports.index', 'admin.reports.*', 0],
         ],
+        'Platform' => [
+            ['Module Management', 'puzzle-piece', 'admin.modules.index', 'admin.modules.*', 0],
+            ['Branding & Logo', 'image', 'admin.branding.edit', 'admin.branding.*', 0],
+            ['Settings', 'gear', 'admin.settings.edit', 'admin.settings.*', 0],
+        ],
         'Administration' => [
             ['Employees and roles', 'user-shield', 'admin.admins.index', 'admin.admins.*', 0],
             ['Activity log', 'clock-rotate-left', 'admin.logs.index', 'admin.logs.*', 0],
-            ['Settings', 'gear', 'admin.settings.edit', 'admin.settings.*', 0],
             ['My account', 'user', 'admin.profile.edit', 'admin.profile.*', 0],
         ],
     ];
@@ -63,7 +71,7 @@
 <div class="app-wrapper">
     <aside class="app-sidebar" id="appSidebar" aria-label="{{ __('app.nav.menu') }}">
         <div class="sidebar-brand">
-            <a href="{{ route($admin->homeRoute()) }}" class="brand-link"><x-brand-logo /><span class="brand-text">{{ config('app.name') }}</span></a>
+            <a href="{{ route($admin->homeRoute()) }}" class="brand-link"><x-brand-logo /><span class="brand-text">{{ \App\Support\Branding::name() }}</span></a>
         </div>
         <div class="sidebar-scroll" id="sidebarScroll">
             <div class="drawer-profile">
@@ -76,7 +84,7 @@
             </div>
             <ul class="sidebar-menu" id="sidebarMenu">
                 @foreach ($menu as $heading => $entries)
-                    @php($entries = array_filter($entries, fn ($entry) => $can($entry[2])))
+                    @php($entries = array_filter($entries, fn ($entry) => $entry && $can($entry[2])))
                     @continue(! $entries)
                     <li class="menu-heading"><span>{{ __($heading) }}</span></li>
                     @foreach ($entries as [$label, $icon, $route, $pattern, $waitingCount])

@@ -20,7 +20,6 @@ class SettingsController extends Controller
         }
         $values['registration'] = Platform::bool('registration');
         $values['posting_free'] = Platform::bool('posting_free');
-        $values['products_enabled'] = Platform::bool('products_enabled');
 
         return view('admin.settings', ['values' => $values]);
     }
@@ -62,7 +61,6 @@ class SettingsController extends Controller
 
         $data['registration'] = $request->boolean('registration') ? '1' : '0';
         $data['posting_free'] = $request->boolean('posting_free') ? '1' : '0';
-        $data['products_enabled'] = $request->boolean('products_enabled') ? '1' : '0';
         $data['billing_email'] = implode(', ', preg_split('/[\s,;]+/', (string) ($data['billing_email'] ?? ''), -1, PREG_SPLIT_NO_EMPTY));
 
         foreach (['google_site_verification', 'bing_site_verification'] as $key) {

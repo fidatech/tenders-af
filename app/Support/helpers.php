@@ -1,7 +1,11 @@
 <?php
 
 use App\Models\Company;
+use App\Support\Modules;
+use App\Support\Platform;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\HtmlString;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 
@@ -30,7 +34,15 @@ if (! function_exists('platform')) {
     /** A setting of the platform (see App\Support\Platform): the saved value, or the one from config. */
     function platform(string $key, mixed $default = null): mixed
     {
-        return \App\Support\Platform::get($key, $default);
+        return Platform::get($key, $default);
+    }
+}
+
+if (! function_exists('module_on')) {
+    /** Is a module of the platform switched on (with the modules it depends on)? See config/modules.php. */
+    function module_on(string $key): bool
+    {
+        return Modules::enabled($key);
     }
 }
 
@@ -96,7 +108,7 @@ if (! function_exists('fmt_datetime')) {
         if (! $date) {
             return '';
         }
-        $date = $date instanceof DateTimeInterface ? \Illuminate\Support\Carbon::instance($date) : \Illuminate\Support\Carbon::parse((string) $date);
+        $date = $date instanceof DateTimeInterface ? Carbon::instance($date) : Carbon::parse((string) $date);
 
         return $date->format('j M Y, H:i');
     }
@@ -131,9 +143,9 @@ if (! function_exists('quick_add')) {
      *   <select name="client_id" id="client" {{ quick_add(__('New client'), 'clients.create') }}>
      * The script puts a "+ New" link in the label of the list (the label must point at its id).
      */
-    function quick_add(string $title, string $route, array $params = []): \Illuminate\Support\HtmlString
+    function quick_add(string $title, string $route, array $params = []): HtmlString
     {
-        return new \Illuminate\Support\HtmlString('data-quick-add="'.e(route($route, $params)).'" data-quick-title="'.e($title).'"');
+        return new HtmlString('data-quick-add="'.e(route($route, $params)).'" data-quick-title="'.e($title).'"');
     }
 }
 

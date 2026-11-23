@@ -3,7 +3,7 @@
 // The sidebar of a company. 'owner' => true: only the owner of the company sees it.
 // 'active' is the route pattern that opens the entry. 'supplier' => true: only accounts that look
 // for tenders see it; 'buyer' => true: only accounts that post tenders. 'setting' => a switch of the administrators
-// that must be on.
+// that must be on. 'module' => a module (config/modules.php) that must be on and shown in the panel's menu.
 return [
     ['label' => 'Dashboard', 'icon' => 'gauge-high', 'route' => 'dashboard'],
 
@@ -17,10 +17,14 @@ return [
     ['label' => 'Post a tender', 'icon' => 'plus', 'route' => 'posted.create', 'buyer' => true],
 
     ['heading' => 'Products'],
-    ['label' => 'My products', 'icon' => 'boxes-stacked', 'route' => 'products.index', 'active' => 'products.*', 'setting' => 'products_enabled'],
+    ['label' => 'My products', 'icon' => 'boxes-stacked', 'route' => 'products.index', 'active' => 'products.*', 'module' => 'products'],
 
     ['heading' => 'My company'],
     ['label' => 'Company profile', 'icon' => 'building', 'route' => 'settings.edit', 'owner' => true],
+    ['label' => 'Enquiries', 'icon' => 'comments', 'route' => 'enquiries.index', 'active' => 'enquiries.*', 'badge' => 'enquiries', 'module' => 'enquiries'],
+    ['label' => 'Saved suppliers', 'icon' => 'folder-open', 'route' => 'collections.index', 'active' => 'collections.*', 'module' => 'collections'],
+    ['label' => 'Projects', 'icon' => 'briefcase', 'route' => 'projects.index', 'active' => 'projects.*', 'owner' => true, 'module' => 'portfolios'],
+    ['label' => 'Profile PDF', 'icon' => 'file-pdf', 'route' => 'pdf.show', 'active' => 'pdf.*', 'owner' => true, 'module' => 'company_pdf'],
     ['label' => 'Tender alerts', 'icon' => 'paper-plane', 'route' => 'alerts.edit', 'owner' => true, 'supplier' => true],
     ['label' => 'Verification', 'icon' => 'shield-halved', 'route' => 'verification.show', 'owner' => true],
     ['label' => 'Team', 'icon' => 'user-group', 'route' => 'team.index', 'active' => 'team.*', 'owner' => true],

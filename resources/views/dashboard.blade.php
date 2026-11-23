@@ -102,7 +102,7 @@
                     @if (auth()->user()->isOwner())
                         <a class="btn btn-soft-primary" href="{{ route('settings.edit') }}"><x-icon name="building" class="me-1" /> {{ __('Edit the profile') }}</a>
                     @endif
-                    <a class="btn btn-light-secondary" href="{{ route('site.companies.show', ['slug' => $company->slug]) }}" target="_blank" rel="noopener"><x-icon name="eye" class="me-1" /> {{ __('See the public page') }}</a>
+                    @if (module_on('directory'))<a class="btn btn-light-secondary" href="{{ route('site.companies.show', ['slug' => $company->slug]) }}" target="_blank" rel="noopener"><x-icon name="eye" class="me-1" /> {{ __('See the public page') }}</a>@endif
                 </div>
             </div>
         </div>

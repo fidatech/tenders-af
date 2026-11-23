@@ -1,11 +1,13 @@
 @php
-    $name = config('app.name');
+    $name = \App\Support\Branding::name();
+    $brandLogo = \App\Support\Branding::url('logo') ?? \App\Support\Branding::url('icon');
     $pageTitle = $title.' | '.$name;
     $canonical = url()->current();
     $image = asset('img/og.png');
     $imageAlt = $name.' banner reading “Every tender in Afghanistan.”';
-    $menu = ['site.tenders' => ['site.tenders', 'site.sector', 'site.province', 'site.tenders.show'], 'site.companies' => ['site.companies', 'site.companies.show'], 'site.sectors' => ['site.sectors'], 'site.provinces' => ['site.provinces'], 'site.pricing' => ['site.pricing']];
-    $productsOn = \App\Support\Platform::bool('products_enabled');
+    $directoryOn = \App\Support\Modules::inPublicNav('directory');
+    $menu = array_filter(['site.tenders' => ['site.tenders', 'site.sector', 'site.province', 'site.tenders.show'], 'site.companies' => $directoryOn ? ['site.companies', 'site.companies.show'] : null, 'site.sectors' => ['site.sectors'], 'site.provinces' => ['site.provinces'], 'site.pricing' => ['site.pricing']]);
+    $productsOn = \App\Support\Modules::inPublicNav('products');
     $signedIn = auth('web')->check();
     // the bell of a signed-in company: its notifications and tender alerts
     $bellUnread = $signedIn ? \App\Models\Notice::where('user_id', auth('web')->id())->whereNull('read_at')->count() : 0;
@@ -13,7 +15,7 @@
 
     // structured data: who runs the site and what it is. No ratings or reviews: there are none to quote.
     $graph = [
-        ['@type' => 'Organization', '@id' => url('/').'#organization', 'name' => $name, 'url' => url('/'), 'logo' => $image, 'areaServed' => ['@type' => 'Country', 'name' => 'Afghanistan'],
+        ['@type' => 'Organization', '@id' => url('/').'#organization', 'name' => $name, 'url' => url('/'), 'logo' => $brandLogo ?? $image, 'areaServed' => ['@type' => 'Country', 'name' => 'Afghanistan'],
             'parentOrganization' => ['@type' => 'Organization', 'name' => 'Fida Technologies', 'url' => 'https://fida.af']],
         ['@type' => 'WebSite', '@id' => url('/').'#website', 'url' => url('/'), 'name' => $name, 'description' => config('site.description'), 'inLanguage' => 'en', 'publisher' => ['@id' => url('/').'#organization'],
             'potentialAction' => ['@type' => 'SearchAction', 'target' => ['@type' => 'EntryPoint', 'urlTemplate' => route('site.tenders').'?q={search_term_string}'], 'query-input' => 'required name=search_term_string']],
@@ -38,7 +40,7 @@
 <html lang="en" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{{ $pageTitle }}</title>
 <meta name="description" content="{{ $description }}">
 <link rel="canonical" href="{{ $canonical }}">
@@ -69,12 +71,14 @@
 <meta name="twitter:description" content="{{ $description }}">
 <meta name="twitter:image" content="{{ $image }}">
 <meta name="twitter:image:alt" content="{{ $imageAlt }}">
-<link rel="icon" href="{{ asset_v('img/favicon.svg') }}" type="image/svg+xml">
+@include('partials.brand-head')
 <link rel="alternate" type="text/plain" href="{{ url('/llms.txt') }}" title="{{ $name }} for AI assistants">
 @include('partials.head-font')
 <link rel="stylesheet" href="{{ asset_v('vendor/select2/select2.min.css') }}" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="{{ asset_v('css/site.css') }}">
-<script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@graph' => $graph], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
+<link rel="stylesheet" href="{{ asset_v('css/mobile-nav.css') }}">
+{{-- the key is written as '@'.'context': Blade would otherwise read "@context" as its own directive --}}
+<script type="application/ld+json">{!! json_encode(['@'.'context' => 'https://schema.org', '@graph' => $graph], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
 </head>
 <body>
 <a class="sr" href="#content">Skip to the content</a>
@@ -82,7 +86,7 @@
 <div class="dark">
     <div class="flagline"></div>
     <header class="wrap top">
-        <a class="brand" href="{{ route('site.home') }}" aria-label="{{ $name }}, home"><i aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 17 9 11l4 3 7-8"/><path d="M15 6h5v5"/></svg></i><span>Tenders<b>.af</b></span></a>
+        <a class="brand" href="{{ route('site.home') }}" aria-label="{{ $name }}, home"><x-brand-mark tone="dark" /></a>
         <nav class="nav" aria-label="Main">
             @foreach ($menu as $route => $patterns)
                 <a href="{{ route($route) }}" @if (request()->routeIs(...$patterns)) aria-current="page" @endif>{{ \App\Http\Controllers\SiteController::PAGES[$route][1] }}</a>
@@ -116,6 +120,12 @@
 </div>
 
 <main id="content">
+    {{-- the result of a form sent from a public page (saving a supplier, sending an enquiry ...) --}}
+    @foreach (['success', 'danger', 'warning', 'info'] as $kind)
+        @if (session($kind))
+            <div class="wrap"><div class="site-flash {{ $kind }}" role="{{ $kind === 'danger' ? 'alert' : 'status' }}">{{ session($kind) }}</div></div>
+        @endif
+    @endforeach
     @yield('content')
 </main>
 
@@ -124,8 +134,8 @@
     <div class="wrap">
         <div class="foot-grid">
             <div class="foot-brand">
-                <a class="brand" href="{{ route('site.home') }}"><i aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 17 9 11l4 3 7-8"/><path d="M15 6h5v5"/></svg></i><span>Tenders<b>.af</b></span></a>
-                <p>{{ config('site.tagline') }} With a free directory of verified companies.</p>
+                <a class="brand" href="{{ route('site.home') }}"><x-brand-mark tone="dark" :size="20" /></a>
+                <p>{{ \App\Support\Branding::tagline() }} With a free directory of verified companies.</p>
                 <div class="foot-cta">
                     @if ($signedIn)
                         <a class="btn btn-green btn-sm" href="{{ route('dashboard') }}">My account</a>
@@ -147,7 +157,7 @@
             <nav class="foot-col" aria-label="Companies">
                 <h2>Companies</h2>
                 <ul>
-                    <li><a href="{{ route('site.companies') }}">Company directory</a></li>
+                    @if ($directoryOn)<li><a href="{{ route('site.companies') }}">Company directory</a></li>@endif
                     @if ($productsOn)<li><a href="{{ route('site.products') }}">Wholesale products</a></li>@endif
                     <li><a href="{{ route('site.statistics') }}">Statistics</a></li>
                     <li><a href="{{ route('site.pricing') }}">Pricing</a></li>
@@ -177,6 +187,8 @@
         </div>
     </div>
 </footer>
+@include('partials.mobile-nav', ['nav' => \App\Support\MobileNav::site()])
+@if ($signedIn)<form id="mnavLogout" method="POST" action="{{ route('logout') }}" hidden>@csrf</form>@endif
 {{-- every pick list of the website is a Select2 list --}}
 @include('partials.select2-scripts')
 <script>
@@ -188,6 +200,7 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') bell.open = false; });
 })();
 </script>
+<script src="{{ asset_v('js/filters.js') }}" defer></script>
 @stack('scripts')
 </body>
 </html>

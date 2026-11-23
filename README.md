@@ -181,3 +181,76 @@ The panel that companies and buyers use (`layouts/app.blade.php`) sits inside th
 links, a dark band with the company's name, verification and plan, the account menu on the left and the page on the
 right, and the site's footer. Its frame and colours are in `public/css/portal.css` (hand-written, not built); the parts
 inside the pages still come from `app.css`. The admin panel keeps the fida-admin look (`layouts/admin.blade.php`).
+
+## Module Management
+
+**Admin > Platform > Module Management** switches parts of the platform on and off (`config/modules.php`,
+`App\Support\Modules`). A switched-off module is hidden from the menus, its pages answer with an explanatory
+page (status 404, `noindex`) or send a company back to its dashboard, and it leaves the sitemap. Nothing saved in
+it is deleted. Modules that need another module (Mini-Websites, Projects, the profile document and the business-type
+directories need the Company Directory) stop with it and come back with it.
+
+- Tender Management is always on. Products keeps its old setting (`products_enabled`) as its switch, so a site
+  that already used Products is unchanged.
+- Each module can also be hidden from the website menus or the company panel, have its notifications silenced,
+  or be limited to companies on a paid plan.
+- Only a super administrator changes modules; every change is kept in the history on that page and in the
+  activity log.
+- RFQs, supplier contacts, product catalogue documents and international features are listed as **Planned**:
+  they are not built yet, so there is nothing to switch on.
+
+In code: `module_on('directory')` in views, `->middleware('module:directory')` on routes,
+`'module' => 'products'` on an entry of `config/menu.php`.
+
+## Branding & Logo
+
+**Admin > Platform > Branding & Logo**: the website name and tagline, the main logo, a version for dark
+backgrounds, a mobile logo, a square icon and a favicon, the logo height on computers and phones, and the alt text.
+Until a logo is uploaded the site keeps the text brand "Tenders.af". Pictures (PNG, JPG or WebP, up to 2 MB) are
+decoded and saved again as PNG with GD, which drops metadata and anything hidden in the file; SVG is refused
+because it can carry scripts. They are kept in `storage/app/private/branding` and served from `/brand/{asset}` with
+a version in the address, so `storage:link` is not needed. The icon also makes the phone app icons (192 and 512
+px) listed in `/site.webmanifest`.
+
+## Phones
+
+Below 768 px the website and the company panel get a bottom bar (Home, Tenders, Companies or Products when those
+modules are on, Messages in the panel, and Menu/Account) with a menu sheet for everything else
+(`partials/mobile-nav.blade.php`, `public/css/mobile-nav.css`, `public/js/mobile-nav.js`). It keeps clear of the
+iPhone and Android safe areas and steps aside while the keyboard is open. The filter boxes of the list pages become
+a "Filters" drawer with chips (`public/js/filters.js`); on a computer they look as before. The province map always
+fits the screen width (`site/_map.blade.php`, `public/js/afmap.js`): a tap shows the province first, a second tap
+opens it. A service worker (`/sw.js`) keeps only an offline page; tenders, payments and messages are never served
+from a copy.
+
+## Company pages, projects and the profile document
+
+- **Company profile** (owner): kinds of business (manufacturer, importer, exporter ...), the public page (slogan,
+  cover picture, services, template and one of six approved colours) and **contact sharing**: the company ticks
+  each detail it allows (phone, WhatsApp, email, website) and chooses who sees them: everyone, signed-in companies on
+  a paid plan, or nobody (enquiries only). Restricted details are decided on the server and are left out of the page,
+  its structured data and the profile document. Companies that existed before keep showing their phone and website.
+- **Projects** (`/my/projects`): drafts and published projects with pictures, and private evidence documents. A
+  project shows "Company submitted" until a reviewer under **Admin > Company projects** records what was checked
+  (pending, evidence reviewed, client reference confirmed, not accepted). "Evidence reviewed" needs documents; a
+  refusal needs a reason; changing the facts of a checked project sends it back to "Company submitted".
+- The company page shows separately what Tenders.af checked: profile claimed, business licence, project references.
+- **Profile document** (`/my/profile-pdf`): short, standard and detailed versions as a print-ready A4 page that the
+  browser saves as a PDF; a public version (what visitors may see) and a full version for the company itself.
+  Visitors open the public version from the company page.
+- The directory can be filtered by kind of business; manufacturer and importer/exporter/wholesaler filters appear
+  when their modules are on. Profiles with nothing written about the company are `noindex` and left out of the sitemap.
+
+## Saved suppliers and business enquiries
+
+- **Supplier Favourites & Collections** (module, off at first, paid plans by default): from a company page a
+  signed-in company saves the company into its Favourites or another collection. Collections are shared with the
+  team unless their maker made them private; each saved company has a status (researching, shortlisted, contacted,
+  qualified, preferred, rejected), private notes and tags. Two to four can be compared side by side (facts only; no
+  scores), and a collection can be exported as CSV, in which contact details follow each company's sharing choice.
+  Saved companies never see any of it.
+- **Business Enquiries** (module, off at first): a signed-in company sends an enquiry from another company's page
+  (with an optional PDF or picture); both companies' people answer in a private thread under **Enquiries**, on any
+  plan. Either side can close the thread, block the other company or report it. Administrators with the "messages"
+  permission see a thread only after it is reported (**Admin > Reported enquiries**), and opening it is logged.
+  A company starts at most 20 enquiries a day.

@@ -2,6 +2,9 @@
 
 namespace App\Support;
 
+use App\Models\DirectMessage;
+use App\Models\Enquiry;
+use App\Models\Tender;
 use App\Models\User;
 
 /**
@@ -41,8 +44,9 @@ class Menu
     public static function badge(array $item): int
     {
         return match ($item['badge'] ?? null) {
-            'messages' => \App\Models\DirectMessage::where('user_id', auth('web')->id())->where('from_admin', true)->whereNull('read_at')->count(),
-            'matching' => ($company = company()) && $company->is_supplier ? \App\Models\Tender::open()->matching($company)->count() : 0,
+            'enquiries' => ($id = auth('web')->user()?->company_id) ? Enquiry::unreadFor($id)->count() : 0,
+            'messages' => DirectMessage::where('user_id', auth('web')->id())->where('from_admin', true)->whereNull('read_at')->count(),
+            'matching' => ($company = company()) && $company->is_supplier ? Tender::open()->matching($company)->count() : 0,
             default => 0,
         };
     }
@@ -115,6 +119,9 @@ class Menu
     private static function allowed(User $user, array $item): bool
     {
         if (! empty($item['setting']) && ! Platform::bool($item['setting'])) {
+            return false;
+        }
+        if (! empty($item['module']) && ! Modules::inDashboardNav($item['module'])) {
             return false;
         }
         $company = $user->company;
