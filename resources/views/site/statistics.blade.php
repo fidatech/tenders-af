@@ -13,13 +13,97 @@
 @extends('layouts.site', ['schema' => $schema])
 
 @section('hero')
-@include('site._pagehead', ['heading' => 'Statistics', 'lead' => 'Real numbers from '.$site.', counted from the site itself. Nothing is estimated, and a section appears as soon as it has something to show.', 'crumbs' => [['Statistics', null]]])
+@include('site._pagehead', ['heading' => 'Statistics', 'lead' => 'Who visits '.$site.' and from where, and what is published on it. Counted from the site itself: nothing is estimated, no cookies are used.', 'crumbs' => [['Statistics', null]]])
 @endsection
 
 @section('content')
 <div class="wrap stats-page">
+    {{-- visitor analytics first: who opens the site, from where, on what, and which pages --}}
+    <section class="block stats-visitors" id="visitors">
+        <div class="stats-head">
+            <div>
+                <h2>Visitors</h2>
+                <p class="stats-note">People who opened the website, counted once a day each, without cookies and without keeping IP addresses. Robots are not counted. Updated every ten minutes.</p>
+            </div>
+            <nav class="stats-period" aria-label="Period">
+                @foreach (\App\Support\Statistics::PERIODS as $period)
+                    <a href="{{ route('site.statistics', $period === 30 ? [] : ['days' => $period]) }}#visitors" @class(['on' => $days === $period]) @if ($days === $period) aria-current="true" @endif>{{ $period }} days</a>
+                @endforeach
+            </nav>
+        </div>
+
+        @if (! $hasVisitors)
+            <div class="card-plain stats-empty">
+                <b>Counting has started.</b>
+                <span>{{ $visitors['since'] ? 'The first visits were counted on '.fmt_date($visitors['since']).'.' : 'Visits are counted from today.' }} Charts appear here as soon as there are visits in the chosen period.</span>
+            </div>
+        @else
+            @php
+                $change = $visitors['before'] ? round(100 * ($visitors['visitors'] - $visitors['before']) / $visitors['before']) : null;
+                $countriesKnown = collect($visitors['countries'])->whereNotNull('code')->count();
+                $phoneShare = $visitors['devices'] ? round(100 * ($visitors['devices']['mobile'] ?? 0) / max(1, array_sum($visitors['devices']))) : 0;
+            @endphp
+            <div class="statgrid small">
+                <div class="statcard"><b class="gt-green">{{ number_format($visitors['visitors']) }}</b><span>Visitors</span>
+                    <small>@if ($change !== null)<em @class(['up' => $change >= 0, 'down' => $change < 0])>{{ $change >= 0 ? '▲' : '▼' }} {{ abs($change) }}%</em> against the {{ $days }} days before @else One per person per day @endif</small></div>
+                <div class="statcard"><b class="gt-ink">{{ number_format($visitors['views']) }}</b><span>Pages opened</span><small>{{ number_format($visitors['views'] / max(1, $visitors['visitors']), 1) }} pages per visitor</small></div>
+                <div class="statcard"><b class="gt-red">{{ number_format($countriesKnown) }}</b><span>{{ $countriesKnown === 1 ? 'Country' : 'Countries' }}</span><small>Where visitors were</small></div>
+                <div class="statcard"><b class="gt-ink">{{ $phoneShare }}%</b><span>On phones</span><small>The rest on computers and tablets</small></div>
+            </div>
+
+            <div class="card-plain">
+                <h3 class="stats-h3">Visitors and pages opened, day by day</h3>
+                @include('site._trend', ['points' => $visitors['daily'], 'names' => ['Visitors', 'Pages opened'], 'label' => 'Visitors and pages opened each day over the last '.$days.' days'])
+            </div>
+
+            <div class="stats-two">
+                <div class="card-plain">
+                    <h3 class="stats-h3">Visitors by country</h3>
+                    @include('site._bars', ['rows' => collect($visitors['countries'])->take(12)->map(fn ($c) => [$c['name'], $c['visitors'], null, $c['flag']])->all(), 'label' => 'Visitors by country', 'share' => true])
+                </div>
+                <div class="card-plain">
+                    <h3 class="stats-h3">Visitors by city</h3>
+                    @if ($visitors['cities'])
+                        @include('site._bars', ['rows' => collect($visitors['cities'])->take(12)->map(fn ($c) => [$c['city'].($c['region'] && $c['region'] !== $c['city'] ? ', '.$c['region'] : '').' · '.$c['country'], $c['visitors'], null, $c['flag']])->all(), 'label' => 'Visitors by city'])
+                        <p class="stats-note">Cities with at least {{ \App\Support\Statistics::CITY_MIN }} visitors.</p>
+                    @else
+                        <p class="stats-note">A city is shown once it has at least {{ \App\Support\Statistics::CITY_MIN }} visitors, so no single person can be pointed at.</p>
+                    @endif
+                </div>
+            </div>
+
+            <div class="stats-two">
+                @if ($visitors['sources'])
+                    <div class="card-plain">
+                        <h3 class="stats-h3">How visitors found the site</h3>
+                        @include('site._donut', ['parts' => $visitors['sources'], 'label' => 'Visitors by source', 'unit' => 'visitors'])
+                    </div>
+                @endif
+                @if ($visitors['devices'])
+                    <div class="card-plain">
+                        <h3 class="stats-h3">Devices</h3>
+                        @include('site._donut', ['parts' => collect($visitors['devices'])->mapWithKeys(fn ($n, $d) => [$d === 'mobile' ? 'Phones' : 'Computers and tablets' => $n])->all(), 'label' => 'Visitors by device', 'unit' => 'visitors'])
+                    </div>
+                @endif
+            </div>
+
+            @if ($visitors['pages'])
+                <div class="card-plain">
+                    <h3 class="stats-h3">Pages opened most</h3>
+                    @include('site._bars', ['rows' => collect($visitors['pages'])->map(fn ($p) => [$p['label'], $p['views'], url($p['page'])])->all(), 'label' => 'Pages opened most'])
+                </div>
+            @endif
+
+            <p class="stats-note">
+                @if ($visitors['since'])Counted since {{ fmt_date($visitors['since']) }}.@endif
+                @if (\App\Support\GeoIp::available())Places from <a href="{{ config('geoip.attribution.1') }}" rel="noopener" target="_blank">{{ config('geoip.attribution.0') }}</a>.@endif
+            </p>
+        @endif
+    </section>
+
+    <h2 class="stats-part">Tenders and companies</h2>
     @if ($headline)
-        <div class="statgrid">
+        <div class="statgrid small">
             @foreach (array_values($headline) as $index => [$label, $number, $explain])
                 <div class="statcard"><b class="{{ $tones[$index % 3] }}">{{ number_format($number) }}</b><span>{{ $label }}</span><small>{{ $explain }}</small></div>
             @endforeach
@@ -148,41 +232,6 @@
         </section>
     @endif
 
-    @if ($hasVisitors)
-        <section class="block" id="visitors">
-            <h2>Visitors in the last 30 days</h2>
-            <p class="stats-note">People who opened the website, counted once a day each, without cookies and without keeping IP addresses. Robots are not counted. Updated every ten minutes.</p>
-            <div class="statgrid small">
-                <div class="statcard"><b class="gt-green">{{ number_format($visitors['visitors']) }}</b><span>Visitors</span><small>One per person per day.</small></div>
-                <div class="statcard"><b class="gt-ink">{{ number_format($visitors['views']) }}</b><span>Pages opened</span></div>
-                <div class="statcard"><b class="gt-red">{{ number_format(collect($visitors['countries'])->whereNotNull('code')->count()) }}</b><span>Countries</span></div>
-                @if (! empty($visitors['devices']))
-                    @php($all = max(1, array_sum($visitors['devices'])))
-                    <div class="statcard"><b class="gt-ink">{{ round(100 * ($visitors['devices']['mobile'] ?? 0) / $all) }}%</b><span>On phones</span></div>
-                @endif
-            </div>
-            <div class="card-plain" style="margin-top:16px">@include('site._columns', ['columns' => $visitors['daily'], 'label' => 'Visitors each day over the last 30 days'])</div>
-            <div class="stats-two">
-                <div class="card-plain">
-                    <h3 class="stats-h3">By country</h3>
-                    @include('site._bars', ['rows' => collect($visitors['countries'])->take(15)->map(fn ($c) => [$c['name'], $c['visitors'], null, $c['flag']])->all(), 'label' => 'Visitors by country', 'share' => true])
-                </div>
-                <div class="card-plain">
-                    <h3 class="stats-h3">By city</h3>
-                    @if ($visitors['cities'])
-                        @include('site._bars', ['rows' => collect($visitors['cities'])->map(fn ($c) => [$c['city'].($c['region'] && $c['region'] !== $c['city'] ? ', '.$c['region'] : '').' · '.$c['country'], $c['visitors'], null, $c['flag']])->all(), 'label' => 'Visitors by city'])
-                        <p class="stats-note">Cities with at least {{ \App\Support\Statistics::CITY_MIN }} visitors.</p>
-                    @else
-                        <p class="stats-note">Cities are shown once one has at least {{ \App\Support\Statistics::CITY_MIN }} visitors.</p>
-                    @endif
-                </div>
-            </div>
-            <p class="stats-note">
-                @if ($visitors['since'])Counted since {{ fmt_date($visitors['since']) }}.@endif
-                @if (\App\Support\GeoIp::available())Places from <a href="{{ config('geoip.attribution.1') }}" rel="noopener" target="_blank">{{ config('geoip.attribution.0') }}</a>.@endif
-            </p>
-        </section>
-    @endif
 
     <section class="block">
         <h2>How we count</h2>

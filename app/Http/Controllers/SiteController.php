@@ -419,13 +419,14 @@ class SiteController extends Controller
     /* ---------------------------------------------------------------------- statistics */
 
     /** Real numbers about the site, for visitors, journalists and AI assistants. Small figures stay hidden until they grow. */
-    public function statistics(): View
+    public function statistics(Request $request): View
     {
+        $days = in_array((int) $request->query('days'), Statistics::PERIODS, true) ? (int) $request->query('days') : 30;
         $open = $this->provinceCounts();
         $tenders = Tender::visible()->count();
 
         return $this->page('site.statistics', [
-            'title' => 'Statistics: tenders, companies and visitors of Tenders.af',
+            'title' => 'Statistics and visitor analytics of Tenders.af',
             'description' => 'Live figures from '.config('app.name').': tenders published and open by month, sector, province and buyer; registered and verified companies; visitors by country. Counted, not estimated.',
             'headline' => Statistics::headline(),
             'months' => Statistics::tendersByMonth(),
@@ -438,7 +439,10 @@ class SiteController extends Controller
             'tenderKinds' => Statistics::byKind('type', 'tenders.types'),
             'deadlines' => Statistics::deadlines(),
             'companies' => Statistics::companies(),
-            'visitors' => Statistics::visitors(30),
+            'visitors' => Statistics::visitors($days),
+            'days' => $days,
+            // the other periods are the same page: only the 30 days are offered to search engines
+            'noindex' => $request->has('days'),
             'withProducts' => module_on('products'),
             'coverage' => ['provinces' => Province::count(), 'sectors' => Industry::where('is_active', true)->count()],
             'updated' => fmt_datetime(Tender::now()),

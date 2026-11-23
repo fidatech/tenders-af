@@ -115,7 +115,7 @@ class StatisticsTest extends TestCase
 
         Cache::flush();
         $page = $this->get('/statistics')->assertOk();
-        $page->assertSee('Visitors in the last 30 days')->assertSee('Afghanistan')->assertSee('Germany')->assertSee('Unknown');
+        $page->assertSee('Visitors and pages opened, day by day')->assertSee('Afghanistan')->assertSee('Germany')->assertSee('Unknown');
         $page->assertSee('Kabul')->assertDontSee('Hamburg');
         $page->assertSee('60%'); // three of five on phones
     }
@@ -123,7 +123,35 @@ class StatisticsTest extends TestCase
     public function test_an_empty_site_explains_itself_instead_of_showing_nothing(): void
     {
         $page = $this->get('/statistics')->assertOk();
-        $page->assertSee('Tender figures start with the first tenders')->assertSee('provinces covered')->assertDontSee('Visitors in the last 30 days');
+        $page->assertSee('Tender figures start with the first tenders')->assertSee('provinces covered')->assertSee('Counting has started.');
+    }
+
+    public function test_visitors_come_first_with_periods_sources_and_pages(): void
+    {
+        $day = fn (int $ago) => now('Asia/Kabul')->subDays($ago)->toDateString();
+        $add = fn (string $who, int $ago, ?string $referrer, string $page) => Visit::create(['visited_on' => $day($ago), 'visitor' => str_pad($who, 16, 'x'), 'country' => 'AF', 'page' => $page, 'referrer' => $referrer, 'device' => 'mobile']);
+        $add('a', 0, 'google.com', '/');
+        $add('b', 1, null, '/tenders');
+        $add('c', 2, 'facebook.com', '/tender/road-in-herat');
+        $add('d', 20, 'news.example.org', '/');
+        $add('a', 0, null, '/tenders'); // a click inside the site: still the visitor who came from Google
+        $this->assertSame(['Direct or bookmarks' => 1, 'Search engines' => 1, 'Social media' => 1, 'Other websites' => 1], Statistics::visitors(30)['sources']);
+        $this->assertSame(4, array_sum(Statistics::visitors(30)['sources'])); // the sources add up to the visitors
+        Cache::flush();
+        $this->assertSame(3, Statistics::visitors(7)['visitors']);
+        $this->assertSame(4, Statistics::visitors(30)['visitors']);
+        Cache::flush();
+
+        $page = $this->get('/statistics')->assertOk();
+        $html = $page->getContent();
+        $this->assertLessThan(strpos($html, 'Tenders and companies'), strpos($html, 'How visitors found the site'));
+        $page->assertSee('Search engines')->assertSee('Social media')->assertSee('Direct or bookmarks')->assertSee('Other websites');
+        $page->assertDontSee('news.example.org'); // other websites are named only in the admin panel
+        $page->assertSee('Tender: road in herat')->assertSee('Home page');
+
+        $week = $this->get('/statistics?days=7')->assertOk();
+        $week->assertSee('noindex', false);
+        $this->get('/statistics?days=999')->assertOk(); // an unknown period falls back to 30 days
     }
 
     public function test_tenders_by_month_sector_and_buyer_and_the_csv_download(): void

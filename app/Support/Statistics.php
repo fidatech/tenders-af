@@ -134,27 +134,48 @@ class Statistics
         return ['listed' => $listed->count(), 'verified' => $listed->where('verify_status', 'verified')->count(), 'types' => $types];
     }
 
+    /** Periods a visitor may choose on the statistics page, in days. */
+    public const PERIODS = [7, 30, 90];
+
+    /** Where visitors came from, by the website that sent them. */
+    private const SOURCES = [
+        'Search engines' => '/(^|\.)(google|bing|yahoo|duckduckgo|yandex|baidu|ecosia|qwant|brave|startpage)\./i',
+        'Social media' => '/(^|\.)(facebook|fb|instagram|linkedin|lnkd|twitter|x|t|youtube|telegram|whatsapp|reddit|tiktok|pinterest)\.(com|co|me|org|in)$/i',
+    ];
+
     /**
-     * The visitors of the last $days days: visitors (one per person per day), page views, by day,
-     * by country, by city, by device. Counted at most every ten minutes.
+     * The visitors of the last $days days: totals and the change against the $days before, visitors and
+     * pages by day, by country, by city, by device, by source, and the pages opened most.
+     * Counted at most every ten minutes.
      */
     public static function visitors(int $days = 30): array
     {
         return Cache::remember('stats.visitors.'.$days, self::VISITOR_CACHE, function () use ($days) {
-            $from = Tender::now()->subDays($days - 1)->toDateString();
+            $today = Tender::now();
+            $from = $today->copy()->subDays($days - 1)->toDateString();
             $base = fn () => Visit::where('visited_on', '>=', $from);
 
             $views = $base()->count();
+            $since = Visit::min('visited_on');
             if ($views === 0) {
-                return ['views' => 0];
+                return ['views' => 0, 'since' => $since];
             }
+            $visitors = $base()->distinct()->count('visitor');
+
+            // the same number of days just before, to show the change (only once counting covered them)
+            $before = null;
+            $prevFrom = $today->copy()->subDays(2 * $days - 1)->toDateString();
+            if ($since && $since <= $prevFrom) {
+                $before = Visit::whereBetween('visited_on', [$prevFrom, $today->copy()->subDays($days)->toDateString()])->distinct()->count('visitor');
+            }
+
             // one visitor per person per day: the visitor code itself changes every day
             $perDay = $base()->selectRaw('visited_on, count(distinct visitor) as v, count(*) as p')->groupBy('visited_on')->get()
                 ->mapWithKeys(fn ($row) => [Carbon::parse($row->visited_on)->toDateString() => [(int) $row->v, (int) $row->p]]);
             $daily = [];
             for ($i = $days - 1; $i >= 0; $i--) {
-                $day = Tender::now()->subDays($i);
-                $daily[$day->toDateString()] = [$day->format('j M'), $perDay[$day->toDateString()][0] ?? 0];
+                $day = $today->copy()->subDays($i);
+                $daily[$day->toDateString()] = [$day->format('j M'), $perDay[$day->toDateString()][0] ?? 0, $perDay[$day->toDateString()][1] ?? 0];
             }
 
             $countries = $base()->selectRaw('country, count(distinct visitor) as v')->groupBy('country')->orderByDesc('v')->get()
@@ -165,16 +186,60 @@ class Statistics
                 ->map(fn ($row) => ['city' => $row->city, 'region' => $row->region, 'country' => GeoIp::countryName($row->country), 'flag' => GeoIp::flag($row->country), 'visitors' => (int) $row->v])->values();
             $devices = $base()->selectRaw('device, count(distinct visitor) as v')->groupBy('device')->pluck('v', 'device')->map(fn ($v) => (int) $v)->all();
 
+            // sources: only kinds are shown publicly, never the other websites' names
+            $sources = ['Direct or bookmarks' => 0, 'Search engines' => 0, 'Social media' => 0, 'Other websites' => 0];
+            // each visitor once, by the first page they opened that day: later pages were reached by clicking inside the site
+            $firstViews = Visit::selectRaw('min(id)')->where('visited_on', '>=', $from)->groupBy('visitor');
+            foreach (Visit::whereIn('id', $firstViews)->selectRaw('referrer, count(*) as v')->groupBy('referrer')->get() as $row) {
+                $kind = 'Other websites';
+                if (! $row->referrer) {
+                    $kind = 'Direct or bookmarks';
+                } else {
+                    foreach (self::SOURCES as $name => $pattern) {
+                        if (preg_match($pattern, $row->referrer)) {
+                            $kind = $name;
+                            break;
+                        }
+                    }
+                }
+                $sources[$kind] += (int) $row->v;
+            }
+
+            $pages = $base()->selectRaw('page, count(*) as p')->groupBy('page')->orderByDesc('p')->limit(10)->get()
+                ->map(fn ($row) => ['page' => $row->page, 'label' => self::pageLabel($row->page), 'views' => (int) $row->p]);
+
             return [
+                'days' => $days,
                 'views' => $views,
-                'visitors' => $base()->distinct()->count('visitor'),
+                'visitors' => $visitors,
+                'before' => $before,
                 'daily' => $daily,
                 'countries' => $countries->values()->all(),
-                'located' => $countries->whereNotNull('code')->sum('visitors'),
                 'cities' => $cities->all(),
                 'devices' => $devices,
-                'since' => Visit::min('visited_on'),
+                'sources' => array_filter($sources),
+                'pages' => $pages->all(),
+                'since' => $since,
             ];
         });
+    }
+
+    /** A readable name for a page of the site: "/tender/road-in-herat" → "Tender: road in herat". */
+    public static function pageLabel(string $path): string
+    {
+        $fixed = ['/' => 'Home page', '/tenders' => 'Open tenders', '/companies' => 'Company directory', '/sectors' => 'Sectors', '/provinces' => 'Provinces',
+            '/statistics' => 'Statistics', '/pricing' => 'Pricing', '/how-it-works' => 'How it works', '/questions' => 'Questions', '/contact' => 'Contact',
+            '/login' => 'Sign in', '/register' => 'Register', '/products' => 'Products', '/privacy' => 'Privacy', '/terms' => 'Terms'];
+        if (isset($fixed[$path])) {
+            return $fixed[$path];
+        }
+        $parts = explode('/', trim($path, '/'));
+        $kind = ['tender' => 'Tender', 'companies' => 'Company', 'products' => 'Product'][$parts[0]] ?? null;
+        if ($parts[0] === 'tenders' && in_array($parts[1] ?? '', ['sector', 'province'], true)) {
+            $kind = ucfirst($parts[1]);
+        }
+        $name = str_replace('-', ' ', (string) end($parts));
+
+        return $kind && count($parts) > 1 ? $kind.': '.$name : $path;
     }
 }
