@@ -4,6 +4,7 @@ use App\Exceptions\UserError;
 use App\Http\Middleware\AdminRole;
 use App\Http\Middleware\CanonicalHost;
 use App\Http\Middleware\CompressResponse;
+use App\Http\Middleware\CountVisit;
 use App\Http\Middleware\EnsureCompanyActive;
 use App\Http\Middleware\EnsureModule;
 use App\Http\Middleware\EnsureOwner;
@@ -22,11 +23,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // the visitor beacon carries nothing and changes nothing but a counter (App\Support\Visitors::beacon)
+        $middleware->validateCsrfTokens(except: ['v']);
         // the businesses and the system administrators each have their own sign-in page
         $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*') ? route('admin.login') : route('login'));
         $middleware->redirectUsersTo(fn (Request $request) => $request->is('admin', 'admin/*') ? route('admin.dashboard') : route('dashboard'));
 
-        $middleware->web(append: [StripNumberCommas::class, EnsureUserIsActive::class, \App\Http\Middleware\CountVisit::class]);
+        $middleware->web(append: [StripNumberCommas::class, EnsureUserIsActive::class, CountVisit::class]);
         // tender.af and the www addresses lead to tenders.af
         $middleware->prepend(CanonicalHost::class);
         $middleware->prepend(CompressResponse::class);

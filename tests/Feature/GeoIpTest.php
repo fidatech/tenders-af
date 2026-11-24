@@ -91,6 +91,8 @@ class GeoIpTest extends TestCase
         $browser = 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/131.0 Mobile Safari/537.36';
         foreach (['180.94.70.12', '5.146.1.1', '1.1.1.1'] as $ip) {
             $this->withHeaders(['User-Agent' => $browser])->withServerVariables(['REMOTE_ADDR' => $ip])->get('/tenders')->assertOk();
+            // the page's script confirms a real browser
+            $this->withHeaders(['User-Agent' => $browser])->withServerVariables(['REMOTE_ADDR' => $ip])->post(route('site.beacon'))->assertNoContent();
         }
 
         $visits = Visit::orderBy('id')->get();

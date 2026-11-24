@@ -56,6 +56,8 @@ Route::middleware('module:products')->group(function () {
     Route::get('products/{slug}/whatsapp', [SiteController::class, 'productContact'])->middleware('throttle:30,1')->name('site.products.contact');
 });
 Route::get('statistics', [SiteController::class, 'statistics'])->name('site.statistics');
+// the page's script says it ran in a real browser (App\Support\Visitors::beacon); no CSRF token: it carries nothing
+Route::post('v', [SiteController::class, 'beacon'])->middleware('throttle:30,1')->name('site.beacon');
 Route::get('statistics.csv', [SiteController::class, 'statisticsCsv'])->middleware('throttle:20,1')->name('site.statistics.csv');
 
 Route::get('pricing', [SiteController::class, 'pricing'])->name('site.pricing');
@@ -259,7 +261,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         crud_routes('industries', Admin\IndustryController::class, 'industries');
         crud_routes('categories', Admin\CategoryController::class, 'categories');
 
-        Route::get('visitors', [Admin\VisitorController::class, 'index'])->name('visitors.index');
+        Route::get('growth', [Admin\GrowthController::class, 'index'])->name('growth.index');
+        // the old address of the visitor figures
+        Route::permanentRedirect('visitors', '/admin/growth')->name('visitors.index');
         Route::get('enquiries', [Admin\EnquiryController::class, 'index'])->name('enquiries.index');
         Route::get('enquiries/{id}', [Admin\EnquiryController::class, 'show'])->whereNumber('id')->name('enquiries.show');
         Route::post('enquiries/{id}/close', [Admin\EnquiryController::class, 'close'])->whereNumber('id')->name('enquiries.close');
