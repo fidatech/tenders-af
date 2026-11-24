@@ -20,6 +20,7 @@ use App\Models\Tender;
 use App\Support\Modules;
 use App\Support\Platform;
 use App\Support\Statistics;
+use App\Support\Visitors;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -448,6 +449,14 @@ class SiteController extends Controller
             'updated' => fmt_datetime(Tender::now()),
             'crumbs' => [['Statistics', null]],
         ]);
+    }
+
+    /** The page's script ran in a real browser: the visitor is a person (App\Support\Visitors). */
+    public function beacon(Request $request): Response
+    {
+        Visitors::beacon($request);
+
+        return response()->noContent();
     }
 
     /** The figures of the statistics page as a CSV file, to quote or reuse (please name the source). */

@@ -201,6 +201,8 @@
 })();
 </script>
 <script src="{{ asset_v('js/filters.js') }}" defer></script>
+{{-- tells the server this page ran in a real browser, so the visit counts as a person (App\Support\Visitors). Robots rarely run it. --}}
+<script>(function () { if (navigator.webdriver || !navigator.sendBeacon) return; var sent = false; function go() { if (sent) return; sent = true; navigator.sendBeacon('{{ route('site.beacon', [], false) }}'); } setTimeout(go, 1500); ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (e) { addEventListener(e, go, { once: true, passive: true }); }); })();</script>
 @stack('scripts')
 </body>
 </html>

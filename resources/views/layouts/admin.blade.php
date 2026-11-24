@@ -51,7 +51,7 @@
             ['Reports', 'chart-line', 'admin.reports.index', 'admin.reports.*', 0],
         ],
         'Platform' => [
-            ['Visitors', 'chart-line', 'admin.visitors.index', 'admin.visitors.*', 0],
+            ['Growth', 'chart-line', 'admin.growth.index', 'admin.growth.*', 0],
             ['Module Management', 'puzzle-piece', 'admin.modules.index', 'admin.modules.*', 0],
             ['Branding & Logo', 'image', 'admin.branding.edit', 'admin.branding.*', 0],
             ['Settings', 'gear', 'admin.settings.edit', 'admin.settings.*', 0],

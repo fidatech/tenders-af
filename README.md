@@ -257,13 +257,19 @@ from a copy.
 
 ## Statistics and visitors
 
-`/statistics` shows tenders by month, sector, province, buyer, kind and deadline; companies by kind of business
+`/statistics` shows real visitors only, then tenders by month, sector, province, buyer, kind and deadline; companies by kind of business
 and verification; and visitors of the last 30 days by day, country, city and device. Every figure is counted;
 a section appears once it has data and zeros are left out (the minimum is **Admin > Settings > stats_min**, 1 by
-default). The figures can be downloaded as CSV from `/statistics.csv`. **Admin > Platform > Visitors** shows the
-full detail (every city, pages opened, referring websites) for 7, 30, 90 or 365 days.
+default). The figures can be downloaded as CSV from `/statistics.csv`. **Admin > Platform > Growth** shows the
+full detail for 7, 30, 90 or 365 days.
 
-Visitors are counted by `App\Http\Middleware\CountVisit` on public pages only, after the page is sent. No cookie is
+Visitors are counted by `App\Http\Middleware\CountVisit` on public pages only, after the page is sent. Each view is
+one of three kinds: **bot** (a known robot recognised by `App\Support\Robots`: search engines, AI crawlers, SEO tools,
+link previews, monitors, scripts), **human** (the page's script told the server, through `POST /v`, that it ran in a
+real browser; the person's next pages in the following half hour count as human at once), or **pending** (never
+confirmed: mostly scripts and robots that hide their name). The public page shows people only. **Admin > Platform >
+Growth** shows all three apart, with robots by kind and name and what they read (the sitemap, robots.txt and llms.txt
+are counted for robots), plus companies, verifications, tenders and products added each month. No cookie is
 set and no IP address is stored: a visitor is a daily code that cannot be turned back into the address. Robots,
 prefetches, signed-in administrators and browsers sending Do Not Track or Global Privacy Control are skipped.
 Records older than 13 months are deleted every night (`visits:prune`). Cities with fewer than 3 visitors are left

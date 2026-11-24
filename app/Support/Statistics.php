@@ -153,10 +153,11 @@ class Statistics
         return Cache::remember('stats.visitors.'.$days, self::VISITOR_CACHE, function () use ($days) {
             $today = Tender::now();
             $from = $today->copy()->subDays($days - 1)->toDateString();
-            $base = fn () => Visit::where('visited_on', '>=', $from);
+            // people only: robots, crawlers and unconfirmed traffic are on Admin > Growth
+            $base = fn () => Visit::where('visited_on', '>=', $from)->where('kind', 'human');
 
             $views = $base()->count();
-            $since = Visit::min('visited_on');
+            $since = Visit::where('kind', 'human')->min('visited_on');
             if ($views === 0) {
                 return ['views' => 0, 'since' => $since];
             }
@@ -166,7 +167,7 @@ class Statistics
             $before = null;
             $prevFrom = $today->copy()->subDays(2 * $days - 1)->toDateString();
             if ($since && $since <= $prevFrom) {
-                $before = Visit::whereBetween('visited_on', [$prevFrom, $today->copy()->subDays($days)->toDateString()])->distinct()->count('visitor');
+                $before = Visit::where('kind', 'human')->whereBetween('visited_on', [$prevFrom, $today->copy()->subDays($days)->toDateString()])->distinct()->count('visitor');
             }
 
             // one visitor per person per day: the visitor code itself changes every day
@@ -189,7 +190,7 @@ class Statistics
             // sources: only kinds are shown publicly, never the other websites' names
             $sources = ['Direct or bookmarks' => 0, 'Search engines' => 0, 'Social media' => 0, 'Other websites' => 0];
             // each visitor once, by the first page they opened that day: later pages were reached by clicking inside the site
-            $firstViews = Visit::selectRaw('min(id)')->where('visited_on', '>=', $from)->groupBy('visitor');
+            $firstViews = Visit::selectRaw('min(id)')->where('visited_on', '>=', $from)->where('kind', 'human')->groupBy('visitor');
             foreach (Visit::whereIn('id', $firstViews)->selectRaw('referrer, count(*) as v')->groupBy('referrer')->get() as $row) {
                 $kind = 'Other websites';
                 if (! $row->referrer) {
@@ -227,7 +228,7 @@ class Statistics
     /** A readable name for a page of the site: "/tender/road-in-herat" → "Tender: road in herat". */
     public static function pageLabel(string $path): string
     {
-        $fixed = ['/' => 'Home page', '/tenders' => 'Open tenders', '/companies' => 'Company directory', '/sectors' => 'Sectors', '/provinces' => 'Provinces',
+        $fixed = ['/sitemap.xml' => 'Sitemap', '/robots.txt' => 'robots.txt', '/llms.txt' => 'llms.txt', '/' => 'Home page', '/tenders' => 'Open tenders', '/companies' => 'Company directory', '/sectors' => 'Sectors', '/provinces' => 'Provinces',
             '/statistics' => 'Statistics', '/pricing' => 'Pricing', '/how-it-works' => 'How it works', '/questions' => 'Questions', '/contact' => 'Contact',
             '/login' => 'Sign in', '/register' => 'Register', '/products' => 'Products', '/privacy' => 'Privacy', '/terms' => 'Terms'];
         if (isset($fixed[$path])) {

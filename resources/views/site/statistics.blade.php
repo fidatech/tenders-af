@@ -23,7 +23,7 @@
         <div class="stats-head">
             <div>
                 <h2>Visitors</h2>
-                <p class="stats-note">People who opened the website, counted once a day each, without cookies and without keeping IP addresses. Robots are not counted. Updated every ten minutes.</p>
+                <p class="stats-note">Real people who opened the website, counted once a day each, without cookies and without keeping IP addresses. Robots, crawlers and scripts are not counted. Updated every ten minutes.</p>
             </div>
             <nav class="stats-period" aria-label="Period">
                 @foreach (\App\Support\Statistics::PERIODS as $period)

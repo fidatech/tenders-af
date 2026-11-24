@@ -11,8 +11,7 @@ class Visit extends Model
 
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['visited_on' => 'date'];
-    }
+    // visited_on stays a plain "Y-m-d" string: a date cast would write a time with it on some
+    // databases, and then a visit could not be found by its day
+
 }
