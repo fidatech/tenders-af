@@ -29,7 +29,8 @@ class SiteTest extends TestCase
         $this->get('/tenders/sector/construction')->assertOk()->assertSee('Construction tenders in Afghanistan')->assertSee($tender->title);
         $this->get('/tenders/province/herat')->assertOk()->assertSee('Tenders in Herat')->assertSee($tender->title);
         $this->get('/sitemap.xml')->assertOk()->assertSee('/tender/'.$tender->slug)->assertSee('/tenders/province/kabul');
-        $this->get('/robots.txt')->assertOk()->assertSee('Disallow: /admin');
+        $this->get('/robots.txt')->assertOk()->assertSee('Disallow: /admin')
+            ->assertSee('Disallow: /company$', false)->assertSee('Disallow: /company/', false);
         $this->get('/llms.txt')->assertOk()->assertSee('Company registration: free');
     }
 
