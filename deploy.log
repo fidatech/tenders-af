@@ -1,0 +1,27 @@
+== Copying files
+   package: 6.4M
+== PHP 8.4.28 (/opt/cpanel/ea-php84/root/usr/bin/php)
+== Database
+
+   INFO  Nothing to migrate.  
+
+Administrator admin@tenders.af is up to date.
+== Caches
+
+   INFO  Configuration cached successfully.  
+
+
+   INFO  Routes cached successfully.  
+
+
+
+   INFO  Blade templates cached successfully.  
+
+!! tender.af is not a domain of this account yet: add it in cPanel > Domains, document root tender.af (its redirect is ready)
+== AutoSSL asked to cover the domains
+   tender.af NS:   A: 
+   tenders.af A: 51.81.56.231 
+== Deployed 2026-11-26 15:58:50
+== Location database for the visitor figures
+   The location database is up to date.
+   file: 121M, 2026-11-23

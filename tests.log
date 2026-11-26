@@ -1,0 +1,153 @@
+
+   PASS  Tests\Unit\HelpersTest
+  ✓ initials
+  ✓ money and sums
+  ✓ grouped numbers
+
+   PASS  Tests\Feature\BrandingTest
+  ✓ the text brand is shown while no logo is uploaded                    0.19s  
+  ✓ a super administrator uploads a logo and it is shown everywhere      0.06s  
+  ✓ removing the logo brings back the text brand                         0.03s  
+  ✓ the dark and mobile versions are used where they belong              0.04s  
+  ✓ svg and fake pictures are refused                                    0.02s  
+  ✓ the icon makes app icons and the favicon                             0.08s  
+  ✓ name and tagline change the site                                     0.03s  
+  ✓ only a super administrator may change the branding                   0.02s  
+  ✓ unknown assets are not served                                        0.02s  
+  ✓ the offline page and service worker never cache live pages           0.01s  
+
+   PASS  Tests\Feature\BuyerTest
+  ✓ an organisation registers as a buyer and only sees the buyer menu    0.07s  
+  ✓ a posted tender waits for an administrator and is published after a… 0.07s  
+  ✓ a buyer adds several documents at once                               0.02s  
+  ✓ a tender is sent back with a reason and the buyer sends it again     0.04s  
+  ✓ a buyer extends cancels and awards only its own published tenders    0.02s  
+  ✓ a company that only looks for tenders has no posting pages           0.04s  
+  ✓ when posting is no longer free a buyer needs a plan that includes i… 0.02s  
+
+   PASS  Tests\Feature\CollectionTest
+  ✓ a paid subscriber saves a supplier and manages it                    0.08s  
+  ✓ free companies are sent to the plans and cannot save                 0.03s  
+  ✓ notes stay private to the saving company                             0.04s  
+  ✓ private collections are hidden from the rest of the team             0.03s  
+  ✓ compare shows facts and the export respects contact sharing          0.04s  
+  ✓ switched off the save control and pages disappear and lists are kep… 0.03s  
+
+   PASS  Tests\Feature\CompanyDirectoryTest
+  ✓ existing companies keep showing their phone and website              0.02s  
+  ✓ premium contacts are left out of the page structured data and docum… 0.05s  
+  ✓ private contacts are never shown and offer an enquiry                0.02s  
+  ✓ the owner chooses what is shared and sees the full document          0.03s  
+  ✓ arbitrary colours and templates are refused                          0.02s  
+  ✓ the directory filters by business type only for modules that are on  0.04s  
+  ✓ a company publishes a project with pictures and private evidence     0.06s  
+  ✓ a company cannot see or change another companys projects             0.02s  
+  ✓ a reviewer records what was checked and a changed project needs a n… 0.03s  
+  ✓ a company verifier may review projects but a focal point may not     0.03s  
+  ✓ switched off modules hide projects pages and documents               0.03s  
+  ✓ an empty profile is not offered to search engines                    0.03s  
+
+   PASS  Tests\Feature\CompanyTest
+  ✓ registration is free and the kind of company decides the currency    0.02s  
+  ✓ a free company sees the summary and a paid one the full tender       0.06s  
+  ✓ the subscription page offers plans and payment methods in the curre… 0.05s  
+  ✓ a company saves a tender and finds it under saved tenders            0.03s  
+  ✓ a matching tender is emailed once to a company with instant alerts   0.03s  
+  ✓ a company sends its licence and an administrator verifies it         0.04s  
+  ✓ an administrator enters a tender and publishes it                    0.06s  
+  ✓ the website is saved with https and the country comes from the list  0.05s  
+  ✓ whatsapp alerts are locked on a plan without them                    0.04s  
+  ✓ administrators are told about new companies and licences             0.06s  
+  ✓ admin sidebar links to notifications and mark all covers every page  0.07s  
+  ✓ a company can send a full message to the administrators              0.03s  
+
+   PASS  Tests\Feature\CompressionTest
+  ✓ pages are gzipped when the browser accepts it                        0.02s  
+  ✓ pages are plain without gzip                                         0.02s  
+
+   PASS  Tests\Feature\DirectMessageTest
+  ✓ a focal point and bidder can exchange private messages and attachme… 0.07s  
+  ✓ messages reject empty posts and unsafe file types                    0.02s  
+
+   PASS  Tests\Feature\EnquiryTest
+  ✓ a buyer sends an enquiry and a free supplier answers                 0.07s  
+  ✓ other companies cannot read or write in a thread                     0.04s  
+  ✓ a blocked company cannot write and a report opens the thread to adm… 0.05s  
+  ✓ guests are asked to sign in and nobody writes to themselves          0.03s  
+  ✓ the daily limit and a switched off module                            0.03s  
+
+   PASS  Tests\Feature\GeoIpTest
+  ✓ the built in reader finds countries and cities with every record si… 0.02s  
+  ✓ a file that is not a location database is refused                    0.01s  
+  ✓ visits get real country names and cities                             0.15s  
+  ✓ a damaged file never breaks a page                                   0.02s  
+  ✓ the update command downloads unpacks and checks the database         0.03s  
+
+   PASS  Tests\Feature\MobileNavTest
+  ✓ the public bottom bar follows the modules                            0.03s  
+  ✓ a signed in company gets its account in the public sheet             0.02s  
+  ✓ the panel bar and sheet show only what the user may open             0.03s  
+
+   PASS  Tests\Feature\ModuleTest
+  ✓ defaults follow the plan and keep what is already in use             0.01s  
+  ✓ the core module cannot be switched off                               0.02s  
+  ✓ switching the directory off blocks its pages hides its links and ke… 0.03s  
+  ✓ dependent modules stop with their parent and come back with it       0.01s  
+  ✓ switching products on opens its pages and menu                       0.05s  
+  ✓ a paid only module is refused to free companies                      0.02s  
+  ✓ only a super administrator may change a module and planned ones can… 0.04s  
+  ✓ companies and guests cannot reach module management                  0.01s  
+  ✓ saving the settings page does not change a module                    0.03s  
+
+   PASS  Tests\Feature\OfficeRegisterTest
+  ✓ owner reviews employee collections expenses and handovers without d… 0.14s  
+  ✓ verifier and custom staff have only their assigned capabilities      0.05s  
+  ✓ hesabpay requires a reference and can only be recorded once          0.03s  
+
+   PASS  Tests\Feature\ProductTest
+  ✓ the module is off until an administrator switches it on              0.06s  
+  ✓ a product with a picture and a video is shown after approval         0.06s  
+  ✓ a product needs a smallest order and a company lists a limited numb… 0.02s  
+  ✓ a company pays to sponsor a product and it is shown first            0.06s  
+  ✓ the statistics page hides small numbers and shows real ones          0.03s  
+
+   PASS  Tests\Feature\SchemaTest
+  ✓ every index and foreign key name fits mysql                          0.02s  
+
+   PASS  Tests\Feature\SignInRedirectTest
+  ✓ a company is not sent to an admin page saved earlier                 0.02s  
+  ✓ a company still returns to its own page saved earlier                0.02s  
+  ✓ an administrator is not sent to a company page saved earlier         0.03s  
+
+   PASS  Tests\Feature\SiteTest
+  ✓ every page of the website opens for a visitor                        0.16s  
+  ✓ the structured data is valid json with a schema org context          0.04s  
+  ✓ a visitor reads the summary of a tender but not its full details     0.02s  
+  ✓ a draft tender is not on the website                                 0.02s  
+  ✓ the pricing page shows afn prices first and usd prices on request    0.03s  
+  ✓ a listed company has a public page and an unlisted one has none      0.03s  
+  ✓ the other addresses lead to the main one                             0.02s  
+
+   PASS  Tests\Feature\SiteVerificationTest
+  ✓ home page has google verification tag                                0.02s  
+  ✓ public pages have complete website share metadata                    0.01s  
+
+   PASS  Tests\Feature\StatisticsTest
+  ✓ a public page view is counted without keeping the address            0.02s  
+  ✓ robots are kept apart and private browsers admins and other pages a… 0.07s  
+  ✓ a view counts as a person only after the page confirms a real brows… 0.03s  
+  ✓ a robot cannot confirm itself and the beacon needs no token          0.02s  
+  ✓ robot names and kinds are recognised and phones are not robots       0.01s  
+  ✓ without the location database visits are counted with an unknown pl… 0.02s  
+  ✓ the cloudflare country is used when the site trusts it               0.02s  
+  ✓ country names and flags never show an empty or unknown name for a r… 0.01s  
+  ✓ the page shows visitors by country and city but never a lonely city  0.02s  
+  ✓ an empty site explains itself instead of showing nothing             0.02s  
+  ✓ visitors come first with periods sources and pages                   0.04s  
+  ✓ tenders by month sector and buyer and the csv download               0.02s  
+  ✓ old visits are pruned                                                0.01s  
+  ✓ the growth page shows people robots and unconfirmed traffic apart    0.09s  
+
+  Tests:    111 passed (1011 assertions)
+  Duration: 4.20s
+
